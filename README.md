@@ -17,7 +17,10 @@ Project setup is in progress. Gameplay has not been implemented yet.
 
 ## Run locally
 
-Development and production commands will be documented after the build tooling is configured.
+Install dependencies with `npm ci`, then run the development server with `npm run dev`.
+
+Run `npm run typecheck` to check TypeScript types and `npm run build` to create a production build in `dist/`.
+Use `npm run preview` to serve the production build locally.
 
 ## Requirements
 

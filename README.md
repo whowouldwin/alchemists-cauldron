@@ -18,6 +18,8 @@ Project setup is in progress. Gameplay has not been implemented yet.
 ## Run locally
 
 Install dependencies with `npm ci`, then run the development server with `npm run dev`.
+Installing dependencies also enables Git hooks: Commitlint checks commit messages against the
+Conventional Commits format used by RS School, and pushes run ESLint and the Prettier check.
 
 Run `npm run lint` to lint project code, `npm run format` to format project files, and
 `npm run format:check` to check formatting. Run `npm run typecheck` to check TypeScript types.

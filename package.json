@@ -4,7 +4,9 @@
   "description": "Alchemist's Cauldron is a browser game where the player combines ingredients to match the target ranges of a randomly selected potion recipe. Each ingredient changes the cauldron's temperature, density, and magic power. The player earns points by brewing successful potions before time or lives run out.",
   "main": "index.js",
   "scripts": {
-    "dev": "vite"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
@@ -12,5 +14,6 @@
   "devDependencies": {
     "typescript": "^7.0.2",
     "vite": "^8.3.4"
-  }
+  },
+  "type": "module"
 }

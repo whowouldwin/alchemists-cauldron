@@ -19,7 +19,8 @@ Project setup is in progress. Gameplay has not been implemented yet.
 
 Install dependencies with `npm ci`, then run the development server with `npm run dev`.
 
-Run `npm run lint` to lint project code and `npm run typecheck` to check TypeScript types.
+Run `npm run lint` to lint project code, `npm run format` to format project files, and
+`npm run format:check` to check formatting. Run `npm run typecheck` to check TypeScript types.
 Run `npm run build` to create a production build in `dist/`.
 Use `npm run preview` to serve the production build locally.
 

@@ -1,0 +1,148 @@
+.cauldron-panel {
+  position: sticky;
+  top: 20px;
+  overflow: hidden;
+  border-color: #252525;
+  background: #252525;
+  box-shadow: 4px 4px 0 #c4c4c4;
+  color: #ffffff;
+
+  .eyebrow {
+    color: var(--color-neutral-light);
+  }
+
+  .panel-heading h2 {
+    color: #ffffff;
+  }
+
+  .item-count {
+    background: var(--color-neutral-light);
+
+    &--full {
+      border-color: #ffffff;
+      background: var(--color-ink);
+      box-shadow: 0 0 0 2px var(--color-neutral-mid);
+      color: #ffffff;
+    }
+  }
+}
+
+.cauldron-art-wrap {
+  position: relative;
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  margin: 9px 0 2px;
+  overflow: hidden;
+
+  &::before {
+    position: absolute;
+    width: 190px;
+    height: 190px;
+    border: 1px dashed #ffffff;
+    border-radius: 50%;
+    background: var(--color-neutral-mid);
+    content: "";
+  }
+}
+
+.cauldron-art {
+  position: relative;
+  z-index: 1;
+  width: min(72%, 180px);
+  max-height: 170px;
+  object-fit: contain;
+  filter: none;
+  animation: potion-bob 3.2s ease-in-out infinite;
+}
+
+@keyframes potion-bob {
+  50% {
+    transform: translateY(-5px) rotate(2deg);
+  }
+}
+
+.cauldron-list {
+  display: flex;
+  min-height: 112px;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cauldron-ingredient {
+  display: grid;
+  grid-template-columns: 24px 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 5px 9px;
+  border: 1px solid #dedede;
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--color-ink);
+
+  &__number {
+    display: grid;
+    width: 22px;
+    height: 22px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-neutral-light);
+    font-size: 11px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ingredient-icon {
+    width: 29px;
+    height: 29px;
+  }
+
+  &__name {
+    overflow: hidden;
+    font-size: 11px;
+    font-weight: 900;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__values {
+    color: #404040;
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+}
+
+.empty-cauldron {
+  display: grid;
+  min-height: 112px;
+  place-items: center;
+  margin-bottom: 0;
+  padding: 16px;
+  border: 1px dashed #c8c8c8;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.cauldron-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 17px;
+  padding-top: 13px;
+  border-top: 1px solid #ffffff80;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

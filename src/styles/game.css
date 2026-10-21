@@ -1,0 +1,537 @@
+:root {
+  font-family: "Avenir Next", Avenir, sans-serif;
+  color: #f6f0e7;
+  background: #15111a;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  --line: rgb(225 204 169 / 12%);
+  --text: #f6f0e7;
+  --text-muted: #aaa0ad;
+  --gold: #e7b96f;
+  --gold-soft: #f0d7a5;
+  --mint: #89d6c2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 80% 5%, rgb(98 57 89 / 24%), transparent 38%),
+    radial-gradient(ellipse at 12% 72%, rgb(36 100 90 / 11%), transparent 32%),
+    #15111a;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.game-shell {
+  width: min(1380px, 100% - 64px);
+  margin: 0 auto;
+  padding: 54px 0 28px;
+}
+
+.game-header,
+.section-heading,
+.game-footer,
+.capacity-meter__labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.game-header {
+  gap: 32px;
+  margin-bottom: 34px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--gold);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2 {
+  font-family: Georgia, serif;
+  font-weight: 600;
+}
+
+h1 {
+  margin-bottom: 8px;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+}
+
+.game-intro {
+  max-width: 570px;
+  margin-bottom: 0;
+  color: var(--text-muted);
+  font-size: 0.97rem;
+  line-height: 1.6;
+}
+
+.level-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 15px;
+  border: 1px solid rgb(231 185 111 / 22%);
+  border-radius: 999px;
+  background: rgb(231 185 111 / 7%);
+  color: var(--gold-soft);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.level-badge > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 12px rgb(137 214 194 / 70%);
+}
+
+.level-badge b {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.game-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.shelf-panel,
+.cauldron-panel {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgb(41 33 46 / 95%), rgb(30 25 35 / 96%));
+  box-shadow: 0 24px 70px rgb(0 0 0 / 20%);
+}
+
+.shelf-panel {
+  padding: 26px;
+}
+
+.section-heading {
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.section-heading .eyebrow {
+  margin-bottom: 5px;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: 1.65rem;
+  letter-spacing: -0.025em;
+}
+
+.section-count,
+.cauldron-counter {
+  color: #e7d4b4;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.section-count i,
+.cauldron-counter i {
+  margin: 0 3px;
+  color: #746978;
+  font-style: normal;
+}
+
+.ingredient-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ingredient-card {
+  position: relative;
+  min-width: 0;
+  padding: 18px 16px 15px;
+  overflow: hidden;
+  border: 1px solid rgb(225 204 169 / 10%);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #302735, #28212d 72%);
+}
+
+.ingredient-card::after {
+  position: absolute;
+  right: -35px;
+  bottom: -60px;
+  width: 145px;
+  height: 115px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--ingredient-glow), transparent 70%);
+  content: "";
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.ingredient-card[data-icon="dragon-tears"] {
+  --ingredient-color: #73c8c0;
+  --ingredient-glow: #276e78;
+}
+
+.ingredient-card[data-icon="fairy-dust"] {
+  --ingredient-color: #e4bd7f;
+  --ingredient-glow: #8c692e;
+}
+
+.ingredient-card[data-icon="frost-lotus"] {
+  --ingredient-color: #9ebdeb;
+  --ingredient-glow: #42649c;
+}
+
+.ingredient-card[data-icon="mandrake-root"] {
+  --ingredient-color: #a7c887;
+  --ingredient-glow: #4b773e;
+}
+
+.ingredient-card[data-icon="caustic-acid"] {
+  --ingredient-color: #d2bd68;
+  --ingredient-glow: #887825;
+}
+
+.ingredient-card[data-icon="essence-of-the-void"] {
+  --ingredient-color: #c19be0;
+  --ingredient-glow: #69429b;
+}
+
+.stock-badge {
+  position: absolute;
+  z-index: 1;
+  top: 13px;
+  right: 13px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgb(231 185 111 / 28%);
+  border-radius: 50%;
+  background: #211b25;
+  color: var(--gold-soft);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.ingredient-card__art {
+  display: grid;
+  width: 70px;
+  height: 70px;
+  margin: 0 0 14px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--ingredient-color) 25%, transparent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--ingredient-color) 9%, #28212d);
+  color: var(--ingredient-color);
+}
+
+.ingredient-icon {
+  width: 45px;
+  height: 45px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.ingredient-card__name {
+  min-height: 2.8em;
+  margin: 0 0 15px;
+  color: #f4eee4;
+  font-family: Georgia, serif;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.ingredient-values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin: 0;
+  padding-top: 11px;
+  border-top: 1px solid rgb(225 204 169 / 10%);
+}
+
+.ingredient-values__item {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ingredient-values dt {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.58rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ingredient-values dd {
+  margin: 0;
+  color: #f2d49e;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.shelf-note {
+  margin: 18px 0 0;
+  color: #8f8592;
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.cauldron-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 26px 22px;
+}
+
+.section-heading--compact {
+  margin-bottom: 0;
+}
+
+.cauldron-counter {
+  padding: 7px 10px;
+  border: 1px solid rgb(137 214 194 / 22%);
+  border-radius: 999px;
+  background: rgb(137 214 194 / 6%);
+  color: #a9dfd0;
+}
+
+.cauldron-illustration {
+  position: relative;
+  display: grid;
+  min-height: 215px;
+  margin: 17px 0 10px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgb(137 214 194 / 10%);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 50% 75%, rgb(53 117 103 / 18%), transparent 55%),
+    #211b26;
+}
+
+.cauldron-illustration svg {
+  position: relative;
+  z-index: 1;
+  width: 185px;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.cauldron-rim {
+  fill: #39303b;
+  stroke: #c99e5b;
+  stroke-width: 3;
+}
+
+.cauldron-liquid {
+  fill: #367f72;
+  opacity: 0.8;
+}
+
+.cauldron-highlight {
+  fill: none;
+  stroke: #e2ba76;
+  stroke-linecap: round;
+  stroke-width: 4;
+}
+
+.cauldron-bubble {
+  fill: #9de4c9;
+  opacity: 0.8;
+}
+
+.cauldron-bubble--two {
+  opacity: 0.55;
+}
+
+.cauldron-steam {
+  position: absolute;
+  top: 40px;
+  width: 16px;
+  height: 40px;
+  border-left: 2px solid rgb(137 214 194 / 30%);
+  border-radius: 50%;
+  transform: rotate(22deg);
+}
+
+.cauldron-steam--one {
+  left: calc(50% - 20px);
+}
+
+.cauldron-steam--two {
+  top: 50px;
+  left: calc(50% + 13px);
+  height: 29px;
+  transform: rotate(-20deg);
+}
+
+.cauldron-empty-title {
+  margin: 7px 0 5px;
+  color: #eee3d4;
+  font-family: Georgia, serif;
+  font-size: 1.03rem;
+  text-align: center;
+}
+
+.cauldron-empty-copy {
+  max-width: 220px;
+  margin: 0 auto;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.capacity-meter {
+  margin-top: auto;
+  padding-top: 25px;
+}
+
+.capacity-meter__labels {
+  margin-bottom: 9px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.capacity-meter__labels strong {
+  color: #d9c5a8;
+  font-variant-numeric: tabular-nums;
+}
+
+.capacity-meter__track {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #423744;
+}
+
+.capacity-meter__track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--mint);
+}
+
+.game-footer {
+  gap: 16px;
+  padding: 18px 4px 0;
+  color: #756c79;
+  font-size: 0.69rem;
+}
+
+@media (width <= 1050px) {
+  .game-board {
+    grid-template-columns: minmax(0, 1fr) 285px;
+    gap: 16px;
+  }
+
+  .shelf-panel {
+    padding: 22px;
+  }
+
+  .ingredient-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 760px) {
+  .game-shell {
+    width: min(100% - 32px, 580px);
+    padding-top: 34px;
+  }
+
+  .game-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .game-board {
+    grid-template-columns: 1fr;
+  }
+
+  .cauldron-panel {
+    min-height: 430px;
+  }
+}
+
+@media (width <= 420px) {
+  .game-shell {
+    width: min(100% - 24px, 380px);
+    padding-top: 26px;
+  }
+
+  .shelf-panel,
+  .cauldron-panel {
+    padding: 18px 14px;
+    border-radius: 17px;
+  }
+
+  .ingredient-grid {
+    gap: 9px;
+  }
+
+  .ingredient-card {
+    padding: 14px 11px 12px;
+  }
+
+  .ingredient-card__art {
+    width: 58px;
+    height: 58px;
+  }
+
+  .ingredient-icon {
+    width: 39px;
+    height: 39px;
+  }
+
+  .ingredient-values dt {
+    font-size: 0.53rem;
+  }
+
+  .game-footer span:last-child {
+    text-align: right;
+  }
+}

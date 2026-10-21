@@ -13,7 +13,7 @@ The game will use TypeScript, HTML, and CSS. Game rules will live separately fro
 
 ## Status
 
-Project setup is in progress. Gameplay has not been implemented yet.
+The Level 1 ingredient shelf and empty cauldron view are in progress. The shelf shows the first six ingredients from the full eight-ingredient catalogue, with randomized starting stock for each ingredient.
 
 ## Run locally
 
@@ -23,7 +23,7 @@ Conventional Commits format used by RS School, and pushes run ESLint and the Pre
 
 Run `npm run lint` to lint project code, `npm run format` to format project files, and
 `npm run format:check` to check formatting. Run `npm run typecheck` to check TypeScript types.
-Run `npm run build` to create a production build in `dist/`.
+Run `npm test` to check the ingredient catalogue and starting stock. Run `npm run build` to create a production build in `dist/`.
 Use `npm run preview` to serve the production build locally.
 
 ## Requirements

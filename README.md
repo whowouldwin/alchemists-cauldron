@@ -13,7 +13,7 @@ The game will use TypeScript, HTML, and CSS. Game rules will live separately fro
 
 ## Status
 
-The Level 1 ingredient shelf and empty cauldron view are in progress. The shelf shows the first six ingredients from the full eight-ingredient catalogue, with randomized starting stock for each ingredient.
+The Level 1 ingredient shelf and cauldron are implemented. The shelf shows the first six ingredients from the full eight-ingredient catalogue, with randomized starting stock. Players can add ingredients in order, clear the cauldron without restoring spent stock, and add no more than four ingredients at a time.
 
 ## Run locally
 

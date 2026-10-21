@@ -176,12 +176,54 @@ h2 {
 
 .ingredient-card {
   position: relative;
+  display: block;
+  width: 100%;
   min-width: 0;
   padding: 18px 16px 15px;
   overflow: hidden;
   border: 1px solid rgb(225 204 169 / 10%);
   border-radius: 16px;
   background: linear-gradient(145deg, #302735, #28212d 72%);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+.ingredient-card:not(:disabled):hover {
+  transform: translateY(-2px);
+  border-color: rgb(231 185 111 / 42%);
+}
+
+.ingredient-card:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.ingredient-card:disabled {
+  cursor: default;
+}
+
+.ingredient-card--empty,
+.ingredient-card:disabled:not(.ingredient-card--empty) {
+  opacity: 0.48;
+}
+
+.ingredient-card--empty {
+  background: linear-gradient(145deg, #28232c, #241f28 72%);
+}
+
+.ingredient-card--empty::after {
+  display: none;
+}
+
+.ingredient-card__art--empty {
+  border-style: dashed;
+  color: #756d78;
 }
 
 .ingredient-card::after {
@@ -333,6 +375,101 @@ h2 {
   border-radius: 999px;
   background: rgb(137 214 194 / 6%);
   color: #a9dfd0;
+}
+
+.cauldron-ingredients {
+  display: grid;
+  gap: 9px;
+  margin: 17px 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.cauldron-ingredient {
+  display: grid;
+  grid-template-columns: 22px 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  min-height: 54px;
+  padding: 7px 10px;
+  border: 1px solid rgb(137 214 194 / 14%);
+  border-radius: 12px;
+  background: rgb(33 27 38 / 76%);
+}
+
+.cauldron-ingredient__position {
+  color: #9c909f;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.cauldron-ingredient__icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--ingredient-color) 10%, transparent);
+  color: var(--ingredient-color);
+}
+
+.cauldron-ingredient__icon .ingredient-icon {
+  width: 23px;
+  height: 23px;
+}
+
+.cauldron-ingredient__name {
+  overflow: hidden;
+  color: #e8dfd4;
+  font-size: 0.77rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cauldron-ingredient[data-icon="dragon-tears"] {
+  --ingredient-color: #73c8c0;
+}
+.cauldron-ingredient[data-icon="fairy-dust"] {
+  --ingredient-color: #e4bd7f;
+}
+.cauldron-ingredient[data-icon="frost-lotus"] {
+  --ingredient-color: #9ebdeb;
+}
+.cauldron-ingredient[data-icon="mandrake-root"] {
+  --ingredient-color: #a7c887;
+}
+.cauldron-ingredient[data-icon="caustic-acid"] {
+  --ingredient-color: #d2bd68;
+}
+.cauldron-ingredient[data-icon="essence-of-the-void"] {
+  --ingredient-color: #c19be0;
+}
+
+.cauldron-empty-title--filled {
+  margin-top: 5px;
+}
+
+.clear-cauldron-button {
+  align-self: center;
+  margin: 2px 0 12px;
+  padding: 7px 11px;
+  border: 1px solid rgb(225 204 169 / 18%);
+  border-radius: 999px;
+  background: transparent;
+  color: #b9acbc;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.clear-cauldron-button:hover {
+  border-color: rgb(231 185 111 / 42%);
+  color: var(--gold-soft);
+}
+
+.clear-cauldron-button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
 }
 
 .cauldron-illustration {

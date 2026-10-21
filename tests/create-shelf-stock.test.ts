@@ -7,7 +7,7 @@ import {
 } from "../src/data/ingredients.ts";
 import { createShelfStock } from "../src/logic/create-shelf-stock.ts";
 
-test("keeps all eight ingredients in the required catalogue order", () => {
+test("matches the required eight-ingredient catalogue", () => {
   assert.deepEqual(INGREDIENTS, [
     {
       id: "dragon-tears",
@@ -77,18 +77,22 @@ test("generates stock for each ingredient using values from 2 to 15", () => {
   const random = (): number => {
     const value = values[nextValue];
 
-    assert.notEqual(value, undefined);
+    assert.ok(value !== undefined);
     nextValue += 1;
-    return value!;
+
+    return value;
   };
   const stock = createShelfStock(LEVEL_ONE_INGREDIENTS, random);
 
   assert.equal(nextValue, values.length);
-  assert.deepEqual(Object.values(stock), [2, 3, 5, 9, 12, 15]);
-  assert.deepEqual(
-    Object.keys(stock),
-    LEVEL_ONE_INGREDIENTS.map(({ id }) => id),
-  );
+  assert.deepEqual(stock, {
+    "dragon-tears": 2,
+    "fairy-dust": 3,
+    "frost-lotus": 5,
+    "mandrake-root": 9,
+    "caustic-acid": 12,
+    "essence-of-the-void": 15,
+  });
 });
 
 test("returns an empty stock for an empty shelf", () => {

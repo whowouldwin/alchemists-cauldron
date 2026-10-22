@@ -2,7 +2,10 @@ import type { GameState } from "../../state/game-state.ts";
 import { calculateCauldron } from "../../logic/calculate-cauldron.ts";
 import { renderCauldron } from "../cauldron/render-cauldron.ts";
 import { renderIngredientShelf } from "../ingredient-shelf/render-ingredient-shelf.ts";
-import { renderParameterBars } from "../parameter-bars/render-parameter-bars.ts";
+import {
+  renderParameterBars,
+  type CauldronTargetRanges,
+} from "../parameter-bars/render-parameter-bars.ts";
 import { renderRecipePanel } from "../recipe-panel/render-recipe-panel.ts";
 import { renderGameStatus } from "../game-status/render-game-status.ts";
 import { renderTopbar } from "../shared/render-layout.ts";
@@ -25,6 +28,11 @@ export function renderActiveGame(state: GameState): HTMLElement {
   );
   const gameLayout = createElement("div", "game-layout");
   const cauldronValues = calculateCauldron(state.cauldronIngredients);
+  const targetRanges: CauldronTargetRanges = {
+    temperature: state.activeRecipe.temperature,
+    density: state.activeRecipe.density,
+    magicPower: state.activeRecipe.magicPower,
+  };
 
   gameIntro.setAttribute("aria-labelledby", "game-heading");
   heading.id = "game-heading";
@@ -36,7 +44,7 @@ export function renderActiveGame(state: GameState): HTMLElement {
     gameIntro,
     renderRecipePanel(state),
     gameLayout,
-    renderParameterBars(cauldronValues),
+    renderParameterBars(cauldronValues, targetRanges),
   );
 
   return appShell;

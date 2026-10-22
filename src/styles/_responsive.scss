@@ -77,6 +77,11 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .parameter-bars {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
   .cauldron-panel {
     position: static;
   }

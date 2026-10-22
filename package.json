@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "prepare": "husky",
     "test": "node --test tests/*.test.ts"
   },
@@ -21,6 +21,7 @@
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.5",
     "eslint": "^10.13.0",
     "globals": "^17.13.0",
     "husky": "^9.1.7",

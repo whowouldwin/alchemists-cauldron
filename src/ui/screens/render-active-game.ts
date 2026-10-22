@@ -2,6 +2,7 @@ import type { GameState } from "../../state/game-state.ts";
 import { renderCauldron } from "../cauldron/render-cauldron.ts";
 import { renderIngredientShelf } from "../ingredient-shelf/render-ingredient-shelf.ts";
 import { renderRecipePanel } from "../recipe-panel/render-recipe-panel.ts";
+import { renderGameStatus } from "../game-status/render-game-status.ts";
 import { renderTopbar } from "../shared/render-layout.ts";
 import { createElement } from "../shared/create-element.ts";
 
@@ -25,7 +26,7 @@ export function renderActiveGame(state: GameState): HTMLElement {
   gameIntro.setAttribute("aria-labelledby", "game-heading");
   heading.id = "game-heading";
   introContent.append(eyebrowText, heading, description);
-  gameIntro.append(introContent);
+  gameIntro.append(introContent, renderGameStatus(state));
   gameLayout.append(renderIngredientShelf(state), renderCauldron(state));
   appShell.append(
     renderTopbar(),

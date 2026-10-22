@@ -1,3 +1,7 @@
+$target-zone-color: #cce4d2;
+$target-match-color: #2f7042;
+$target-glow-color: #79b98a;
+
 .parameter-panel {
   margin-top: 22px;
 
@@ -46,10 +50,14 @@
       position: absolute;
       top: 1px;
       bottom: 1px;
-      left: 50%;
+      left: 0;
       width: 1px;
       background: var(--color-neutral-mid);
       content: "";
+    }
+
+    &--signed::before {
+      left: 50%;
     }
   }
 
@@ -64,4 +72,19 @@
     box-shadow: 0 0 0 1px var(--color-ink);
     transform: translate(-50%, -50%);
   }
+
+  &__target-zone {
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    border-radius: 999px;
+    background: $target-zone-color;
+  }
+}
+
+.parameter-bar--in-range .parameter-bar__marker {
+  background: $target-match-color;
+  box-shadow:
+    0 0 0 1px $target-match-color,
+    0 0 10px $target-glow-color;
 }

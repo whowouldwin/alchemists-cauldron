@@ -8,6 +8,16 @@ export interface ParameterScale {
   readonly maximum: number;
 }
 
+export interface ParameterTargetRange {
+  readonly minimum: number;
+  readonly maximum: number;
+}
+
+export interface ParameterTargetPosition {
+  readonly left: number;
+  readonly width: number;
+}
+
 export function calculateParameterScale(
   ingredients: readonly Ingredient[],
   parameter: CauldronParameter,
@@ -32,4 +42,23 @@ export function calculateMarkerPosition(
   scale: ParameterScale,
 ): number {
   return ((value - scale.minimum) / (scale.maximum - scale.minimum)) * 100;
+}
+
+export function calculateTargetPosition(
+  targetRange: ParameterTargetRange,
+  scale: ParameterScale,
+): ParameterTargetPosition {
+  const start = calculateMarkerPosition(targetRange.minimum, scale);
+  const end = calculateMarkerPosition(targetRange.maximum, scale);
+  const left = Math.max(0, Math.min(start, 100));
+  const right = Math.max(0, Math.min(end, 100));
+
+  return { left, width: Math.max(right - left, 0) };
+}
+
+export function isValueInTargetRange(
+  value: number,
+  targetRange: ParameterTargetRange,
+): boolean {
+  return value >= targetRange.minimum && value <= targetRange.maximum;
 }

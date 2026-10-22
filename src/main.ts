@@ -67,7 +67,25 @@ function handleIngredientClick(ingredientId: string): void {
   );
 }
 
-applicationRoot.addEventListener("click", (event: MouseEvent) => {
+function handleIngredientButtonClick(target: Element): void {
+  const ingredientButton = target.closest<HTMLButtonElement>(
+    "[data-ingredient-id]",
+  );
+
+  if (ingredientButton === null || ingredientButton.disabled) {
+    return;
+  }
+
+  const ingredientId = ingredientButton.dataset.ingredientId;
+
+  if (ingredientId === undefined) {
+    return;
+  }
+
+  handleIngredientClick(ingredientId);
+}
+
+function handleApplicationClick(event: MouseEvent): void {
   if (!(event.target instanceof Element)) {
     return;
   }
@@ -81,24 +99,9 @@ applicationRoot.addEventListener("click", (event: MouseEvent) => {
     return;
   }
 
-  const ingredientButton = event.target.closest<HTMLButtonElement>(
-    "[data-ingredient-id]",
-  );
+  handleIngredientButtonClick(event.target);
+}
 
-  if (
-    ingredientButton === null ||
-    ingredientButton.disabled
-  ) {
-    return;
-  }
-
-  const ingredientId = ingredientButton.dataset.ingredientId;
-
-  if (ingredientId === undefined) {
-    return;
-  }
-
-  handleIngredientClick(ingredientId);
-});
+applicationRoot.addEventListener("click", handleApplicationClick);
 
 render();

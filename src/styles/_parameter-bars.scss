@@ -1,0 +1,105 @@
+$target-zone-color: #cce4d2;
+$target-match-color: #2f7042;
+$target-glow-color: #79b98a;
+
+.parameter-panel {
+  margin-top: 22px;
+
+  &__heading {
+    margin: 0 0 20px;
+    font-size: 20px;
+    letter-spacing: -0.04em;
+  }
+}
+
+.parameter-bars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.parameter-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+
+  &__label {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  &__value {
+    color: var(--color-ink);
+    font-size: 15px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__track {
+    position: relative;
+    grid-column: 1 / -1;
+    height: 12px;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: var(--color-neutral-light);
+
+    &::before {
+      position: absolute;
+      top: 1px;
+      bottom: 1px;
+      left: 0;
+      width: 1px;
+      background: var(--color-neutral-mid);
+      content: "";
+    }
+
+    &--signed::before {
+      left: 50%;
+    }
+  }
+
+  &__scale-labels {
+    display: flex;
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    gap: 8px;
+    color: var(--color-muted);
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__scale-label {
+    white-space: nowrap;
+  }
+
+  &__marker {
+    position: absolute;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    border: 3px solid var(--color-surface);
+    border-radius: 50%;
+    background: var(--color-ink);
+    box-shadow: 0 0 0 1px var(--color-ink);
+    transform: translate(-50%, -50%);
+  }
+
+  &__target-zone {
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    border-radius: 999px;
+    background: $target-zone-color;
+  }
+}
+
+.parameter-bar--in-range .parameter-bar__marker {
+  background: $target-match-color;
+  box-shadow:
+    0 0 0 1px $target-match-color,
+    0 0 10px $target-glow-color;
+}

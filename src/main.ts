@@ -1,10 +1,13 @@
 import "./styles/game.scss";
 import {
   addIngredient,
+  applyBrewResult,
   createGameState,
   MAX_CAULDRON_INGREDIENTS,
   type GameState,
 } from "./state/game-state.ts";
+import { calculateCauldron } from "./logic/calculate-cauldron.ts";
+import { isBrewSuccessful } from "./logic/brew-check.ts";
 import { renderGame } from "./ui/screens/render-game.ts";
 
 const announcementRegion = document.createElement("div");
@@ -37,6 +40,12 @@ function announceIngredientAdded(
   announcementRegion.textContent = `${ingredientName} added. ${cauldronMessage}`;
 }
 
+function announceBrewResult(succeeded: boolean): void {
+  announcementRegion.textContent = succeeded
+    ? "Brew successful. 200 points awarded. A new recipe is ready."
+    : "Brew failed. One life was lost.";
+}
+
 function startGame(): void {
   gameState = createGameState();
   render();
@@ -67,6 +76,19 @@ function handleIngredientClick(ingredientId: string): void {
   );
 }
 
+function handleBrewClick(): void {
+  if (gameState === null || gameState.cauldronIngredients.length === 0) {
+    return;
+  }
+
+  const values = calculateCauldron(gameState.cauldronIngredients);
+  const succeeded = isBrewSuccessful(values, gameState.activeRecipe);
+
+  gameState = applyBrewResult(gameState, succeeded);
+  render();
+  announceBrewResult(succeeded);
+}
+
 function handleIngredientButtonClick(target: Element): void {
   const ingredientButton = target.closest<HTMLButtonElement>(
     "[data-ingredient-id]",
@@ -85,6 +107,20 @@ function handleIngredientButtonClick(target: Element): void {
   handleIngredientClick(ingredientId);
 }
 
+function handleBrewButtonClick(target: Element): boolean {
+  const brewButton = target.closest<HTMLButtonElement>('[data-action="brew"]');
+
+  if (brewButton === null) {
+    return false;
+  }
+
+  if (!brewButton.disabled) {
+    handleBrewClick();
+  }
+
+  return true;
+}
+
 function handleApplicationClick(event: MouseEvent): void {
   if (!(event.target instanceof Element)) {
     return;
@@ -96,6 +132,10 @@ function handleApplicationClick(event: MouseEvent): void {
 
   if (startButton !== null) {
     startGame();
+    return;
+  }
+
+  if (handleBrewButtonClick(event.target)) {
     return;
   }
 

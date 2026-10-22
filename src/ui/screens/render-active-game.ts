@@ -1,6 +1,7 @@
 import type { GameState } from "../../state/game-state.ts";
 import { renderCauldron } from "../cauldron/render-cauldron.ts";
 import { renderIngredientShelf } from "../ingredient-shelf/render-ingredient-shelf.ts";
+import { renderRecipePanel } from "../recipe-panel/render-recipe-panel.ts";
 import { renderTopbar } from "../shared/render-layout.ts";
 import { createElement } from "../shared/create-element.ts";
 
@@ -26,7 +27,12 @@ export function renderActiveGame(state: GameState): HTMLElement {
   introContent.append(eyebrowText, heading, description);
   gameIntro.append(introContent);
   gameLayout.append(renderIngredientShelf(state), renderCauldron(state));
-  appShell.append(renderTopbar(), gameIntro, gameLayout);
+  appShell.append(
+    renderTopbar(),
+    gameIntro,
+    renderRecipePanel(state),
+    gameLayout,
+  );
 
   return appShell;
 }

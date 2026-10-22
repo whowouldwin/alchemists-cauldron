@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { LEVEL_ONE_INGREDIENTS } from "../src/data/ingredients.ts";
+import { getRecipesByDifficulty } from "../src/logic/recipe-generator.ts";
 import {
   addIngredient,
   createGameState,
@@ -15,6 +16,7 @@ test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
     ...LEVEL_ONE_INGREDIENTS.map(({ id }) => id),
   ]);
   assert.deepEqual(Object.values(state.shelfStock), [2, 2, 2, 2, 2, 2]);
+  assert.ok(getRecipesByDifficulty("medium").includes(state.activeRecipe));
 });
 
 test("adds ingredients in order and spends one stock per addition", () => {

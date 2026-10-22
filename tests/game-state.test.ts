@@ -20,6 +20,7 @@ test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
   assert.equal(state.score, 0);
   assert.equal(state.timeRemaining, 150);
   assert.equal(state.lives, 3);
+  assert.equal(state.lastBrewResult, null);
 });
 
 test("adds ingredients in order and spends one stock per addition", () => {

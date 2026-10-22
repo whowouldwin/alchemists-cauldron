@@ -10,6 +10,8 @@ const LEVEL_ONE_SCORE_PER_BREW = 200;
 const LEVEL_ONE_TIME_BONUS = 10;
 const LEVEL_ONE_RECIPE_DIFFICULTY = "medium";
 
+export type BrewResult = "success" | "failure";
+
 export interface GameState {
   readonly cauldronIngredients: readonly Ingredient[];
   readonly shelfStock: Readonly<Record<string, number>>;
@@ -17,6 +19,7 @@ export interface GameState {
   readonly score: number;
   readonly timeRemaining: number;
   readonly lives: number;
+  readonly lastBrewResult: BrewResult | null;
 }
 
 export function createGameState(random: () => number = Math.random): GameState {
@@ -27,6 +30,7 @@ export function createGameState(random: () => number = Math.random): GameState {
     score: 0,
     timeRemaining: LEVEL_ONE_MAX_TIME,
     lives: LEVEL_ONE_STARTING_LIVES,
+    lastBrewResult: null,
   };
 }
 
@@ -50,6 +54,7 @@ export function addIngredient(
   return {
     ...state,
     cauldronIngredients: [...state.cauldronIngredients, ingredient],
+    lastBrewResult: null,
     shelfStock: {
       ...state.shelfStock,
       [ingredientId]: stock - 1,
@@ -69,7 +74,11 @@ export function applyBrewResult(
   const clearedState = { ...state, cauldronIngredients: [] };
 
   if (!succeeded) {
-    return { ...clearedState, lives: Math.max(state.lives - 1, 0) };
+    return {
+      ...clearedState,
+      lives: Math.max(state.lives - 1, 0),
+      lastBrewResult: "failure",
+    };
   }
 
   return {
@@ -80,5 +89,6 @@ export function applyBrewResult(
       state.timeRemaining + LEVEL_ONE_TIME_BONUS,
       LEVEL_ONE_MAX_TIME,
     ),
+    lastBrewResult: "success",
   };
 }

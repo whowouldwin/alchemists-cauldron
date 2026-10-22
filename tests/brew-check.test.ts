@@ -4,8 +4,8 @@ import type { Recipe } from "../src/data/recipes.ts";
 import {
   isBrewSuccessful,
   LEVEL_ONE_RECIPE_TOLERANCE,
-  type CauldronValues,
 } from "../src/logic/brew-check.ts";
+import type { CauldronValues } from "../src/logic/calculate-cauldron.ts";
 
 const RECIPE: Recipe = {
   id: "test-recipe",

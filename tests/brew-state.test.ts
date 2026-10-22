@@ -18,15 +18,26 @@ function createStateWithIngredient() {
 test("awards score and time, clears the cauldron, and selects a recipe on success", () => {
   const state = {
     ...createStateWithIngredient(),
-    timeRemaining: 145,
+    timeRemaining: 120,
   };
   const nextState = applyBrewResult(state, true, () => 0.5);
 
   assert.deepEqual(nextState.cauldronIngredients, []);
   assert.equal(nextState.score, 200);
-  assert.equal(nextState.timeRemaining, LEVEL_ONE_MAX_TIME);
+  assert.equal(nextState.timeRemaining, 130);
   assert.equal(nextState.lives, state.lives);
   assert.notEqual(nextState.activeRecipe.id, state.activeRecipe.id);
+  assert.equal(nextState.lastBrewResult, "success");
+});
+
+test("caps the successful brew time bonus at the Level 1 maximum", () => {
+  const state = {
+    ...createStateWithIngredient(),
+    timeRemaining: LEVEL_ONE_MAX_TIME - 5,
+  };
+  const nextState = applyBrewResult(state, true, () => 0.5);
+
+  assert.equal(nextState.timeRemaining, LEVEL_ONE_MAX_TIME);
 });
 
 test("deducts a life and clears the cauldron on failure", () => {
@@ -38,6 +49,7 @@ test("deducts a life and clears the cauldron on failure", () => {
   assert.equal(nextState.timeRemaining, state.timeRemaining);
   assert.equal(nextState.lives, state.lives - 1);
   assert.equal(nextState.activeRecipe, state.activeRecipe);
+  assert.equal(nextState.lastBrewResult, "failure");
 });
 
 test("does not apply a brew result to an empty cauldron", () => {
@@ -52,4 +64,12 @@ test("does not deduct lives below zero", () => {
   const nextState = applyBrewResult(state, false);
 
   assert.equal(nextState.lives, 0);
+});
+
+test("clears the previous brew message when another ingredient is added", () => {
+  const state = applyBrewResult(createStateWithIngredient(), false);
+  const ingredientId = LEVEL_ONE_INGREDIENTS[0].id;
+  const nextState = addIngredient(state, ingredientId);
+
+  assert.equal(nextState.lastBrewResult, null);
 });

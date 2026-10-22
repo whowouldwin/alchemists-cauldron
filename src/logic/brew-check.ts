@@ -1,12 +1,7 @@
 import type { Recipe, RecipeRange } from "../data/recipes.ts";
+import type { CauldronValues } from "./calculate-cauldron.ts";
 
 export const LEVEL_ONE_RECIPE_TOLERANCE = 8;
-
-export interface CauldronValues {
-  readonly temperature: number;
-  readonly density: number;
-  readonly magicPower: number;
-}
 
 function isValueWithinTolerance(
   value: number,

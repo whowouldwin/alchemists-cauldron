@@ -48,6 +48,37 @@ function renderTargetZone(
   return targetZone;
 }
 
+function renderScaleLabels(
+  scale: ParameterScale,
+  supportsNegativeValues: boolean,
+): HTMLDivElement {
+  const labels = createElement("div", "parameter-bar__scale-labels");
+  const minimumLabel = supportsNegativeValues
+    ? `Min: ${formatIngredientValue(scale.minimum)}`
+    : `Min / 0: ${formatIngredientValue(scale.minimum)}`;
+  const minimum = createElement(
+    "span",
+    "parameter-bar__scale-label",
+    minimumLabel,
+  );
+  const maximum = createElement(
+    "span",
+    "parameter-bar__scale-label",
+    `Max: ${formatIngredientValue(scale.maximum)}`,
+  );
+
+  labels.setAttribute("aria-hidden", "true");
+  labels.append(minimum);
+
+  if (supportsNegativeValues) {
+    labels.append(createElement("span", "parameter-bar__scale-label", "0"));
+  }
+
+  labels.append(maximum);
+
+  return labels;
+}
+
 function animateMarker(
   marker: HTMLSpanElement,
   startPosition: number,
@@ -96,6 +127,10 @@ export function renderParameterBar(
     : "parameter-bar__track";
   const track = createElement("div", trackClassName);
   const marker = createElement("span", "parameter-bar__marker");
+  const scaleLabels = renderScaleLabels(
+    scale,
+    parameter.supportsNegativeValues,
+  );
 
   label.id = headingId;
   track.setAttribute("role", "meter");
@@ -118,7 +153,7 @@ export function renderParameterBar(
 
   marker.style.left = `${startPosition}%`;
   track.append(marker);
-  bar.append(label, output, track);
+  bar.append(label, output, track, scaleLabels);
   animateMarker(marker, startPosition, position);
   previousMarkerPositions.set(parameter.name, position);
 

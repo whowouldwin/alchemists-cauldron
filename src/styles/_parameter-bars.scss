@@ -61,6 +61,21 @@ $target-glow-color: #79b98a;
     }
   }
 
+  &__scale-labels {
+    display: flex;
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    gap: 8px;
+    color: var(--color-muted);
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__scale-label {
+    white-space: nowrap;
+  }
+
   &__marker {
     position: absolute;
     top: 50%;

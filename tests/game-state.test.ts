@@ -17,6 +17,9 @@ test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
   ]);
   assert.deepEqual(Object.values(state.shelfStock), [2, 2, 2, 2, 2, 2]);
   assert.ok(getRecipesByDifficulty("medium").includes(state.activeRecipe));
+  assert.equal(state.score, 0);
+  assert.equal(state.timeRemaining, 150);
+  assert.equal(state.lives, 3);
 });
 
 test("adds ingredients in order and spends one stock per addition", () => {

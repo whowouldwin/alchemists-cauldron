@@ -5,11 +5,13 @@ import { getRecipesByDifficulty } from "../src/logic/recipe-generator.ts";
 import {
   addIngredient,
   createGameState,
+  getGameTimeRemaining,
   MAX_CAULDRON_INGREDIENTS,
 } from "../src/state/game-state.ts";
 
 test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
-  const state = createGameState(() => 0);
+  const currentTime = 10_000;
+  const state = createGameState(() => 0, currentTime);
 
   assert.deepEqual(state.cauldronIngredients, []);
   assert.deepEqual(Object.keys(state.shelfStock), [
@@ -18,7 +20,8 @@ test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
   assert.deepEqual(Object.values(state.shelfStock), [2, 2, 2, 2, 2, 2]);
   assert.ok(getRecipesByDifficulty("medium").includes(state.activeRecipe));
   assert.equal(state.score, 0);
-  assert.equal(state.timeRemaining, 150);
+  assert.equal(state.endTime, currentTime + 150_000);
+  assert.equal(getGameTimeRemaining(state, currentTime), 150);
   assert.equal(state.lives, 3);
   assert.equal(state.lastBrewResult, null);
 });

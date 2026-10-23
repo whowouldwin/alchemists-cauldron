@@ -1,4 +1,7 @@
-import type { GameState } from "../../state/game-state.ts";
+import {
+  getGameTimeRemaining,
+  type GameState,
+} from "../../state/game-state.ts";
 import { createElement } from "../shared/create-element.ts";
 import { formatTimeRemaining } from "../shared/format-time-remaining.ts";
 
@@ -7,7 +10,7 @@ export function renderGameStatus(state: GameState): HTMLElement {
   const score = createStatusItem("Score", String(state.score));
   const time = createStatusItem(
     "Time",
-    formatTimeRemaining(state.timeRemaining),
+    formatTimeRemaining(getGameTimeRemaining(state)),
   );
   const lives = createStatusItem("Lives", String(state.lives));
 

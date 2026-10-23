@@ -14,6 +14,7 @@ export function renderGameStatus(state: GameState): HTMLElement {
   );
   const lives = createStatusItem("Lives", String(state.lives));
 
+  time.querySelector("strong")?.setAttribute("data-time-remaining", "");
   status.setAttribute("aria-label", "Game status");
   status.append(score, time, lives);
 

@@ -3,12 +3,16 @@ import {
   addIngredient,
   applyBrewResult,
   createGameState,
+  getGameTimeRemaining,
   MAX_CAULDRON_INGREDIENTS,
   type GameState,
 } from "./state/game-state.ts";
 import { calculateCauldron } from "./logic/calculate-cauldron.ts";
 import { isBrewSuccessful } from "./logic/brew-check.ts";
+import { formatTimeRemaining } from "./ui/shared/format-time-remaining.ts";
 import { renderGame } from "./ui/screens/render-game.ts";
+
+const TIMER_REFRESH_INTERVAL_MS = 1000;
 
 const announcementRegion = document.createElement("div");
 announcementRegion.id = "app-announcements";
@@ -23,9 +27,45 @@ applicationRoot.id = "app";
 document.body.append(announcementRegion, applicationRoot);
 
 let gameState: GameState | null = null;
+let timerRefreshId: number | null = null;
 
 function render(): void {
   applicationRoot.replaceChildren(renderGame(gameState));
+}
+
+function refreshTimerDisplay(): void {
+  if (gameState === null) {
+    return;
+  }
+
+  const timerDisplay = applicationRoot.querySelector<HTMLElement>(
+    "[data-time-remaining]",
+  );
+
+  if (timerDisplay === null) {
+    return;
+  }
+
+  timerDisplay.textContent = formatTimeRemaining(
+    getGameTimeRemaining(gameState),
+  );
+}
+
+function stopTimerRefresh(): void {
+  if (timerRefreshId === null) {
+    return;
+  }
+
+  window.clearInterval(timerRefreshId);
+  timerRefreshId = null;
+}
+
+function startTimerRefresh(): void {
+  stopTimerRefresh();
+  timerRefreshId = window.setInterval(
+    refreshTimerDisplay,
+    TIMER_REFRESH_INTERVAL_MS,
+  );
 }
 
 function announceIngredientAdded(
@@ -49,6 +89,7 @@ function announceBrewResult(succeeded: boolean): void {
 function startGame(): void {
   gameState = createGameState();
   render();
+  startTimerRefresh();
 }
 
 function handleIngredientClick(ingredientId: string): void {

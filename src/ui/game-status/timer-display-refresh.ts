@@ -2,6 +2,7 @@ import {
   getGameTimeRemaining,
   type GameState,
 } from "../../state/game-state.ts";
+import { isTimerUrgent } from "../../logic/timer.ts";
 import { formatTimeRemaining } from "../shared/format-time-remaining.ts";
 
 const TIMER_REFRESH_INTERVAL_MS = 1000;
@@ -19,15 +20,32 @@ export function createTimerDisplayRefresh(
       return;
     }
 
+    const timerStatus = applicationRoot.querySelector<HTMLElement>(
+      "[data-timer-status]",
+    );
     const timerDisplay = applicationRoot.querySelector<HTMLElement>(
       "[data-time-remaining]",
     );
+    const timerProgress = applicationRoot.querySelector<HTMLProgressElement>(
+      "[data-time-remaining-bar]",
+    );
 
-    if (timerDisplay === null) {
+    if (
+      timerStatus === null ||
+      timerDisplay === null ||
+      timerProgress === null
+    ) {
       return;
     }
 
-    timerDisplay.textContent = formatTimeRemaining(getGameTimeRemaining(state));
+    const remainingSeconds = getGameTimeRemaining(state);
+
+    timerDisplay.textContent = formatTimeRemaining(remainingSeconds);
+    timerProgress.value = remainingSeconds;
+    timerStatus.classList.toggle(
+      "active-stats__timer--urgent",
+      isTimerUrgent(remainingSeconds),
+    );
   }
 
   function stop(): void {

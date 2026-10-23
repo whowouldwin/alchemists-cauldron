@@ -13,6 +13,7 @@ const MILLISECONDS_PER_SECOND = 1000;
 const LEVEL_ONE_RECIPE_DIFFICULTY = "medium";
 
 export type BrewResult = "success" | "failure";
+export type GameOverReason = "time" | "lives" | "out-of-ingredients";
 
 export interface GameState {
   readonly cauldronIngredients: readonly Ingredient[];
@@ -22,6 +23,7 @@ export interface GameState {
   readonly endTime: number;
   readonly lives: number;
   readonly lastBrewResult: BrewResult | null;
+  readonly gameOverReason: GameOverReason | null;
 }
 
 export function createGameState(
@@ -36,6 +38,7 @@ export function createGameState(
     endTime: currentTime + LEVEL_ONE_MAX_TIME * MILLISECONDS_PER_SECOND,
     lives: LEVEL_ONE_STARTING_LIVES,
     lastBrewResult: null,
+    gameOverReason: null,
   };
 }
 
@@ -106,4 +109,35 @@ export function getGameTimeRemaining(
   currentTime: number = Date.now(),
 ): number {
   return getRemainingSeconds(state.endTime, currentTime);
+}
+
+export function getGameOverReason(
+  state: GameState,
+  currentTime: number = Date.now(),
+): GameOverReason | null {
+  if (getGameTimeRemaining(state, currentTime) === 0) {
+    return "time";
+  }
+
+  if (state.lives === 0) {
+    return "lives";
+  }
+
+  const shelfIsEmpty = Object.values(state.shelfStock).every(
+    (stock) => stock === 0,
+  );
+  const cauldronIsEmpty = state.cauldronIngredients.length === 0;
+
+  if (shelfIsEmpty && cauldronIsEmpty) {
+    return "out-of-ingredients";
+  }
+
+  return null;
+}
+
+export function finishGame(
+  state: GameState,
+  reason: GameOverReason,
+): GameState {
+  return { ...state, gameOverReason: reason };
 }

@@ -3,6 +3,8 @@ import {
   addIngredient,
   applyBrewResult,
   createGameState,
+  finishGame,
+  getGameOverReason,
   type GameState,
 } from "./state/game-state.ts";
 import { calculateCauldron } from "./logic/calculate-cauldron.ts";
@@ -22,6 +24,7 @@ let gameState: GameState | null = null;
 const timerDisplayRefresh = createTimerDisplayRefresh(
   applicationRoot,
   () => gameState,
+  finishGameIfNeeded,
 );
 
 function render(): void {
@@ -35,7 +38,7 @@ function startGame(): void {
 }
 
 function handleIngredientClick(ingredientId: string): void {
-  if (gameState === null) {
+  if (gameState === null || finishGameIfNeeded()) {
     return;
   }
 
@@ -60,7 +63,11 @@ function handleIngredientClick(ingredientId: string): void {
 }
 
 function handleBrewClick(): void {
-  if (gameState === null || gameState.cauldronIngredients.length === 0) {
+  if (
+    gameState === null ||
+    finishGameIfNeeded() ||
+    gameState.cauldronIngredients.length === 0
+  ) {
     return;
   }
 
@@ -68,8 +75,35 @@ function handleBrewClick(): void {
   const succeeded = isBrewSuccessful(values, gameState.activeRecipe);
 
   gameState = applyBrewResult(gameState, succeeded);
+  if (finishGameIfNeeded()) {
+    return;
+  }
+
   render();
   announcements.brewResult(succeeded);
+}
+
+function finishGameIfNeeded(): boolean {
+  if (gameState === null) {
+    return false;
+  }
+
+  if (gameState.gameOverReason !== null) {
+    return true;
+  }
+
+  const reason = getGameOverReason(gameState);
+
+  if (reason === null) {
+    return false;
+  }
+
+  gameState = finishGame(gameState, reason);
+  timerDisplayRefresh.stop();
+  render();
+  announcements.gameOver(reason);
+
+  return true;
 }
 
 applicationRoot.addEventListener(

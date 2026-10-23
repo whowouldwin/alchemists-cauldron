@@ -10,6 +10,7 @@ const TIMER_REFRESH_INTERVAL_MS = 1000;
 export function createTimerDisplayRefresh(
   applicationRoot: HTMLElement,
   getGameState: () => GameState | null,
+  onTimeExpired: () => void,
 ): { start: () => void; stop: () => void } {
   let intervalId: number | null = null;
 
@@ -39,6 +40,11 @@ export function createTimerDisplayRefresh(
     }
 
     const remainingSeconds = getGameTimeRemaining(state);
+
+    if (remainingSeconds === 0) {
+      onTimeExpired();
+      return;
+    }
 
     timerDisplay.textContent = formatTimeRemaining(remainingSeconds);
     timerProgress.value = remainingSeconds;

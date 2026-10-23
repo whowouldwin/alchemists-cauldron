@@ -1,8 +1,5 @@
-import {
-  getGameTimeRemaining,
-  LEVEL_ONE_MAX_TIME,
-  type GameState,
-} from "../../state/game-state.ts";
+import { LEVEL_ONE_MAX_TIME, type GameState } from "../../state/game-state.ts";
+import { getGameTimeRemaining } from "../../state/game-status.ts";
 import { createElement } from "../shared/create-element.ts";
 import { formatTimeRemaining } from "../shared/format-time-remaining.ts";
 import { isTimerUrgent } from "../../logic/timer.ts";

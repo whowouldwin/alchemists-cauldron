@@ -2,12 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { LEVEL_ONE_INGREDIENTS } from "../src/data/ingredients.ts";
 import { getRecipesByDifficulty } from "../src/logic/recipe-generator.ts";
-import {
-  addIngredient,
-  createGameState,
-  getGameTimeRemaining,
-  MAX_CAULDRON_INGREDIENTS,
-} from "../src/state/game-state.ts";
+import { MAX_CAULDRON_INGREDIENTS } from "../src/state/game-state.ts";
+import { createGameState } from "../src/state/create-game-state.ts";
+import { addIngredient } from "../src/state/game-actions.ts";
+import { getGameTimeRemaining } from "../src/state/game-status.ts";
 
 test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
   const currentTime = 10_000;

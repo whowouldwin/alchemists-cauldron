@@ -1,7 +1,5 @@
-import {
-  getGameTimeRemaining,
-  type GameState,
-} from "../../state/game-state.ts";
+import type { GameState } from "../../state/game-state.ts";
+import { getGameTimeRemaining } from "../../state/game-status.ts";
 import { isTimerUrgent } from "../../logic/timer.ts";
 import { formatTimeRemaining } from "../shared/format-time-remaining.ts";
 

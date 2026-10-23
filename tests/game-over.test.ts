@@ -1,12 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { LEVEL_ONE_INGREDIENTS } from "../src/data/ingredients.ts";
-import {
-  addIngredient,
-  createGameState,
-  finishGame,
-  getGameOverReason,
-} from "../src/state/game-state.ts";
+import { createGameState } from "../src/state/create-game-state.ts";
+import { addIngredient } from "../src/state/game-actions.ts";
+import { finishGame, getGameOverReason } from "../src/state/game-status.ts";
 
 test("ends the game when the timer reaches zero", () => {
   const state = createGameState(() => 0, 0);

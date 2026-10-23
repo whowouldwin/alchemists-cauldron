@@ -1,13 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { LEVEL_ONE_INGREDIENTS } from "../src/data/ingredients.ts";
-import {
-  addIngredient,
-  applyBrewResult,
-  createGameState,
-  getGameTimeRemaining,
-  LEVEL_ONE_MAX_TIME,
-} from "../src/state/game-state.ts";
+import { LEVEL_ONE_MAX_TIME } from "../src/state/game-state.ts";
+import { createGameState } from "../src/state/create-game-state.ts";
+import { getGameTimeRemaining } from "../src/state/game-status.ts";
+import { addIngredient, applyBrewResult } from "../src/state/game-actions.ts";
 
 function createStateWithIngredient(currentTime: number) {
   const state = createGameState(() => 0, currentTime);

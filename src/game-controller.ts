@@ -1,4 +1,5 @@
 import { createLeaderboardController } from "./game-controller/leaderboard-controller.ts";
+import { DIFFICULTY_SETTINGS } from "./data/difficulty-settings.ts";
 import { isBrewSuccessful } from "./logic/brew-check.ts";
 import { calculateCauldron } from "./logic/calculate-cauldron.ts";
 import { createGameState } from "./state/create-game-state.ts";
@@ -76,6 +77,7 @@ export function initializeGameController(
     announcements.ingredientAdded(
       addedIngredient.name,
       nextState.cauldronIngredients.length,
+      DIFFICULTY_SETTINGS[nextState.difficulty].maxCauldronIngredients,
     );
   }
 
@@ -176,7 +178,10 @@ export function initializeGameController(
     }
 
     render();
-    announcements.brewResult(succeeded);
+    announcements.brewResult(
+      succeeded,
+      DIFFICULTY_SETTINGS[gameState.difficulty].scorePerBrew,
+    );
   }
 
   function finishGameIfNeeded(): boolean {

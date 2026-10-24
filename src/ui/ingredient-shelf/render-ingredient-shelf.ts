@@ -1,12 +1,14 @@
-import { LEVEL_ONE_INGREDIENTS } from "../../data/ingredients.ts";
+import { getIngredientsForDifficulty } from "../../data/ingredients.ts";
+import { DIFFICULTY_SETTINGS } from "../../data/difficulty-settings.ts";
 import type { GameState } from "../../state/game-state.ts";
-import { MAX_CAULDRON_INGREDIENTS } from "../../state/game-state.ts";
 import { createElement } from "../shared/create-element.ts";
 import { renderIngredientCard } from "./render-ingredient-card.ts";
 
 export function renderIngredientShelf(state: GameState): HTMLElement {
-  const cauldronIsFull =
-    state.cauldronIngredients.length >= MAX_CAULDRON_INGREDIENTS;
+  const ingredients = getIngredientsForDifficulty(state.difficulty);
+  const maximumIngredients =
+    DIFFICULTY_SETTINGS[state.difficulty].maxCauldronIngredients;
+  const cauldronIsFull = state.cauldronIngredients.length >= maximumIngredients;
   const shelfPanel = createElement("section", "panel shelf-panel");
   const panelHeading = createElement("div", "panel-heading");
   const headingContent = createElement("div");
@@ -15,7 +17,7 @@ export function renderIngredientShelf(state: GameState): HTMLElement {
   const itemCount = createElement(
     "span",
     "item-count",
-    `${LEVEL_ONE_INGREDIENTS.length} types`,
+    `${ingredients.length} types`,
   );
   const panelNote = createElement(
     "p",
@@ -35,7 +37,7 @@ export function renderIngredientShelf(state: GameState): HTMLElement {
     panelNote.setAttribute("role", "status");
   }
 
-  LEVEL_ONE_INGREDIENTS.forEach((ingredient) => {
+  ingredients.forEach((ingredient) => {
     shelfGrid.append(
       renderIngredientCard(
         ingredient,

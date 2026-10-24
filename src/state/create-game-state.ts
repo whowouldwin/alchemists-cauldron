@@ -1,4 +1,4 @@
-import { INGREDIENTS } from "../data/ingredients.ts";
+import { getIngredientsForDifficulty } from "../data/ingredients.ts";
 import { DIFFICULTY_SETTINGS } from "../data/difficulty-settings.ts";
 import type { Difficulty } from "../data/recipes.ts";
 import { createShelfStock } from "../logic/create-shelf-stock.ts";
@@ -12,7 +12,7 @@ export function createGameState(
   difficulty: Difficulty = LEVEL_ONE_RECIPE_DIFFICULTY,
 ): GameState {
   const settings = DIFFICULTY_SETTINGS[difficulty];
-  const shelfIngredients = INGREDIENTS.slice(0, settings.shelfIngredientCount);
+  const shelfIngredients = getIngredientsForDifficulty(difficulty);
 
   return {
     difficulty,

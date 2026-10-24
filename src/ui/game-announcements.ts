@@ -1,12 +1,13 @@
-import {
-  MAX_CAULDRON_INGREDIENTS,
-  type GameOverReason,
-} from "../state/game-state.ts";
+import type { GameOverReason } from "../state/game-state.ts";
 
 export interface GameAnnouncements {
   readonly region: HTMLDivElement;
-  ingredientAdded(ingredientName: string, ingredientCount: number): void;
-  brewResult(succeeded: boolean): void;
+  ingredientAdded(
+    ingredientName: string,
+    ingredientCount: number,
+    maximumIngredients: number,
+  ): void;
+  brewResult(succeeded: boolean, scoreAwarded: number): void;
   gameOver(reason: GameOverReason): void;
 }
 
@@ -20,17 +21,17 @@ export function createGameAnnouncements(): GameAnnouncements {
 
   return {
     region,
-    ingredientAdded(ingredientName, ingredientCount) {
+    ingredientAdded(ingredientName, ingredientCount, maximumIngredients) {
       const cauldronMessage =
-        ingredientCount >= MAX_CAULDRON_INGREDIENTS
-          ? `The cauldron is full at ${ingredientCount} of ${MAX_CAULDRON_INGREDIENTS}.`
-          : `The cauldron contains ${ingredientCount} of ${MAX_CAULDRON_INGREDIENTS} ingredients.`;
+        ingredientCount >= maximumIngredients
+          ? `The cauldron is full at ${ingredientCount} of ${maximumIngredients}.`
+          : `The cauldron contains ${ingredientCount} of ${maximumIngredients} ingredients.`;
 
       region.textContent = `${ingredientName} added. ${cauldronMessage}`;
     },
-    brewResult(succeeded) {
+    brewResult(succeeded, scoreAwarded) {
       region.textContent = succeeded
-        ? "Brew successful. 200 points awarded. A new recipe is ready."
+        ? `Brew successful. ${scoreAwarded} points awarded. A new recipe is ready.`
         : "Brew failed. One life was lost.";
     },
     gameOver(reason) {

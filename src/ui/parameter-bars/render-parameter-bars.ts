@@ -1,4 +1,5 @@
 import type { CauldronValues } from "../../logic/calculate-cauldron.ts";
+import type { Difficulty } from "../../data/recipes.ts";
 import { createElement } from "../shared/create-element.ts";
 import {
   PARAMETER_BAR_CONFIGS,
@@ -11,6 +12,7 @@ export type { CauldronTargetRanges } from "./parameter-bar-config.ts";
 export function renderParameterBars(
   values: CauldronValues,
   targetRanges?: CauldronTargetRanges,
+  difficulty: Difficulty = "medium",
 ): HTMLElement {
   const panel = createElement("section", "panel parameter-panel");
   const heading = createElement(
@@ -28,6 +30,7 @@ export function renderParameterBars(
         parameter,
         values[parameter.name],
         targetRanges?.[parameter.name],
+        difficulty,
       ),
     ),
   );

@@ -21,7 +21,31 @@ test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
   assert.equal(state.endTime, currentTime + 150_000);
   assert.equal(getGameTimeRemaining(state, currentTime), 150);
   assert.equal(state.lives, 3);
+  assert.equal(state.difficulty, "medium");
   assert.equal(state.lastBrewResult, null);
+});
+
+test("creates the initial state from the selected difficulty settings", () => {
+  const expectedSettings = [
+    { difficulty: "easy", shelfSize: 4, startingTime: 180, lives: 5 },
+    { difficulty: "medium", shelfSize: 6, startingTime: 150, lives: 3 },
+    { difficulty: "hard", shelfSize: 8, startingTime: 150, lives: 3 },
+  ] as const;
+
+  for (const {
+    difficulty,
+    shelfSize,
+    startingTime,
+    lives,
+  } of expectedSettings) {
+    const state = createGameState(() => 0, 10_000, difficulty);
+
+    assert.equal(state.difficulty, difficulty);
+    assert.equal(Object.keys(state.shelfStock).length, shelfSize);
+    assert.equal(state.endTime, 10_000 + startingTime * 1_000);
+    assert.equal(state.lives, lives);
+    assert.equal(state.activeRecipe.difficulty, difficulty);
+  }
 });
 
 test("adds ingredients in order and spends one stock per addition", () => {

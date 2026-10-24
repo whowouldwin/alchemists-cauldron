@@ -1,14 +1,16 @@
+import { createLeaderboardController } from "./game-controller/leaderboard-controller.ts";
+import { isBrewSuccessful } from "./logic/brew-check.ts";
+import { calculateCauldron } from "./logic/calculate-cauldron.ts";
+import { createGameState } from "./state/create-game-state.ts";
 import { addIngredient, applyBrewResult } from "./state/game-actions.ts";
 import type { GameState } from "./state/game-state.ts";
-import { createGameState } from "./state/create-game-state.ts";
 import {
   finishGame,
   getGameOverReason,
   pauseGame,
   resumeGame,
 } from "./state/game-status.ts";
-import { calculateCauldron } from "./logic/calculate-cauldron.ts";
-import { isBrewSuccessful } from "./logic/brew-check.ts";
+import { qualifiesForLeaderboard } from "./storage/leaderboard.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
 import { createTimerDisplayRefresh } from "./ui/game-status/timer-display-refresh.ts";
@@ -19,6 +21,16 @@ export function initializeGameController(
   announcements: GameAnnouncements,
 ): void {
   let gameState: GameState | null = null;
+  let leaderboardEntryPending = false;
+  const leaderboardController = createLeaderboardController({
+    applicationRoot,
+    getGameState: () => gameState,
+    isEntryPending: () => leaderboardEntryPending,
+    setEntryPending: (pending) => {
+      leaderboardEntryPending = pending;
+    },
+    render,
+  });
   const timerDisplayRefresh = createTimerDisplayRefresh(
     applicationRoot,
     () => gameState,
@@ -26,11 +38,18 @@ export function initializeGameController(
   );
 
   function render(): void {
-    applicationRoot.replaceChildren(renderGame(gameState));
+    const screen = leaderboardController.isVisible()
+      ? leaderboardController.render()
+      : renderGame(gameState, leaderboardEntryPending);
+
+    applicationRoot.replaceChildren(screen);
+    leaderboardController.afterRender();
   }
 
   function startGame(): void {
     gameState = createGameState();
+    leaderboardEntryPending = false;
+    leaderboardController.reset();
     render();
     timerDisplayRefresh.start();
   }
@@ -126,6 +145,7 @@ export function initializeGameController(
     }
 
     gameState = null;
+    leaderboardEntryPending = false;
     timerDisplayRefresh.stop();
     render();
     applicationRoot
@@ -171,6 +191,7 @@ export function initializeGameController(
     }
 
     gameState = finishGame(gameState, reason);
+    leaderboardEntryPending = qualifiesForLeaderboard(gameState.score);
     timerDisplayRefresh.stop();
     render();
     announcements.gameOver(reason);
@@ -187,9 +208,19 @@ export function initializeGameController(
       exitToMenu: handleExitToMenu,
       brew: handleBrewClick,
       addIngredient: handleIngredientClick,
+      openLeaderboard: leaderboardController.open,
+      closeLeaderboard: leaderboardController.close,
+      openLeaderboardClearConfirmation:
+        leaderboardController.openClearConfirmation,
+      cancelLeaderboardClear: leaderboardController.cancelClear,
+      confirmLeaderboardClear: leaderboardController.confirmClear,
     }),
   );
   document.addEventListener("visibilitychange", handleVisibilityChange);
+  applicationRoot.addEventListener(
+    "submit",
+    leaderboardController.handleNameSubmit,
+  );
 
   render();
 }

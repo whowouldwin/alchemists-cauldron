@@ -1,5 +1,9 @@
 import { CAULDRON_ICON } from "../shared/ui-assets.ts";
-import { renderEmptyPanel, renderTopbar } from "../shared/render-layout.ts";
+import {
+  renderEmptyPanel,
+  renderLeaderboardButton,
+  renderTopbar,
+} from "../shared/render-layout.ts";
 import { createElement } from "../shared/create-element.ts";
 
 export function renderStartScreen(): HTMLElement {
@@ -63,12 +67,10 @@ export function renderStartScreen(): HTMLElement {
     ),
   );
 
-  appShell.append(
-    renderTopbar("A little magic lab"),
-    welcomePanel,
-    preGameStats,
-    gameLayout,
-  );
+  const topbar = renderTopbar("A little magic lab");
+  topbar.append(renderLeaderboardButton());
+
+  appShell.append(topbar, welcomePanel, preGameStats, gameLayout);
 
   return appShell;
 }

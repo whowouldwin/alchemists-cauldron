@@ -9,6 +9,11 @@ import {
 } from "./state/game-status.ts";
 import { calculateCauldron } from "./logic/calculate-cauldron.ts";
 import { isBrewSuccessful } from "./logic/brew-check.ts";
+import {
+  isValidPlayerName,
+  qualifiesForLeaderboard,
+  saveLeaderboardEntry,
+} from "./storage/leaderboard.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
 import { createTimerDisplayRefresh } from "./ui/game-status/timer-display-refresh.ts";
@@ -19,6 +24,7 @@ export function initializeGameController(
   announcements: GameAnnouncements,
 ): void {
   let gameState: GameState | null = null;
+  let leaderboardEntryPending = false;
   const timerDisplayRefresh = createTimerDisplayRefresh(
     applicationRoot,
     () => gameState,
@@ -26,11 +32,14 @@ export function initializeGameController(
   );
 
   function render(): void {
-    applicationRoot.replaceChildren(renderGame(gameState));
+    applicationRoot.replaceChildren(
+      renderGame(gameState, leaderboardEntryPending),
+    );
   }
 
   function startGame(): void {
     gameState = createGameState();
+    leaderboardEntryPending = false;
     render();
     timerDisplayRefresh.start();
   }
@@ -126,7 +135,50 @@ export function initializeGameController(
     }
 
     gameState = null;
+    leaderboardEntryPending = false;
     timerDisplayRefresh.stop();
+    render();
+    applicationRoot
+      .querySelector<HTMLButtonElement>('[data-action="start-game"]')
+      ?.focus();
+  }
+
+  function handleLeaderboardNameSubmit(event: SubmitEvent): void {
+    if (
+      !(event.target instanceof HTMLFormElement) ||
+      event.target.dataset.form !== "leaderboard-entry" ||
+      gameState === null ||
+      gameState.gameOverReason === null ||
+      !leaderboardEntryPending
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const input = event.target.querySelector<HTMLInputElement>(
+      '[name="playerName"]',
+    );
+    const status = event.target.querySelector<HTMLElement>('[role="status"]');
+
+    if (input === null || status === null) {
+      return;
+    }
+
+    if (!isValidPlayerName(input.value)) {
+      input.setCustomValidity(
+        "Enter 2–15 letters, numbers, spaces, underscores or hyphens.",
+      );
+      input.reportValidity();
+      return;
+    }
+
+    if (!saveLeaderboardEntry(input.value, gameState.score)) {
+      status.textContent = "Could not save your score. Please try again.";
+      return;
+    }
+
+    leaderboardEntryPending = false;
     render();
     applicationRoot
       .querySelector<HTMLButtonElement>('[data-action="start-game"]')
@@ -171,6 +223,7 @@ export function initializeGameController(
     }
 
     gameState = finishGame(gameState, reason);
+    leaderboardEntryPending = qualifiesForLeaderboard(gameState.score);
     timerDisplayRefresh.stop();
     render();
     announcements.gameOver(reason);
@@ -190,6 +243,7 @@ export function initializeGameController(
     }),
   );
   document.addEventListener("visibilitychange", handleVisibilityChange);
+  applicationRoot.addEventListener("submit", handleLeaderboardNameSubmit);
 
   render();
 }

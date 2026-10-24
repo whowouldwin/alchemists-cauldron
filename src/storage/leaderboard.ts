@@ -24,6 +24,23 @@ export function isValidPlayerName(name: string): boolean {
   );
 }
 
+export function qualifiesForLeaderboard(
+  score: number,
+  storage?: LeaderboardStorage,
+): boolean {
+  if (!Number.isFinite(score) || score < 0) {
+    return false;
+  }
+
+  const entries = readLeaderboard(storage);
+  const lowestRankedEntry = entries.at(-1);
+
+  return (
+    entries.length < LEADERBOARD_LIMIT ||
+    (lowestRankedEntry !== undefined && score > lowestRankedEntry.score)
+  );
+}
+
 export function readLeaderboard(
   storage?: LeaderboardStorage,
 ): readonly LeaderboardEntry[] {

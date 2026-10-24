@@ -4,6 +4,7 @@ import {
   clearLeaderboard,
   isValidPlayerName,
   LEADERBOARD_LIMIT,
+  qualifiesForLeaderboard,
   readLeaderboard,
   saveLeaderboardEntry,
   type LeaderboardStorage,
@@ -112,4 +113,18 @@ test("clears the saved leaderboard", () => {
   assert.equal(saveLeaderboardEntry("Mage", 100, storage), true);
   assert.equal(clearLeaderboard(storage), true);
   assert.deepEqual(readLeaderboard(storage), []);
+});
+
+test("qualifies scores below the list limit and above the tenth score", () => {
+  const { storage } = createMemoryStorage();
+
+  assert.equal(qualifiesForLeaderboard(0, storage), true);
+
+  for (let score = 1; score <= LEADERBOARD_LIMIT; score += 1) {
+    saveLeaderboardEntry(`Mage${score}`, score * 100, storage, score);
+  }
+
+  assert.equal(qualifiesForLeaderboard(101, storage), true);
+  assert.equal(qualifiesForLeaderboard(100, storage), false);
+  assert.equal(qualifiesForLeaderboard(-1, storage), false);
 });

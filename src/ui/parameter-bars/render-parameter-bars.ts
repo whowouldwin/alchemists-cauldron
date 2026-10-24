@@ -1,0 +1,37 @@
+import type { CauldronValues } from "../../logic/calculate-cauldron.ts";
+import { createElement } from "../shared/create-element.ts";
+import {
+  PARAMETER_BAR_CONFIGS,
+  type CauldronTargetRanges,
+} from "./parameter-bar-config.ts";
+import { renderParameterBar } from "./render-parameter-bar.ts";
+
+export type { CauldronTargetRanges } from "./parameter-bar-config.ts";
+
+export function renderParameterBars(
+  values: CauldronValues,
+  targetRanges?: CauldronTargetRanges,
+): HTMLElement {
+  const panel = createElement("section", "panel parameter-panel");
+  const heading = createElement(
+    "h2",
+    "parameter-panel__heading",
+    "Cauldron values",
+  );
+  const bars = createElement("div", "parameter-bars");
+
+  panel.setAttribute("aria-labelledby", "parameter-panel-heading");
+  heading.id = "parameter-panel-heading";
+  bars.append(
+    ...PARAMETER_BAR_CONFIGS.map((parameter) =>
+      renderParameterBar(
+        parameter,
+        values[parameter.name],
+        targetRanges?.[parameter.name],
+      ),
+    ),
+  );
+  panel.append(heading, bars);
+
+  return panel;
+}

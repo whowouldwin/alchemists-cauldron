@@ -1,0 +1,35 @@
+{
+  "name": "alchemists-cauldron",
+  "version": "1.0.0",
+  "description": "Alchemist's Cauldron is a browser game where the player combines ingredients to match the target ranges of a randomly selected potion recipe. Each ingredient changes the cauldron's temperature, density, and magic power. The player earns points by brewing successful potions before time or lives run out.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "prepare": "husky",
+    "test": "node --test tests/*.test.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.5",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.9.10",
+    "sass": "^1.106.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.0",
+    "vite": "^8.3.4"
+  },
+  "type": "module"
+}

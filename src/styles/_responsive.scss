@@ -1,0 +1,237 @@
+@use "breakpoints" as bp;
+
+@media (max-width: bp.$tablet) {
+  .app-shell {
+    width: min(100% - 42px, 900px);
+  }
+
+  .game-layout {
+    grid-template-columns: minmax(0, 1.2fr) minmax(270px, 0.8fr);
+    gap: 14px;
+  }
+
+  .panel {
+    padding: 19px;
+  }
+
+  .shelf-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .ingredient-card {
+    min-height: 165px;
+    padding: 11px;
+  }
+
+  .cauldron-ingredient {
+    grid-template-columns: 18px 27px minmax(0, 1fr);
+
+    &__values {
+      grid-column: 3;
+      margin-top: -4px;
+    }
+  }
+}
+
+@media (max-width: bp.$mobile) {
+  .app-shell {
+    width: min(100% - 32px, 560px);
+    padding-top: 18px;
+  }
+
+  .topbar {
+    margin-bottom: 26px;
+  }
+
+  .topbar-tag {
+    max-width: 130px;
+    font-size: 10px;
+    text-align: right;
+  }
+
+  .welcome-panel {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1.2fr) minmax(125px, 0.8fr);
+    padding: 32px 24px;
+
+    h1 {
+      font-size: clamp(36px, 8vw, 48px);
+    }
+  }
+
+  .welcome-description {
+    font-size: 13px;
+  }
+
+  .welcome-art {
+    min-height: 190px;
+
+    &::before {
+      width: min(100%, 190px);
+    }
+  }
+
+  .game-layout,
+  .game-layout--empty {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .parameter-bars {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .cauldron-panel {
+    position: static;
+  }
+
+  .game-intro {
+    align-items: flex-start;
+  }
+
+  .active-stats {
+    > div {
+      min-width: 78px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      padding: 7px 9px;
+    }
+
+    span {
+      font-size: 10px;
+    }
+  }
+}
+
+@media (max-width: bp.$small-mobile) {
+  .app-shell {
+    width: min(100% - 24px, 420px);
+  }
+
+  .topbar {
+    gap: 10px;
+  }
+
+  .brand {
+    gap: 8px;
+    font-size: 15px;
+
+    &-mark {
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  .topbar-tag {
+    max-width: 108px;
+    font-size: 9px;
+  }
+
+  .welcome-panel {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 28px 21px 16px;
+
+    h1 {
+      max-width: 340px;
+      font-size: 43px;
+    }
+  }
+
+  .welcome-description {
+    max-width: 340px;
+    margin-bottom: 20px;
+  }
+
+  .welcome-art {
+    min-height: 190px;
+    margin-top: 8px;
+
+    > img {
+      width: 170px;
+    }
+  }
+
+  .pre-game-stats {
+    margin: 16px auto 22px;
+  }
+
+  .game-intro {
+    flex-direction: column;
+    gap: 12px;
+    margin: 3px 2px 18px;
+
+    h1 {
+      font-size: 31px;
+    }
+
+    p:last-child {
+      font-size: 12px;
+    }
+  }
+
+  .active-stats {
+    width: 100%;
+
+    > div {
+      min-width: 0;
+      flex: 1;
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  .panel {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .panel-heading h2 {
+    font-size: 21px;
+  }
+
+  .shelf-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .ingredient-card {
+    min-height: 164px;
+    padding: 10px;
+
+    &__name {
+      font-size: 14px;
+    }
+  }
+
+  .ingredient-stat__label {
+    font-size: 10px;
+  }
+
+  .ingredient-stat__value {
+    font-size: 12px;
+  }
+
+  .cauldron-ingredient {
+    grid-template-columns: 17px 28px minmax(0, 1fr) auto;
+    gap: 6px;
+
+    &__values {
+      grid-column: auto;
+      margin-top: 0;
+      font-size: 10px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

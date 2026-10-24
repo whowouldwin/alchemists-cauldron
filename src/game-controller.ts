@@ -1,7 +1,12 @@
 import { addIngredient, applyBrewResult } from "./state/game-actions.ts";
 import type { GameState } from "./state/game-state.ts";
 import { createGameState } from "./state/create-game-state.ts";
-import { finishGame, getGameOverReason } from "./state/game-status.ts";
+import {
+  finishGame,
+  getGameOverReason,
+  pauseGame,
+  resumeGame,
+} from "./state/game-status.ts";
 import { calculateCauldron } from "./logic/calculate-cauldron.ts";
 import { isBrewSuccessful } from "./logic/brew-check.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
@@ -55,6 +60,50 @@ export function initializeGameController(
     );
   }
 
+  function handlePause(): void {
+    if (gameState === null || finishGameIfNeeded()) {
+      return;
+    }
+
+    gameState = pauseGame(gameState);
+
+    if (gameState.remainingTimeAtPauseMs === null) {
+      return;
+    }
+
+    timerDisplayRefresh.stop();
+    render();
+    applicationRoot
+      .querySelector<HTMLButtonElement>('[data-action="resume-game"]')
+      ?.focus();
+  }
+
+  function handleResume(): void {
+    if (gameState === null || gameState.remainingTimeAtPauseMs === null) {
+      return;
+    }
+
+    gameState = resumeGame(gameState);
+    render();
+    timerDisplayRefresh.start();
+    applicationRoot
+      .querySelector<HTMLButtonElement>('[data-action="pause-game"]')
+      ?.focus();
+  }
+
+  function handleExitToMenu(): void {
+    if (gameState === null || gameState.remainingTimeAtPauseMs === null) {
+      return;
+    }
+
+    gameState = null;
+    timerDisplayRefresh.stop();
+    render();
+    applicationRoot
+      .querySelector<HTMLButtonElement>('[data-action="start-game"]')
+      ?.focus();
+  }
+
   function handleBrewClick(): void {
     if (
       gameState === null ||
@@ -104,6 +153,9 @@ export function initializeGameController(
     "click",
     createGameClickHandler({
       startGame,
+      pauseGame: handlePause,
+      resumeGame: handleResume,
+      exitToMenu: handleExitToMenu,
       brew: handleBrewClick,
       addIngredient: handleIngredientClick,
     }),

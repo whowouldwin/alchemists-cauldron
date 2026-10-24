@@ -10,9 +10,16 @@ import { renderRecipePanel } from "../recipe-panel/render-recipe-panel.ts";
 import { renderGameStatus } from "../game-status/render-game-status.ts";
 import { renderTopbar } from "../shared/render-layout.ts";
 import { createElement } from "../shared/create-element.ts";
+import { renderPauseDialog } from "./render-pause-dialog.ts";
 
 export function renderActiveGame(state: GameState): HTMLElement {
-  const appShell = createElement("main", "app-shell");
+  const isPaused = state.remainingTimeAtPauseMs !== null;
+  const appShell = createElement(
+    "main",
+    isPaused ? "app-shell app-shell--paused" : "app-shell",
+  );
+  const gameContent = createElement("div", "game-content");
+  const topbar = renderTopbar();
   const gameIntro = createElement("section", "game-intro");
   const introContent = createElement("div");
   const eyebrowText = createElement(
@@ -34,18 +41,40 @@ export function renderActiveGame(state: GameState): HTMLElement {
     magicPower: state.activeRecipe.magicPower,
   };
 
+  if (isPaused) {
+    gameContent.inert = true;
+    gameContent.setAttribute("aria-hidden", "true");
+  }
+
+  topbar.append(createPauseButton(isPaused));
+
   gameIntro.setAttribute("aria-labelledby", "game-heading");
   heading.id = "game-heading";
   introContent.append(eyebrowText, heading, description);
   gameIntro.append(introContent, renderGameStatus(state));
   gameLayout.append(renderIngredientShelf(state), renderCauldron(state));
-  appShell.append(
-    renderTopbar(),
+  gameContent.append(
+    topbar,
     gameIntro,
     renderRecipePanel(state),
     gameLayout,
     renderParameterBars(cauldronValues, targetRanges),
   );
+  appShell.append(gameContent);
+
+  if (isPaused) {
+    appShell.append(renderPauseDialog());
+  }
 
   return appShell;
+}
+
+function createPauseButton(isPaused: boolean): HTMLButtonElement {
+  const button = createElement("button", "pause-button", "Pause");
+
+  button.type = "button";
+  button.dataset.action = "pause-game";
+  button.disabled = isPaused;
+
+  return button;
 }

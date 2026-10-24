@@ -1,4 +1,6 @@
-import { LEVEL_ONE_INGREDIENTS } from "../../data/ingredients.ts";
+import { getIngredientsForDifficulty } from "../../data/ingredients.ts";
+import type { Difficulty } from "../../data/recipes.ts";
+import { DIFFICULTY_SETTINGS } from "../../data/difficulty-settings.ts";
 import {
   calculateMarkerPosition,
   calculateParameterScale,
@@ -8,7 +10,6 @@ import {
   type ParameterScale,
   type ParameterTargetRange,
 } from "../../logic/parameter-bar-scale.ts";
-import { MAX_CAULDRON_INGREDIENTS } from "../../state/game-state.ts";
 import { createElement } from "../shared/create-element.ts";
 import { formatIngredientValue } from "../shared/format-ingredient-value.ts";
 import type { ParameterBarConfig } from "./parameter-bar-config.ts";
@@ -101,11 +102,12 @@ export function renderParameterBar(
   parameter: ParameterBarConfig,
   value: number,
   targetRange?: ParameterTargetRange,
+  difficulty: Difficulty = "medium",
 ): HTMLDivElement {
   const scale = calculateParameterScale(
-    LEVEL_ONE_INGREDIENTS,
+    getIngredientsForDifficulty(difficulty),
     parameter.name,
-    MAX_CAULDRON_INGREDIENTS,
+    DIFFICULTY_SETTINGS[difficulty].maxCauldronIngredients,
     parameter.supportsNegativeValues,
   );
   const position = calculateMarkerPosition(value, scale);

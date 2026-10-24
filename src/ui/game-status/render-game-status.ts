@@ -1,4 +1,5 @@
-import { LEVEL_ONE_MAX_TIME, type GameState } from "../../state/game-state.ts";
+import { DIFFICULTY_SETTINGS } from "../../data/difficulty-settings.ts";
+import type { GameState } from "../../state/game-state.ts";
 import { getGameTimeRemaining } from "../../state/game-status.ts";
 import { createElement } from "../shared/create-element.ts";
 import { formatTimeRemaining } from "../shared/format-time-remaining.ts";
@@ -7,7 +8,10 @@ import { isTimerUrgent } from "../../logic/timer.ts";
 export function renderGameStatus(state: GameState): HTMLElement {
   const status = createElement("section", "active-stats");
   const score = createStatusItem("Score", String(state.score));
-  const time = createTimerStatusItem(getGameTimeRemaining(state));
+  const time = createTimerStatusItem(
+    getGameTimeRemaining(state),
+    DIFFICULTY_SETTINGS[state.difficulty].startingTimeSeconds,
+  );
   const lives = createStatusItem("Lives", String(state.lives));
 
   status.setAttribute("aria-label", "Game status");
@@ -16,7 +20,10 @@ export function renderGameStatus(state: GameState): HTMLElement {
   return status;
 }
 
-function createTimerStatusItem(remainingSeconds: number): HTMLElement {
+function createTimerStatusItem(
+  remainingSeconds: number,
+  maximumSeconds: number,
+): HTMLElement {
   const item = createElement("div", "active-stats__timer");
   const label = createElement("span", undefined, "Time");
   const value = createElement(
@@ -28,7 +35,7 @@ function createTimerStatusItem(remainingSeconds: number): HTMLElement {
 
   item.dataset.timerStatus = "";
   value.setAttribute("data-time-remaining", "");
-  progress.max = LEVEL_ONE_MAX_TIME;
+  progress.max = maximumSeconds;
   progress.value = remainingSeconds;
   progress.setAttribute("aria-label", "Time remaining");
   progress.setAttribute("data-time-remaining-bar", "");

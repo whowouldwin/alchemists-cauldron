@@ -7,6 +7,9 @@ export interface GameClickActions {
   readonly addIngredient: (ingredientId: string) => void;
   readonly openLeaderboard: () => void;
   readonly closeLeaderboard: () => void;
+  readonly openLeaderboardClearConfirmation: () => void;
+  readonly cancelLeaderboardClear: () => void;
+  readonly confirmLeaderboardClear: () => void;
 }
 
 export function createGameClickHandler(
@@ -41,6 +44,35 @@ export function createGameClickHandler(
 
     if (closeLeaderboardButton !== null) {
       actions.closeLeaderboard();
+      return;
+    }
+
+    const openClearConfirmationButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="open-leaderboard-clear-confirmation"]',
+    );
+
+    if (openClearConfirmationButton !== null) {
+      actions.openLeaderboardClearConfirmation();
+      return;
+    }
+
+    const cancelLeaderboardClearButton =
+      event.target.closest<HTMLButtonElement>(
+        '[data-action="cancel-leaderboard-clear"]',
+      );
+
+    if (cancelLeaderboardClearButton !== null) {
+      actions.cancelLeaderboardClear();
+      return;
+    }
+
+    const confirmLeaderboardClearButton =
+      event.target.closest<HTMLButtonElement>(
+        '[data-action="confirm-leaderboard-clear"]',
+      );
+
+    if (confirmLeaderboardClearButton !== null) {
+      actions.confirmLeaderboardClear();
       return;
     }
 

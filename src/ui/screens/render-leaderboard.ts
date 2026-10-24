@@ -4,6 +4,8 @@ import { renderTopbar } from "../shared/render-layout.ts";
 
 export function renderLeaderboard(
   entries: readonly LeaderboardEntry[],
+  showClearConfirmation: boolean,
+  clearErrorMessage: string | null,
 ): HTMLElement {
   const appShell = createElement("main", "app-shell");
   const panel = createElement("section", "leaderboard-panel");
@@ -11,12 +13,21 @@ export function renderLeaderboard(
   const eyebrow = createElement("p", "eyebrow", "Level 1");
   const heading = createElement("h1", undefined, "Leaderboard");
   const backButton = createElement("button", "leaderboard-link", "Back");
+  const clearButton = createElement(
+    "button",
+    "leaderboard-link leaderboard-link--clear",
+    "Clear leaderboard",
+  );
+  const headingActions = createElement("div", "leaderboard-panel__actions");
 
   panel.setAttribute("aria-labelledby", "leaderboard-heading");
   heading.id = "leaderboard-heading";
   backButton.type = "button";
   backButton.dataset.action = "close-leaderboard";
-  panelHeading.append(eyebrow, heading, backButton);
+  clearButton.type = "button";
+  clearButton.dataset.action = "open-leaderboard-clear-confirmation";
+  headingActions.append(clearButton, backButton);
+  panelHeading.append(eyebrow, heading, headingActions);
   panel.append(panelHeading);
 
   if (entries.length === 0) {
@@ -32,7 +43,50 @@ export function renderLeaderboard(
 
   appShell.append(renderTopbar(), panel);
 
+  if (showClearConfirmation) {
+    appShell.append(renderClearConfirmation(clearErrorMessage));
+  }
+
   return appShell;
+}
+
+function renderClearConfirmation(
+  errorMessage: string | null,
+): HTMLDialogElement {
+  const dialog = createElement("dialog", "leaderboard-confirmation");
+  const heading = createElement("h2", undefined, "Clear the leaderboard?");
+  const message = createElement(
+    "p",
+    "leaderboard-confirmation__message",
+    "This will permanently remove all saved Level 1 scores from this browser.",
+  );
+  const status = createElement(
+    "p",
+    "leaderboard-confirmation__status",
+    errorMessage ?? "",
+  );
+  const actions = createElement("div", "leaderboard-confirmation__actions");
+  const cancelButton = createElement("button", "leaderboard-link", "Cancel");
+  const confirmButton = createElement(
+    "button",
+    "leaderboard-clear-button",
+    "Clear scores",
+  );
+
+  dialog.setAttribute("aria-labelledby", "leaderboard-clear-heading");
+  dialog.setAttribute("aria-describedby", "leaderboard-clear-message");
+  heading.id = "leaderboard-clear-heading";
+  message.id = "leaderboard-clear-message";
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  cancelButton.type = "button";
+  cancelButton.dataset.action = "cancel-leaderboard-clear";
+  confirmButton.type = "button";
+  confirmButton.dataset.action = "confirm-leaderboard-clear";
+  actions.append(cancelButton, confirmButton);
+  dialog.append(heading, message, status, actions);
+
+  return dialog;
 }
 
 function renderEntriesTable(entries: readonly LeaderboardEntry[]): HTMLElement {

@@ -12,6 +12,7 @@ import { isBrewSuccessful } from "./logic/brew-check.ts";
 import {
   isValidPlayerName,
   qualifiesForLeaderboard,
+  clearLeaderboard,
   readLeaderboard,
   saveLeaderboardEntry,
 } from "./storage/leaderboard.ts";
@@ -28,6 +29,8 @@ export function initializeGameController(
   let gameState: GameState | null = null;
   let leaderboardEntryPending = false;
   let leaderboardVisible = false;
+  let leaderboardClearConfirmationOpen = false;
+  let leaderboardClearError: string | null = null;
   const timerDisplayRefresh = createTimerDisplayRefresh(
     applicationRoot,
     () => gameState,
@@ -36,10 +39,32 @@ export function initializeGameController(
 
   function render(): void {
     const screen = leaderboardVisible
-      ? renderLeaderboard(readLeaderboard())
+      ? renderLeaderboard(
+          readLeaderboard(),
+          leaderboardClearConfirmationOpen,
+          leaderboardClearError,
+        )
       : renderGame(gameState, leaderboardEntryPending);
 
     applicationRoot.replaceChildren(screen);
+
+    if (leaderboardClearConfirmationOpen) {
+      const dialog = applicationRoot.querySelector<HTMLDialogElement>(
+        ".leaderboard-confirmation",
+      );
+
+      if (dialog !== null) {
+        dialog.addEventListener("cancel", handleLeaderboardClearCancel, {
+          once: true,
+        });
+        dialog.showModal();
+        applicationRoot
+          .querySelector<HTMLButtonElement>(
+            '[data-action="cancel-leaderboard-clear"]',
+          )
+          ?.focus();
+      }
+    }
   }
 
   function startGame(): void {
@@ -124,6 +149,46 @@ export function initializeGameController(
     render();
     applicationRoot
       .querySelector<HTMLButtonElement>('[data-action="open-leaderboard"]')
+      ?.focus();
+  }
+
+  function openLeaderboardClearConfirmation(): void {
+    leaderboardClearError = null;
+    leaderboardClearConfirmationOpen = true;
+    render();
+  }
+
+  function cancelLeaderboardClear(): void {
+    leaderboardClearConfirmationOpen = false;
+    leaderboardClearError = null;
+    render();
+    applicationRoot
+      .querySelector<HTMLButtonElement>(
+        '[data-action="open-leaderboard-clear-confirmation"]',
+      )
+      ?.focus();
+  }
+
+  function handleLeaderboardClearCancel(event: Event): void {
+    event.preventDefault();
+    cancelLeaderboardClear();
+  }
+
+  function confirmLeaderboardClear(): void {
+    if (!clearLeaderboard()) {
+      leaderboardClearError =
+        "Could not clear the leaderboard. Please try again.";
+      render();
+      return;
+    }
+
+    leaderboardClearConfirmationOpen = false;
+    leaderboardClearError = null;
+    render();
+    applicationRoot
+      .querySelector<HTMLButtonElement>(
+        '[data-action="open-leaderboard-clear-confirmation"]',
+      )
       ?.focus();
   }
 
@@ -264,6 +329,9 @@ export function initializeGameController(
       addIngredient: handleIngredientClick,
       openLeaderboard,
       closeLeaderboard,
+      openLeaderboardClearConfirmation,
+      cancelLeaderboardClear,
+      confirmLeaderboardClear,
     }),
   );
   document.addEventListener("visibilitychange", handleVisibilityChange);

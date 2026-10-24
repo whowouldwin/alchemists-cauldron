@@ -21,6 +21,15 @@ export function renderTopbar(tagline = ""): HTMLElement {
   return topbar;
 }
 
+export function renderLeaderboardButton(): HTMLButtonElement {
+  const button = createElement("button", "leaderboard-link", "Leaderboard");
+
+  button.type = "button";
+  button.dataset.action = "open-leaderboard";
+
+  return button;
+}
+
 export function renderEmptyPanel(
   id: string,
   title: string,

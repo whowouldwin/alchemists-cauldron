@@ -12,12 +12,14 @@ import { isBrewSuccessful } from "./logic/brew-check.ts";
 import {
   isValidPlayerName,
   qualifiesForLeaderboard,
+  readLeaderboard,
   saveLeaderboardEntry,
 } from "./storage/leaderboard.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
 import { createTimerDisplayRefresh } from "./ui/game-status/timer-display-refresh.ts";
 import { renderGame } from "./ui/screens/render-game.ts";
+import { renderLeaderboard } from "./ui/screens/render-leaderboard.ts";
 
 export function initializeGameController(
   applicationRoot: HTMLElement,
@@ -25,6 +27,7 @@ export function initializeGameController(
 ): void {
   let gameState: GameState | null = null;
   let leaderboardEntryPending = false;
+  let leaderboardVisible = false;
   const timerDisplayRefresh = createTimerDisplayRefresh(
     applicationRoot,
     () => gameState,
@@ -32,14 +35,17 @@ export function initializeGameController(
   );
 
   function render(): void {
-    applicationRoot.replaceChildren(
-      renderGame(gameState, leaderboardEntryPending),
-    );
+    const screen = leaderboardVisible
+      ? renderLeaderboard(readLeaderboard())
+      : renderGame(gameState, leaderboardEntryPending);
+
+    applicationRoot.replaceChildren(screen);
   }
 
   function startGame(): void {
     gameState = createGameState();
     leaderboardEntryPending = false;
+    leaderboardVisible = false;
     render();
     timerDisplayRefresh.start();
   }
@@ -102,6 +108,22 @@ export function initializeGameController(
   function focusResumeButton(): void {
     applicationRoot
       .querySelector<HTMLButtonElement>('[data-action="resume-game"]')
+      ?.focus();
+  }
+
+  function openLeaderboard(): void {
+    leaderboardVisible = true;
+    render();
+    applicationRoot
+      .querySelector<HTMLButtonElement>('[data-action="close-leaderboard"]')
+      ?.focus();
+  }
+
+  function closeLeaderboard(): void {
+    leaderboardVisible = false;
+    render();
+    applicationRoot
+      .querySelector<HTMLButtonElement>('[data-action="open-leaderboard"]')
       ?.focus();
   }
 
@@ -240,6 +262,8 @@ export function initializeGameController(
       exitToMenu: handleExitToMenu,
       brew: handleBrewClick,
       addIngredient: handleIngredientClick,
+      openLeaderboard,
+      closeLeaderboard,
     }),
   );
   document.addEventListener("visibilitychange", handleVisibilityChange);

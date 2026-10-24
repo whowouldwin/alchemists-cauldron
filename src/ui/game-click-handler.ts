@@ -5,6 +5,8 @@ export interface GameClickActions {
   readonly exitToMenu: () => void;
   readonly brew: () => void;
   readonly addIngredient: (ingredientId: string) => void;
+  readonly openLeaderboard: () => void;
+  readonly closeLeaderboard: () => void;
 }
 
 export function createGameClickHandler(
@@ -21,6 +23,24 @@ export function createGameClickHandler(
 
     if (startButton !== null) {
       actions.startGame();
+      return;
+    }
+
+    const openLeaderboardButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="open-leaderboard"]',
+    );
+
+    if (openLeaderboardButton !== null) {
+      actions.openLeaderboard();
+      return;
+    }
+
+    const closeLeaderboardButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="close-leaderboard"]',
+    );
+
+    if (closeLeaderboardButton !== null) {
+      actions.closeLeaderboard();
       return;
     }
 

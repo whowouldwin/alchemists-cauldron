@@ -60,6 +60,10 @@
     }
   }
 
+  .difficulty-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .welcome-description {
     font-size: 13px;
   }

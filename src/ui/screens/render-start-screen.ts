@@ -5,8 +5,15 @@ import {
   renderTopbar,
 } from "../shared/render-layout.ts";
 import { createElement } from "../shared/create-element.ts";
+import type { Difficulty } from "../../data/recipes.ts";
+import { renderDifficultySettings } from "./render-difficulty-settings.ts";
 
-export function renderStartScreen(): HTMLElement {
+export interface StartScreenOptions {
+  readonly selectedDifficulty: Difficulty;
+  readonly isDifficultySettingsOpen: boolean;
+}
+
+export function renderStartScreen(options: StartScreenOptions): HTMLElement {
   const appShell = createElement("main", "app-shell");
   const welcomePanel = createElement("section", "welcome-panel");
   const welcomeCopy = createElement("div", "welcome-copy");
@@ -39,7 +46,7 @@ export function renderStartScreen(): HTMLElement {
   startButton.dataset.action = "start-game";
   buttonIcon.setAttribute("aria-hidden", "true");
   startButton.append(buttonLabel, buttonIcon);
-  welcomeCopy.append(eyebrowText, heading, description, startButton);
+  welcomeCopy.append(eyebrowText, heading, description);
 
   welcomeArt.setAttribute("aria-hidden", "true");
   cauldronImage.src = CAULDRON_ICON;
@@ -68,9 +75,31 @@ export function renderStartScreen(): HTMLElement {
   );
 
   const topbar = renderTopbar("A little magic lab");
-  topbar.append(renderLeaderboardButton());
+  const settingsButton = createElement(
+    "button",
+    "leaderboard-link",
+    "Settings",
+  );
+  const topbarActions = createElement("div", "start-screen-actions");
+  const startActions = createElement("div", "start-actions");
 
-  appShell.append(topbar, welcomePanel, preGameStats, gameLayout);
+  settingsButton.type = "button";
+  settingsButton.dataset.action = "open-difficulty-settings";
+  settingsButton.setAttribute(
+    "aria-expanded",
+    String(options.isDifficultySettingsOpen),
+  );
+  settingsButton.setAttribute("aria-controls", "difficulty-settings");
+  topbarActions.append(settingsButton, renderLeaderboardButton());
+  topbar.append(topbarActions);
+  startActions.append(startButton);
+  const difficultySettings = renderDifficultySettings(
+    options.selectedDifficulty,
+  );
+  difficultySettings.hidden = !options.isDifficultySettingsOpen;
+
+  appShell.append(topbar, welcomePanel, startActions, difficultySettings);
+  appShell.append(preGameStats, gameLayout);
 
   return appShell;
 }

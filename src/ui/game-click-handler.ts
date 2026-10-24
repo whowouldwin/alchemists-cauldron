@@ -1,5 +1,10 @@
+import type { Difficulty } from "../data/recipes.ts";
+
 export interface GameClickActions {
   readonly startGame: () => void;
+  readonly openDifficultySettings: () => void;
+  readonly closeDifficultySettings: () => void;
+  readonly selectDifficulty: (difficulty: Difficulty) => void;
   readonly pauseGame: () => void;
   readonly resumeGame: () => void;
   readonly exitToMenu: () => void;
@@ -26,6 +31,37 @@ export function createGameClickHandler(
 
     if (startButton !== null) {
       actions.startGame();
+      return;
+    }
+
+    const openSettingsButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="open-difficulty-settings"]',
+    );
+
+    if (openSettingsButton !== null) {
+      actions.openDifficultySettings();
+      return;
+    }
+
+    const closeSettingsButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="close-difficulty-settings"]',
+    );
+
+    if (closeSettingsButton !== null) {
+      actions.closeDifficultySettings();
+      return;
+    }
+
+    const difficultyButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="select-difficulty"]',
+    );
+
+    if (difficultyButton !== null) {
+      const difficulty = difficultyButton.dataset.difficulty;
+
+      if (isDifficulty(difficulty)) {
+        actions.selectDifficulty(difficulty);
+      }
       return;
     }
 
@@ -134,4 +170,8 @@ export function createGameClickHandler(
       actions.addIngredient(ingredientId);
     }
   };
+}
+
+function isDifficulty(value: string | undefined): value is Difficulty {
+  return value === "easy" || value === "medium" || value === "hard";
 }

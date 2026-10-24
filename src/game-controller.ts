@@ -1,5 +1,6 @@
 import { createLeaderboardController } from "./game-controller/leaderboard-controller.ts";
 import { DIFFICULTY_SETTINGS } from "./data/difficulty-settings.ts";
+import type { Difficulty } from "./data/recipes.ts";
 import { isBrewSuccessful } from "./logic/brew-check.ts";
 import { calculateCauldron } from "./logic/calculate-cauldron.ts";
 import { createGameState } from "./state/create-game-state.ts";
@@ -22,6 +23,8 @@ export function initializeGameController(
   announcements: GameAnnouncements,
 ): void {
   let gameState: GameState | null = null;
+  let selectedDifficulty: Difficulty = "medium";
+  let isDifficultySettingsOpen = false;
   let leaderboardEntryPending = false;
   const leaderboardController = createLeaderboardController({
     applicationRoot,
@@ -41,18 +44,52 @@ export function initializeGameController(
   function render(): void {
     const screen = leaderboardController.isVisible()
       ? leaderboardController.render()
-      : renderGame(gameState, leaderboardEntryPending);
+      : renderGame(gameState, leaderboardEntryPending, {
+          selectedDifficulty,
+          isDifficultySettingsOpen,
+        });
 
     applicationRoot.replaceChildren(screen);
     leaderboardController.afterRender();
   }
 
   function startGame(): void {
-    gameState = createGameState();
+    gameState = createGameState(Math.random, Date.now(), selectedDifficulty);
+    isDifficultySettingsOpen = false;
     leaderboardEntryPending = false;
     leaderboardController.reset();
     render();
     timerDisplayRefresh.start();
+  }
+
+  function openDifficultySettings(): void {
+    isDifficultySettingsOpen = true;
+    render();
+    focusSelectedDifficulty();
+  }
+
+  function closeDifficultySettings(): void {
+    isDifficultySettingsOpen = false;
+    render();
+    applicationRoot
+      .querySelector<HTMLButtonElement>(
+        '[data-action="open-difficulty-settings"]',
+      )
+      ?.focus();
+  }
+
+  function selectDifficulty(difficulty: Difficulty): void {
+    selectedDifficulty = difficulty;
+    render();
+    focusSelectedDifficulty();
+  }
+
+  function focusSelectedDifficulty(): void {
+    applicationRoot
+      .querySelector<HTMLButtonElement>(
+        `[data-action="select-difficulty"][data-difficulty="${selectedDifficulty}"]`,
+      )
+      ?.focus();
   }
 
   function handleIngredientClick(ingredientId: string): void {
@@ -212,6 +249,9 @@ export function initializeGameController(
     "click",
     createGameClickHandler({
       startGame,
+      openDifficultySettings,
+      closeDifficultySettings,
+      selectDifficulty,
       pauseGame: handlePause,
       resumeGame: handleResume,
       exitToMenu: handleExitToMenu,

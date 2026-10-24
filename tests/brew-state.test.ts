@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { DIFFICULTY_SETTINGS } from "../src/data/difficulty-settings.ts";
 import { LEVEL_ONE_INGREDIENTS } from "../src/data/ingredients.ts";
 import { LEVEL_ONE_MAX_TIME } from "../src/state/game-state.ts";
 import { createGameState } from "../src/state/create-game-state.ts";
@@ -83,4 +84,39 @@ test("clears the previous brew message when another ingredient is added", () => 
   const nextState = addIngredient(state, ingredientId);
 
   assert.equal(nextState.lastBrewResult, null);
+});
+
+test("applies score and time bonuses for the selected difficulty", () => {
+  const expectedResults = [
+    { difficulty: "easy", score: 100, timeBonus: 15 },
+    { difficulty: "medium", score: 200, timeBonus: 10 },
+    { difficulty: "hard", score: 300, timeBonus: 5 },
+  ] as const;
+
+  for (const { difficulty, score, timeBonus } of expectedResults) {
+    const currentTime = 10_000;
+    const initialState = createGameState(() => 0, currentTime, difficulty);
+    const ingredientId = Object.keys(initialState.shelfStock)[0];
+
+    assert.ok(ingredientId !== undefined);
+
+    const state = addIngredient(initialState, ingredientId);
+    const stateWithLessTime = {
+      ...state,
+      endTime: state.endTime - 30_000,
+    };
+    const nextState = applyBrewResult(
+      stateWithLessTime,
+      true,
+      () => 0,
+      currentTime,
+    );
+
+    assert.equal(nextState.score, score);
+    assert.equal(
+      getGameTimeRemaining(nextState, currentTime),
+      DIFFICULTY_SETTINGS[difficulty].startingTimeSeconds - 30 + timeBonus,
+    );
+    assert.equal(nextState.activeRecipe.difficulty, difficulty);
+  }
 });

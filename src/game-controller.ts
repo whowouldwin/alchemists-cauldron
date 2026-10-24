@@ -163,7 +163,11 @@ export function initializeGameController(
     }
 
     const values = calculateCauldron(gameState.cauldronIngredients);
-    const succeeded = isBrewSuccessful(values, gameState.activeRecipe);
+    const succeeded = isBrewSuccessful(
+      values,
+      gameState.activeRecipe,
+      gameState.difficulty,
+    );
 
     gameState = applyBrewResult(gameState, succeeded);
 

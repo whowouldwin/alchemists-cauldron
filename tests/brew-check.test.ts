@@ -58,3 +58,24 @@ test("fails when any cauldron value is outside its expanded target range", () =>
     assert.equal(isBrewSuccessful(values, RECIPE), false);
   }
 });
+
+test("uses the selected difficulty tolerance when checking a brew", () => {
+  const valuesOutsideMediumTolerance = {
+    temperature: RECIPE.temperature.minimum - 10,
+    density: VALUES_AT_TARGET_MIDPOINT.density,
+    magicPower: VALUES_AT_TARGET_MIDPOINT.magicPower,
+  };
+
+  assert.equal(
+    isBrewSuccessful(valuesOutsideMediumTolerance, RECIPE, "easy"),
+    true,
+  );
+  assert.equal(
+    isBrewSuccessful(valuesOutsideMediumTolerance, RECIPE, "medium"),
+    false,
+  );
+  assert.equal(
+    isBrewSuccessful(valuesOutsideMediumTolerance, RECIPE, "hard"),
+    false,
+  );
+});

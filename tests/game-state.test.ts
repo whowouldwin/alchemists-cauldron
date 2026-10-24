@@ -99,6 +99,18 @@ test("does not exceed the cauldron capacity", () => {
   );
 });
 
+test("uses the selected difficulty cauldron capacity", () => {
+  const hardState = createGameState(() => 0.999, 0, "hard");
+  let fullState = hardState;
+
+  for (let index = 0; index < 5; index += 1) {
+    fullState = addIngredient(fullState, "toad-slime");
+  }
+
+  assert.equal(fullState.cauldronIngredients.length, 5);
+  assert.equal(addIngredient(fullState, "toad-slime"), fullState);
+});
+
 test("ignores ingredient identifiers that are not on the shelf", () => {
   const state = createGameState(() => 0.5);
 

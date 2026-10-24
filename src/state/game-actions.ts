@@ -1,30 +1,23 @@
-import { LEVEL_ONE_INGREDIENTS } from "../data/ingredients.ts";
+import { INGREDIENTS } from "../data/ingredients.ts";
+import { DIFFICULTY_SETTINGS } from "../data/difficulty-settings.ts";
 import { pickRandomRecipe } from "../logic/recipe-generator.ts";
 import { MILLISECONDS_PER_SECOND } from "../logic/timer.ts";
-import {
-  LEVEL_ONE_MAX_TIME,
-  LEVEL_ONE_RECIPE_DIFFICULTY,
-  MAX_CAULDRON_INGREDIENTS,
-  type GameState,
-} from "./game-state.ts";
-
-const LEVEL_ONE_SCORE_PER_BREW = 200;
-const LEVEL_ONE_TIME_BONUS = 10;
+import type { GameState } from "./game-state.ts";
 
 export function addIngredient(
   state: GameState,
   ingredientId: string,
 ): GameState {
+  const settings = DIFFICULTY_SETTINGS[state.difficulty];
+
   if (
     state.remainingTimeAtPauseMs !== null ||
-    state.cauldronIngredients.length >= MAX_CAULDRON_INGREDIENTS
+    state.cauldronIngredients.length >= settings.maxCauldronIngredients
   ) {
     return state;
   }
 
-  const ingredient = LEVEL_ONE_INGREDIENTS.find(
-    ({ id }) => id === ingredientId,
-  );
+  const ingredient = INGREDIENTS.find(({ id }) => id === ingredientId);
   const stock = state.shelfStock[ingredientId];
 
   if (ingredient === undefined || stock === undefined || stock <= 0) {
@@ -56,6 +49,7 @@ export function applyBrewResult(
   }
 
   const clearedState = { ...state, cauldronIngredients: [] };
+  const settings = DIFFICULTY_SETTINGS[state.difficulty];
 
   if (!succeeded) {
     return {
@@ -66,14 +60,14 @@ export function applyBrewResult(
   }
 
   const maximumEndTime =
-    currentTime + LEVEL_ONE_MAX_TIME * MILLISECONDS_PER_SECOND;
+    currentTime + settings.startingTimeSeconds * MILLISECONDS_PER_SECOND;
   const bonusEndTime =
-    state.endTime + LEVEL_ONE_TIME_BONUS * MILLISECONDS_PER_SECOND;
+    state.endTime + settings.timeBonusSeconds * MILLISECONDS_PER_SECOND;
 
   return {
     ...clearedState,
-    activeRecipe: pickRandomRecipe(LEVEL_ONE_RECIPE_DIFFICULTY, random),
-    score: state.score + LEVEL_ONE_SCORE_PER_BREW,
+    activeRecipe: pickRandomRecipe(state.difficulty, random),
+    score: state.score + settings.scorePerBrew,
     endTime: Math.min(bonusEndTime, maximumEndTime),
     lastBrewResult: "success",
   };

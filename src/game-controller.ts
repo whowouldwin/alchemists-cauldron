@@ -1,26 +1,20 @@
+import { createLeaderboardController } from "./game-controller/leaderboard-controller.ts";
+import { isBrewSuccessful } from "./logic/brew-check.ts";
+import { calculateCauldron } from "./logic/calculate-cauldron.ts";
+import { createGameState } from "./state/create-game-state.ts";
 import { addIngredient, applyBrewResult } from "./state/game-actions.ts";
 import type { GameState } from "./state/game-state.ts";
-import { createGameState } from "./state/create-game-state.ts";
 import {
   finishGame,
   getGameOverReason,
   pauseGame,
   resumeGame,
 } from "./state/game-status.ts";
-import { calculateCauldron } from "./logic/calculate-cauldron.ts";
-import { isBrewSuccessful } from "./logic/brew-check.ts";
-import {
-  isValidPlayerName,
-  qualifiesForLeaderboard,
-  clearLeaderboard,
-  readLeaderboard,
-  saveLeaderboardEntry,
-} from "./storage/leaderboard.ts";
+import { qualifiesForLeaderboard } from "./storage/leaderboard.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
 import { createTimerDisplayRefresh } from "./ui/game-status/timer-display-refresh.ts";
 import { renderGame } from "./ui/screens/render-game.ts";
-import { renderLeaderboard } from "./ui/screens/render-leaderboard.ts";
 
 export function initializeGameController(
   applicationRoot: HTMLElement,
@@ -28,9 +22,15 @@ export function initializeGameController(
 ): void {
   let gameState: GameState | null = null;
   let leaderboardEntryPending = false;
-  let leaderboardVisible = false;
-  let leaderboardClearConfirmationOpen = false;
-  let leaderboardClearError: string | null = null;
+  const leaderboardController = createLeaderboardController({
+    applicationRoot,
+    getGameState: () => gameState,
+    isEntryPending: () => leaderboardEntryPending,
+    setEntryPending: (pending) => {
+      leaderboardEntryPending = pending;
+    },
+    render,
+  });
   const timerDisplayRefresh = createTimerDisplayRefresh(
     applicationRoot,
     () => gameState,
@@ -38,39 +38,18 @@ export function initializeGameController(
   );
 
   function render(): void {
-    const screen = leaderboardVisible
-      ? renderLeaderboard(
-          readLeaderboard(),
-          leaderboardClearConfirmationOpen,
-          leaderboardClearError,
-        )
+    const screen = leaderboardController.isVisible()
+      ? leaderboardController.render()
       : renderGame(gameState, leaderboardEntryPending);
 
     applicationRoot.replaceChildren(screen);
-
-    if (leaderboardClearConfirmationOpen) {
-      const dialog = applicationRoot.querySelector<HTMLDialogElement>(
-        ".leaderboard-confirmation",
-      );
-
-      if (dialog !== null) {
-        dialog.addEventListener("cancel", handleLeaderboardClearCancel, {
-          once: true,
-        });
-        dialog.showModal();
-        applicationRoot
-          .querySelector<HTMLButtonElement>(
-            '[data-action="cancel-leaderboard-clear"]',
-          )
-          ?.focus();
-      }
-    }
+    leaderboardController.afterRender();
   }
 
   function startGame(): void {
     gameState = createGameState();
     leaderboardEntryPending = false;
-    leaderboardVisible = false;
+    leaderboardController.reset();
     render();
     timerDisplayRefresh.start();
   }
@@ -136,62 +115,6 @@ export function initializeGameController(
       ?.focus();
   }
 
-  function openLeaderboard(): void {
-    leaderboardVisible = true;
-    render();
-    applicationRoot
-      .querySelector<HTMLButtonElement>('[data-action="close-leaderboard"]')
-      ?.focus();
-  }
-
-  function closeLeaderboard(): void {
-    leaderboardVisible = false;
-    render();
-    applicationRoot
-      .querySelector<HTMLButtonElement>('[data-action="open-leaderboard"]')
-      ?.focus();
-  }
-
-  function openLeaderboardClearConfirmation(): void {
-    leaderboardClearError = null;
-    leaderboardClearConfirmationOpen = true;
-    render();
-  }
-
-  function cancelLeaderboardClear(): void {
-    leaderboardClearConfirmationOpen = false;
-    leaderboardClearError = null;
-    render();
-    applicationRoot
-      .querySelector<HTMLButtonElement>(
-        '[data-action="open-leaderboard-clear-confirmation"]',
-      )
-      ?.focus();
-  }
-
-  function handleLeaderboardClearCancel(event: Event): void {
-    event.preventDefault();
-    cancelLeaderboardClear();
-  }
-
-  function confirmLeaderboardClear(): void {
-    if (!clearLeaderboard()) {
-      leaderboardClearError =
-        "Could not clear the leaderboard. Please try again.";
-      render();
-      return;
-    }
-
-    leaderboardClearConfirmationOpen = false;
-    leaderboardClearError = null;
-    render();
-    applicationRoot
-      .querySelector<HTMLButtonElement>(
-        '[data-action="open-leaderboard-clear-confirmation"]',
-      )
-      ?.focus();
-  }
-
   function handleVisibilityChange(): void {
     if (document.hidden) {
       pauseActiveGame();
@@ -224,48 +147,6 @@ export function initializeGameController(
     gameState = null;
     leaderboardEntryPending = false;
     timerDisplayRefresh.stop();
-    render();
-    applicationRoot
-      .querySelector<HTMLButtonElement>('[data-action="start-game"]')
-      ?.focus();
-  }
-
-  function handleLeaderboardNameSubmit(event: SubmitEvent): void {
-    if (
-      !(event.target instanceof HTMLFormElement) ||
-      event.target.dataset.form !== "leaderboard-entry" ||
-      gameState === null ||
-      gameState.gameOverReason === null ||
-      !leaderboardEntryPending
-    ) {
-      return;
-    }
-
-    event.preventDefault();
-
-    const input = event.target.querySelector<HTMLInputElement>(
-      '[name="playerName"]',
-    );
-    const status = event.target.querySelector<HTMLElement>('[role="status"]');
-
-    if (input === null || status === null) {
-      return;
-    }
-
-    if (!isValidPlayerName(input.value)) {
-      input.setCustomValidity(
-        "Enter 2–15 letters, numbers, spaces, underscores or hyphens.",
-      );
-      input.reportValidity();
-      return;
-    }
-
-    if (!saveLeaderboardEntry(input.value, gameState.score)) {
-      status.textContent = "Could not save your score. Please try again.";
-      return;
-    }
-
-    leaderboardEntryPending = false;
     render();
     applicationRoot
       .querySelector<HTMLButtonElement>('[data-action="start-game"]')
@@ -327,15 +208,19 @@ export function initializeGameController(
       exitToMenu: handleExitToMenu,
       brew: handleBrewClick,
       addIngredient: handleIngredientClick,
-      openLeaderboard,
-      closeLeaderboard,
-      openLeaderboardClearConfirmation,
-      cancelLeaderboardClear,
-      confirmLeaderboardClear,
+      openLeaderboard: leaderboardController.open,
+      closeLeaderboard: leaderboardController.close,
+      openLeaderboardClearConfirmation:
+        leaderboardController.openClearConfirmation,
+      cancelLeaderboardClear: leaderboardController.cancelClear,
+      confirmLeaderboardClear: leaderboardController.confirmClear,
     }),
   );
   document.addEventListener("visibilitychange", handleVisibilityChange);
-  applicationRoot.addEventListener("submit", handleLeaderboardNameSubmit);
+  applicationRoot.addEventListener(
+    "submit",
+    leaderboardController.handleNameSubmit,
+  );
 
   render();
 }

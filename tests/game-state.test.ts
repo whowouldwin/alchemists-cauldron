@@ -5,7 +5,7 @@ import { getRecipesByDifficulty } from "../src/logic/recipe-generator.ts";
 import { MAX_CAULDRON_INGREDIENTS } from "../src/state/game-state.ts";
 import { createGameState } from "../src/state/create-game-state.ts";
 import { addIngredient } from "../src/state/game-actions.ts";
-import { getGameTimeRemaining } from "../src/state/game-status.ts";
+import { getGameTimeRemaining, pauseGame } from "../src/state/game-status.ts";
 
 test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
   const currentTime = 10_000;
@@ -79,4 +79,14 @@ test("ignores ingredient identifiers that are not on the shelf", () => {
   const state = createGameState(() => 0.5);
 
   assert.equal(addIngredient(state, "unknown-ingredient"), state);
+});
+
+test("does not add ingredients while the game is paused", () => {
+  const state = pauseGame(
+    createGameState(() => 0.5),
+    1_000,
+  );
+  const ingredientId = LEVEL_ONE_INGREDIENTS[0].id;
+
+  assert.equal(addIngredient(state, ingredientId), state);
 });

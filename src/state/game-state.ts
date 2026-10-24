@@ -15,6 +15,7 @@ export interface GameState {
   readonly activeRecipe: Recipe;
   readonly score: number;
   readonly endTime: number;
+  readonly remainingTimeAtPauseMs: number | null;
   readonly lives: number;
   readonly lastBrewResult: BrewResult | null;
   readonly gameOverReason: GameOverReason | null;

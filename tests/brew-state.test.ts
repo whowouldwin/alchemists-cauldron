@@ -3,7 +3,7 @@ import test from "node:test";
 import { LEVEL_ONE_INGREDIENTS } from "../src/data/ingredients.ts";
 import { LEVEL_ONE_MAX_TIME } from "../src/state/game-state.ts";
 import { createGameState } from "../src/state/create-game-state.ts";
-import { getGameTimeRemaining } from "../src/state/game-status.ts";
+import { getGameTimeRemaining, pauseGame } from "../src/state/game-status.ts";
 import { addIngredient, applyBrewResult } from "../src/state/game-actions.ts";
 
 function createStateWithIngredient(currentTime: number) {
@@ -61,6 +61,13 @@ test("does not apply a brew result to an empty cauldron", () => {
 
   assert.equal(applyBrewResult(state, true), state);
   assert.equal(applyBrewResult(state, false), state);
+});
+
+test("does not brew while the game is paused", () => {
+  const pausedState = pauseGame(createStateWithIngredient(0), 1_000);
+
+  assert.equal(applyBrewResult(pausedState, true), pausedState);
+  assert.equal(applyBrewResult(pausedState, false), pausedState);
 });
 
 test("does not deduct lives below zero", () => {

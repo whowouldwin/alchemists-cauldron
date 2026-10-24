@@ -61,21 +61,50 @@ export function initializeGameController(
   }
 
   function handlePause(): void {
+    if (!pauseActiveGame()) {
+      return;
+    }
+
+    focusResumeButton();
+  }
+
+  function pauseActiveGame(): boolean {
     if (gameState === null || finishGameIfNeeded()) {
-      return;
+      return false;
     }
 
-    gameState = pauseGame(gameState);
-
-    if (gameState.remainingTimeAtPauseMs === null) {
-      return;
+    if (gameState.remainingTimeAtPauseMs !== null) {
+      return false;
     }
 
+    const pausedState = pauseGame(gameState);
+
+    if (pausedState === gameState) {
+      return false;
+    }
+
+    gameState = pausedState;
     timerDisplayRefresh.stop();
     render();
+
+    return true;
+  }
+
+  function focusResumeButton(): void {
     applicationRoot
       .querySelector<HTMLButtonElement>('[data-action="resume-game"]')
       ?.focus();
+  }
+
+  function handleVisibilityChange(): void {
+    if (document.hidden) {
+      pauseActiveGame();
+      return;
+    }
+
+    if (gameState !== null && gameState.remainingTimeAtPauseMs !== null) {
+      focusResumeButton();
+    }
   }
 
   function handleResume(): void {
@@ -160,6 +189,7 @@ export function initializeGameController(
       addIngredient: handleIngredientClick,
     }),
   );
+  document.addEventListener("visibilitychange", handleVisibilityChange);
 
   render();
 }

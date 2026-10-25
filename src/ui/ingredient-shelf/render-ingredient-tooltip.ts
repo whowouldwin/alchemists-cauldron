@@ -33,7 +33,29 @@ export function renderIngredientTooltip(ingredient: Ingredient): HTMLElement {
   return tooltip;
 }
 
-export function updateIngredientTooltipPosition(
+export function attachIngredientTooltipInteractions(
+  ingredientCard: HTMLElement,
+  tooltip: HTMLElement,
+): void {
+  const showTooltip = (): void => {
+    ingredientCard.classList.add("ingredient-card--tooltip-visible");
+    updateIngredientTooltipPosition(ingredientCard, tooltip);
+  };
+  const hideTooltipIfInactive = (): void => {
+    const cardHasFocus = ingredientCard.contains(document.activeElement);
+
+    if (!cardHasFocus && !ingredientCard.matches(":hover")) {
+      ingredientCard.classList.remove("ingredient-card--tooltip-visible");
+    }
+  };
+
+  ingredientCard.addEventListener("pointerenter", showTooltip);
+  ingredientCard.addEventListener("focusin", showTooltip);
+  ingredientCard.addEventListener("pointerleave", hideTooltipIfInactive);
+  ingredientCard.addEventListener("focusout", hideTooltipIfInactive);
+}
+
+function updateIngredientTooltipPosition(
   ingredientCard: HTMLElement,
   tooltip: HTMLElement,
 ): void {

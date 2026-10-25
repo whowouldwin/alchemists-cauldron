@@ -5,7 +5,7 @@ import { DIFFICULTY_SETTINGS } from "../src/data/difficulty-settings.ts";
 import { getRecipesByDifficulty } from "../src/logic/recipe-generator.ts";
 import { MAX_CAULDRON_INGREDIENTS } from "../src/state/game-state.ts";
 import { createGameState } from "../src/state/create-game-state.ts";
-import { addIngredient } from "../src/state/game-actions.ts";
+import { addIngredient, canAddIngredient } from "../src/state/game-actions.ts";
 import { getGameTimeRemaining, pauseGame } from "../src/state/game-status.ts";
 
 test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
@@ -76,6 +76,7 @@ test("adds ingredients in order and spends one stock per addition", () => {
   const initialState = createGameState(() => 0.5);
   const firstIngredientId = LEVEL_ONE_INGREDIENTS[0].id;
   const secondIngredientId = LEVEL_ONE_INGREDIENTS[1].id;
+  assert.equal(canAddIngredient(initialState, firstIngredientId), true);
   const afterFirstAddition = addIngredient(initialState, firstIngredientId);
   const afterSecondAddition = addIngredient(
     afterFirstAddition,
@@ -100,6 +101,7 @@ test("does not add an ingredient whose stock is empty", () => {
   );
 
   assert.equal(stateAfterTwoAdditions.shelfStock[ingredientId], 0);
+  assert.equal(canAddIngredient(stateAfterTwoAdditions, ingredientId), false);
   assert.equal(
     addIngredient(stateAfterTwoAdditions, ingredientId),
     stateAfterTwoAdditions,
@@ -116,6 +118,7 @@ test("does not exceed the cauldron capacity", () => {
   }
 
   assert.equal(fullState.cauldronIngredients.length, MAX_CAULDRON_INGREDIENTS);
+  assert.equal(canAddIngredient(fullState, ingredientId), false);
   assert.equal(addIngredient(fullState, ingredientId), fullState);
   assert.equal(
     fullState.shelfStock[ingredientId],
@@ -148,5 +151,6 @@ test("does not add ingredients while the game is paused", () => {
   );
   const ingredientId = LEVEL_ONE_INGREDIENTS[0].id;
 
+  assert.equal(canAddIngredient(state, ingredientId), false);
   assert.equal(addIngredient(state, ingredientId), state);
 });

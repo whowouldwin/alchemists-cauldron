@@ -27,6 +27,14 @@
   }
 }
 
+.cauldron-panel--drop-target {
+  outline: 3px solid #f0c75e;
+  outline-offset: 4px;
+  box-shadow:
+    0 0 18px #f0c75e80,
+    4px 4px 0 #c4c4c4;
+}
+
 .cauldron-art-wrap {
   position: relative;
   display: grid;

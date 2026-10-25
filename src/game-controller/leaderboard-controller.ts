@@ -1,11 +1,9 @@
-import type { GameState } from "../state/game-state.ts";
 import type { Difficulty } from "../data/recipes.ts";
-import {
-  clearLeaderboard,
-  isValidPlayerName,
-  readLeaderboard,
-  saveLeaderboardEntry,
-} from "../storage/leaderboard.ts";
+import type { GameState } from "../state/game-state.ts";
+import { LeaderboardClearController } from "./leaderboard-clear-controller.ts";
+import { LeaderboardEntryController } from "./leaderboard-entry-controller.ts";
+import { focusGameAction } from "./focus-game-action.ts";
+import { readLeaderboard } from "../storage/leaderboard.ts";
 import { renderLeaderboard } from "../ui/screens/render-leaderboard.ts";
 
 interface LeaderboardControllerOptions {
@@ -17,188 +15,80 @@ interface LeaderboardControllerOptions {
   readonly render: () => void;
 }
 
-export interface LeaderboardController {
-  readonly isVisible: () => boolean;
-  readonly render: () => HTMLElement;
-  readonly afterRender: () => void;
-  readonly reset: () => void;
-  readonly open: () => void;
-  readonly close: () => void;
-  readonly selectDifficulty: (difficulty: Difficulty) => void;
-  readonly openClearConfirmation: () => void;
-  readonly cancelClear: () => void;
-  readonly confirmClear: () => void;
-  readonly handleNameSubmit: (event: SubmitEvent) => void;
-}
+export class LeaderboardController {
+  private isLeaderboardVisible = false;
+  private selectedDifficulty: Difficulty;
+  private readonly clearConfirmation: LeaderboardClearController;
+  private readonly entryController: LeaderboardEntryController;
 
-export function createLeaderboardController({
-  applicationRoot,
-  getGameState,
-  isEntryPending,
-  setEntryPending,
-  getCurrentDifficulty,
-  render,
-}: LeaderboardControllerOptions): LeaderboardController {
-  let isVisible = false;
-  let selectedDifficulty = getCurrentDifficulty();
-  let isClearConfirmationOpen = false;
-  let clearErrorMessage: string | null = null;
-
-  function renderScreen(): HTMLElement {
-    return renderLeaderboard(
-      readLeaderboard(selectedDifficulty),
-      isClearConfirmationOpen,
-      clearErrorMessage,
-      selectedDifficulty,
-    );
-  }
-
-  function afterRender(): void {
-    if (!isClearConfirmationOpen) {
-      return;
-    }
-
-    const dialog = applicationRoot.querySelector<HTMLDialogElement>(
-      ".leaderboard-confirmation",
-    );
-
-    if (dialog === null) {
-      return;
-    }
-
-    dialog.addEventListener("cancel", handleClearDialogCancel, {
-      once: true,
+  constructor(private readonly options: LeaderboardControllerOptions) {
+    this.selectedDifficulty = options.getCurrentDifficulty();
+    this.clearConfirmation = new LeaderboardClearController({
+      applicationRoot: options.applicationRoot,
+      getSelectedDifficulty: () => this.selectedDifficulty,
+      render: options.render,
     });
-    dialog.showModal();
-    focusAction("cancel-leaderboard-clear");
+    this.entryController = new LeaderboardEntryController({
+      applicationRoot: options.applicationRoot,
+      getGameState: options.getGameState,
+      isEntryPending: options.isEntryPending,
+      setEntryPending: options.setEntryPending,
+      render: options.render,
+    });
   }
 
-  function reset(): void {
-    isVisible = false;
-    selectedDifficulty = getCurrentDifficulty();
-    isClearConfirmationOpen = false;
-    clearErrorMessage = null;
+  readonly isVisible = (): boolean => this.isLeaderboardVisible;
+
+  readonly render = (): HTMLElement =>
+    renderLeaderboard(
+      readLeaderboard(this.selectedDifficulty),
+      this.clearConfirmation.isConfirmationOpen,
+      this.clearConfirmation.clearErrorMessage,
+      this.selectedDifficulty,
+    );
+
+  readonly afterRender = (): void => this.clearConfirmation.afterRender();
+
+  readonly reset = (): void => {
+    this.isLeaderboardVisible = false;
+    this.selectedDifficulty = this.options.getCurrentDifficulty();
+    this.clearConfirmation.reset();
+  };
+
+  readonly open = (): void => {
+    this.isLeaderboardVisible = true;
+    this.selectedDifficulty = this.options.getCurrentDifficulty();
+    this.options.render();
+    focusGameAction(this.options.applicationRoot, "close-leaderboard");
+  };
+
+  readonly close = (): void => {
+    this.isLeaderboardVisible = false;
+    this.options.render();
+    focusGameAction(this.options.applicationRoot, "open-leaderboard");
+  };
+
+  readonly selectDifficulty = (difficulty: Difficulty): void => {
+    this.selectedDifficulty = difficulty;
+    this.options.render();
+    this.focusSelectedDifficulty();
+  };
+
+  readonly openClearConfirmation = (): void => this.clearConfirmation.open();
+
+  readonly cancelClear = (): void => this.clearConfirmation.cancel();
+
+  readonly confirmClear = (): void => this.clearConfirmation.confirm();
+
+  get handleNameSubmit(): (event: SubmitEvent) => void {
+    return this.entryController.handleSubmit;
   }
 
-  function open(): void {
-    isVisible = true;
-    selectedDifficulty = getCurrentDifficulty();
-    render();
-    focusAction("close-leaderboard");
-  }
-
-  function close(): void {
-    isVisible = false;
-    render();
-    focusAction("open-leaderboard");
-  }
-
-  function selectDifficulty(difficulty: Difficulty): void {
-    selectedDifficulty = difficulty;
-    render();
-    focusSelectedDifficulty();
-  }
-
-  function focusSelectedDifficulty(): void {
-    applicationRoot
+  private focusSelectedDifficulty(): void {
+    this.options.applicationRoot
       .querySelector<HTMLButtonElement>(
-        `[data-action="select-leaderboard-difficulty"][data-difficulty="${selectedDifficulty}"]`,
+        `[data-action="select-leaderboard-difficulty"][data-difficulty="${this.selectedDifficulty}"]`,
       )
       ?.focus();
   }
-
-  function openClearConfirmation(): void {
-    clearErrorMessage = null;
-    isClearConfirmationOpen = true;
-    render();
-  }
-
-  function cancelClear(): void {
-    isClearConfirmationOpen = false;
-    clearErrorMessage = null;
-    render();
-    focusAction("open-leaderboard-clear-confirmation");
-  }
-
-  function handleClearDialogCancel(event: Event): void {
-    event.preventDefault();
-    cancelClear();
-  }
-
-  function confirmClear(): void {
-    if (!clearLeaderboard(selectedDifficulty)) {
-      clearErrorMessage = "Could not clear the leaderboard. Please try again.";
-      render();
-      return;
-    }
-
-    isClearConfirmationOpen = false;
-    clearErrorMessage = null;
-    render();
-    focusAction("open-leaderboard-clear-confirmation");
-  }
-
-  function handleNameSubmit(event: SubmitEvent): void {
-    const gameState = getGameState();
-
-    if (
-      !(event.target instanceof HTMLFormElement) ||
-      event.target.dataset.form !== "leaderboard-entry" ||
-      gameState === null ||
-      gameState.gameOverReason === null ||
-      !isEntryPending()
-    ) {
-      return;
-    }
-
-    event.preventDefault();
-
-    const input = event.target.querySelector<HTMLInputElement>(
-      '[name="playerName"]',
-    );
-    const status = event.target.querySelector<HTMLElement>('[role="status"]');
-
-    if (input === null || status === null) {
-      return;
-    }
-
-    if (!isValidPlayerName(input.value)) {
-      input.setCustomValidity(
-        "Enter 2–15 letters, numbers, spaces, underscores or hyphens.",
-      );
-      input.reportValidity();
-      return;
-    }
-
-    if (
-      !saveLeaderboardEntry(input.value, gameState.score, gameState.difficulty)
-    ) {
-      status.textContent = "Could not save your score. Please try again.";
-      return;
-    }
-
-    setEntryPending(false);
-    render();
-    focusAction("start-game");
-  }
-
-  function focusAction(action: string): void {
-    applicationRoot
-      .querySelector<HTMLButtonElement>(`[data-action="${action}"]`)
-      ?.focus();
-  }
-
-  return {
-    isVisible: () => isVisible,
-    render: renderScreen,
-    afterRender,
-    reset,
-    open,
-    close,
-    selectDifficulty,
-    openClearConfirmation,
-    cancelClear,
-    confirmClear,
-    handleNameSubmit,
-  };
 }

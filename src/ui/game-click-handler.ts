@@ -29,191 +29,112 @@ export function createGameClickHandler(
       return;
     }
 
-    const startButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="start-game"]',
-    );
+    const actionButton =
+      event.target.closest<HTMLButtonElement>("[data-action]");
 
-    if (startButton !== null) {
-      actions.startGame();
+    if (actionButton !== null && handleActionButton(actionButton, actions)) {
       return;
     }
 
-    const continueButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="continue-game"]',
-    );
-
-    if (continueButton !== null) {
-      actions.continueGame();
-      return;
-    }
-
-    const openSettingsButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="open-difficulty-settings"]',
-    );
-
-    if (openSettingsButton !== null) {
-      actions.openDifficultySettings();
-      return;
-    }
-
-    const openHelpButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="open-help"]',
-    );
-
-    if (openHelpButton !== null) {
-      actions.openHelp();
-      return;
-    }
-
-    const closeSettingsButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="close-difficulty-settings"]',
-    );
-
-    if (closeSettingsButton !== null) {
-      actions.closeDifficultySettings();
-      return;
-    }
-
-    const closeHelpButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="close-help"]',
-    );
-
-    if (closeHelpButton !== null) {
-      actions.closeHelp();
-      return;
-    }
-
-    const difficultyButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="select-difficulty"]',
-    );
-
-    if (difficultyButton !== null) {
-      const difficulty = difficultyButton.dataset.difficulty;
-
-      if (isDifficulty(difficulty)) {
-        actions.selectDifficulty(difficulty);
-      }
-      return;
-    }
-
-    const openLeaderboardButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="open-leaderboard"]',
-    );
-
-    if (openLeaderboardButton !== null) {
-      actions.openLeaderboard();
-      return;
-    }
-
-    const closeLeaderboardButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="close-leaderboard"]',
-    );
-
-    if (closeLeaderboardButton !== null) {
-      actions.closeLeaderboard();
-      return;
-    }
-
-    const leaderboardDifficultyButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="select-leaderboard-difficulty"]',
-    );
-
-    if (leaderboardDifficultyButton !== null) {
-      const difficulty = leaderboardDifficultyButton.dataset.difficulty;
-
-      if (isDifficulty(difficulty)) {
-        actions.selectLeaderboardDifficulty(difficulty);
-      }
-      return;
-    }
-
-    const openClearConfirmationButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="open-leaderboard-clear-confirmation"]',
-    );
-
-    if (openClearConfirmationButton !== null) {
-      actions.openLeaderboardClearConfirmation();
-      return;
-    }
-
-    const cancelLeaderboardClearButton =
-      event.target.closest<HTMLButtonElement>(
-        '[data-action="cancel-leaderboard-clear"]',
-      );
-
-    if (cancelLeaderboardClearButton !== null) {
-      actions.cancelLeaderboardClear();
-      return;
-    }
-
-    const confirmLeaderboardClearButton =
-      event.target.closest<HTMLButtonElement>(
-        '[data-action="confirm-leaderboard-clear"]',
-      );
-
-    if (confirmLeaderboardClearButton !== null) {
-      actions.confirmLeaderboardClear();
-      return;
-    }
-
-    const pauseButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="pause-game"]',
-    );
-
-    if (pauseButton !== null) {
-      if (!pauseButton.disabled) {
-        actions.pauseGame();
-      }
-      return;
-    }
-
-    const resumeButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="resume-game"]',
-    );
-
-    if (resumeButton !== null) {
-      if (!resumeButton.disabled) {
-        actions.resumeGame();
-      }
-      return;
-    }
-
-    const exitButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="exit-to-menu"]',
-    );
-
-    if (exitButton !== null) {
-      if (!exitButton.disabled) {
-        actions.exitToMenu();
-      }
-      return;
-    }
-
-    const brewButton = event.target.closest<HTMLButtonElement>(
-      '[data-action="brew"]',
-    );
-
-    if (brewButton !== null) {
-      if (!brewButton.disabled) {
-        actions.brew();
-      }
-      return;
-    }
-
-    const ingredientButton = event.target.closest<HTMLButtonElement>(
-      "[data-ingredient-id]",
-    );
-
-    if (ingredientButton === null || ingredientButton.disabled) {
-      return;
-    }
-
-    const ingredientId = ingredientButton.dataset.ingredientId;
-
-    if (ingredientId !== undefined) {
-      actions.addIngredient(ingredientId);
-    }
+    handleIngredientButton(event.target, actions);
   };
+}
+
+function handleActionButton(
+  button: HTMLButtonElement,
+  actions: GameClickActions,
+): boolean {
+  switch (button.dataset.action) {
+    case "start-game":
+      actions.startGame();
+      return true;
+    case "continue-game":
+      actions.continueGame();
+      return true;
+    case "open-difficulty-settings":
+      actions.openDifficultySettings();
+      return true;
+    case "close-difficulty-settings":
+      actions.closeDifficultySettings();
+      return true;
+    case "select-difficulty":
+      handleDifficultySelection(button, actions.selectDifficulty);
+      return true;
+    case "open-help":
+      actions.openHelp();
+      return true;
+    case "close-help":
+      actions.closeHelp();
+      return true;
+    case "open-leaderboard":
+      actions.openLeaderboard();
+      return true;
+    case "close-leaderboard":
+      actions.closeLeaderboard();
+      return true;
+    case "select-leaderboard-difficulty":
+      handleDifficultySelection(button, actions.selectLeaderboardDifficulty);
+      return true;
+    case "open-leaderboard-clear-confirmation":
+      actions.openLeaderboardClearConfirmation();
+      return true;
+    case "cancel-leaderboard-clear":
+      actions.cancelLeaderboardClear();
+      return true;
+    case "confirm-leaderboard-clear":
+      actions.confirmLeaderboardClear();
+      return true;
+    case "pause-game":
+      invokeIfEnabled(button, actions.pauseGame);
+      return true;
+    case "resume-game":
+      invokeIfEnabled(button, actions.resumeGame);
+      return true;
+    case "exit-to-menu":
+      invokeIfEnabled(button, actions.exitToMenu);
+      return true;
+    case "brew":
+      invokeIfEnabled(button, actions.brew);
+      return true;
+    default:
+      return false;
+  }
+}
+
+function handleDifficultySelection(
+  button: HTMLButtonElement,
+  selectDifficulty: (difficulty: Difficulty) => void,
+): void {
+  const difficulty = button.dataset.difficulty;
+
+  if (isDifficulty(difficulty)) {
+    selectDifficulty(difficulty);
+  }
+}
+
+function invokeIfEnabled(button: HTMLButtonElement, action: () => void): void {
+  if (!button.disabled) {
+    action();
+  }
+}
+
+function handleIngredientButton(
+  target: Element,
+  actions: GameClickActions,
+): void {
+  const ingredientButton = target.closest<HTMLButtonElement>(
+    "[data-ingredient-id]",
+  );
+
+  if (ingredientButton === null || ingredientButton.disabled) {
+    return;
+  }
+
+  const ingredientId = ingredientButton.dataset.ingredientId;
+
+  if (ingredientId !== undefined) {
+    actions.addIngredient(ingredientId);
+  }
 }
 
 function isDifficulty(value: string | undefined): value is Difficulty {

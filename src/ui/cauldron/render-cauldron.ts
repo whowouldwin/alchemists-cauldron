@@ -93,6 +93,7 @@ export function renderCauldron(state: GameState): HTMLElement {
   );
 
   panel.setAttribute("aria-labelledby", "cauldron-heading");
+  panel.dataset.dropTarget = "cauldron";
   heading.id = "cauldron-heading";
   headingContent.append(eyebrowText, heading);
   panelHeading.append(headingContent, itemCount);

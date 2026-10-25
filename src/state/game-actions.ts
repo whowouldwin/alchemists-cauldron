@@ -8,19 +8,14 @@ export function addIngredient(
   state: GameState,
   ingredientId: string,
 ): GameState {
-  const settings = DIFFICULTY_SETTINGS[state.difficulty];
-
-  if (
-    state.remainingTimeAtPauseMs !== null ||
-    state.cauldronIngredients.length >= settings.maxCauldronIngredients
-  ) {
+  if (!canAddIngredient(state, ingredientId)) {
     return state;
   }
 
   const ingredient = INGREDIENTS.find(({ id }) => id === ingredientId);
   const stock = state.shelfStock[ingredientId];
 
-  if (ingredient === undefined || stock === undefined || stock <= 0) {
+  if (ingredient === undefined || stock === undefined) {
     return state;
   }
 
@@ -33,6 +28,28 @@ export function addIngredient(
       [ingredientId]: stock - 1,
     },
   };
+}
+
+export function canAddIngredient(
+  state: GameState,
+  ingredientId: string,
+): boolean {
+  const settings = DIFFICULTY_SETTINGS[state.difficulty];
+
+  if (
+    state.remainingTimeAtPauseMs !== null ||
+    state.cauldronIngredients.length >= settings.maxCauldronIngredients
+  ) {
+    return false;
+  }
+
+  const stock = state.shelfStock[ingredientId];
+
+  return (
+    INGREDIENTS.some(({ id }) => id === ingredientId) &&
+    stock !== undefined &&
+    stock > 0
+  );
 }
 
 export function applyBrewResult(

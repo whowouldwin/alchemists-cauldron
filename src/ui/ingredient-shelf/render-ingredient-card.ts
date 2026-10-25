@@ -23,6 +23,7 @@ export function renderIngredientCard(
   const ingredientIcon = isDepleted ? null : renderIngredientIcon(ingredient);
 
   ingredientCard.type = "button";
+  ingredientCard.draggable = !isDisabled;
   ingredientCard.dataset.ingredientId = ingredient.id;
   ingredientCard.disabled = isDisabled;
   ingredientCard.setAttribute(

@@ -13,6 +13,8 @@ export interface IngredientAdditionResult {
   readonly activatedReactions: readonly IReaction[];
 }
 
+const POUR_OUT_TIME_COST_SECONDS = 10;
+
 export function addIngredient(
   state: GameState,
   ingredientId: string,
@@ -80,6 +82,25 @@ export function canAddIngredient(
   );
 }
 
+export function clearCauldron(state: GameState): GameState {
+  return { ...state, cauldronIngredients: [] };
+}
+
+export function pourOut(state: GameState): GameState {
+  if (
+    state.remainingTimeAtPauseMs !== null ||
+    state.cauldronIngredients.length === 0
+  ) {
+    return state;
+  }
+
+  return {
+    ...clearCauldron(state),
+    endTime:
+      state.endTime - POUR_OUT_TIME_COST_SECONDS * MILLISECONDS_PER_SECOND,
+  };
+}
+
 export function applyBrewResult(
   state: GameState,
   succeeded: boolean,
@@ -93,7 +114,7 @@ export function applyBrewResult(
     return state;
   }
 
-  const clearedState = { ...state, cauldronIngredients: [] };
+  const clearedState = clearCauldron(state);
   const settings = DIFFICULTY_SETTINGS[state.difficulty];
 
   if (!succeeded) {

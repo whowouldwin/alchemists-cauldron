@@ -112,6 +112,16 @@
     background: #ededed;
     box-shadow: none;
     color: var(--color-muted);
+    cursor: default;
+    pointer-events: none;
+
+    &::after {
+      display: none;
+    }
+
+    .ingredient-card__icon-wrap {
+      visibility: hidden;
+    }
   }
 }
 

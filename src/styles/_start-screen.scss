@@ -171,6 +171,52 @@ h2 {
   }
 }
 
+.help-dialog {
+  width: min(100% - 32px, 620px);
+  max-height: min(80vh, 720px);
+  overflow-y: auto;
+  margin: auto;
+  padding: clamp(22px, 4vw, 32px);
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-offset);
+
+  &::backdrop {
+    background: rgb(31 31 31 / 45%);
+  }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+
+    h2 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 30px);
+      letter-spacing: -0.04em;
+    }
+  }
+
+  &__rules {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding-left: 24px;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.6;
+
+    li::marker {
+      color: var(--color-ink);
+      font-weight: 800;
+    }
+  }
+}
+
 .difficulty-options {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

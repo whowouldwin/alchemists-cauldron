@@ -5,6 +5,8 @@ export interface GameClickActions {
   readonly openDifficultySettings: () => void;
   readonly closeDifficultySettings: () => void;
   readonly selectDifficulty: (difficulty: Difficulty) => void;
+  readonly openHelp: () => void;
+  readonly closeHelp: () => void;
   readonly pauseGame: () => void;
   readonly resumeGame: () => void;
   readonly exitToMenu: () => void;
@@ -43,12 +45,30 @@ export function createGameClickHandler(
       return;
     }
 
+    const openHelpButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="open-help"]',
+    );
+
+    if (openHelpButton !== null) {
+      actions.openHelp();
+      return;
+    }
+
     const closeSettingsButton = event.target.closest<HTMLButtonElement>(
       '[data-action="close-difficulty-settings"]',
     );
 
     if (closeSettingsButton !== null) {
       actions.closeDifficultySettings();
+      return;
+    }
+
+    const closeHelpButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="close-help"]',
+    );
+
+    if (closeHelpButton !== null) {
+      actions.closeHelp();
       return;
     }
 

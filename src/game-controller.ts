@@ -3,6 +3,7 @@ import { LeaderboardController } from "./game-controller/leaderboard-controller.
 import { GameSessionController } from "./game-controller/game-session-controller.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
+import { createGameKeyboardHandler } from "./ui/game-keyboard-handler.ts";
 import { GameDragHandler } from "./ui/game-drag-handler.ts";
 import { renderGame } from "./ui/screens/render-game.ts";
 
@@ -81,6 +82,17 @@ export function initializeGameController(
         leaderboardController.openClearConfirmation,
       cancelLeaderboardClear: leaderboardController.cancelClear,
       confirmLeaderboardClear: leaderboardController.confirmClear,
+    }),
+  );
+  document.addEventListener(
+    "keydown",
+    createGameKeyboardHandler({
+      getGameState: () => gameSession.currentGameState,
+      canAddIngredient: gameSession.canAddIngredient,
+      addIngredient: gameSession.addIngredient,
+      brew: gameSession.brew,
+      pourOut: gameSession.pourOut,
+      pauseGame: gameSession.pauseGame,
     }),
   );
   applicationRoot.addEventListener(

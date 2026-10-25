@@ -1,11 +1,8 @@
 import type { Difficulty } from "../data/recipes.ts";
 import type { GameState } from "../state/game-state.ts";
 import { LeaderboardClearController } from "./leaderboard-clear-controller.ts";
-import {
-  isValidPlayerName,
-  readLeaderboard,
-  saveLeaderboardEntry,
-} from "../storage/leaderboard.ts";
+import { LeaderboardEntryController } from "./leaderboard-entry-controller.ts";
+import { readLeaderboard } from "../storage/leaderboard.ts";
 import { renderLeaderboard } from "../ui/screens/render-leaderboard.ts";
 
 interface LeaderboardControllerOptions {
@@ -21,12 +18,20 @@ export class LeaderboardController {
   private isLeaderboardVisible = false;
   private selectedDifficulty: Difficulty;
   private readonly clearConfirmation: LeaderboardClearController;
+  private readonly entryController: LeaderboardEntryController;
 
   constructor(private readonly options: LeaderboardControllerOptions) {
     this.selectedDifficulty = options.getCurrentDifficulty();
     this.clearConfirmation = new LeaderboardClearController({
       applicationRoot: options.applicationRoot,
       getSelectedDifficulty: () => this.selectedDifficulty,
+      render: options.render,
+    });
+    this.entryController = new LeaderboardEntryController({
+      applicationRoot: options.applicationRoot,
+      getGameState: options.getGameState,
+      isEntryPending: options.isEntryPending,
+      setEntryPending: options.setEntryPending,
       render: options.render,
     });
   }
@@ -74,49 +79,9 @@ export class LeaderboardController {
 
   readonly confirmClear = (): void => this.clearConfirmation.confirm();
 
-  readonly handleNameSubmit = (event: SubmitEvent): void => {
-    const gameState = this.options.getGameState();
-
-    if (
-      !(event.target instanceof HTMLFormElement) ||
-      event.target.dataset.form !== "leaderboard-entry" ||
-      gameState === null ||
-      gameState.gameOverReason === null ||
-      !this.options.isEntryPending()
-    ) {
-      return;
-    }
-
-    event.preventDefault();
-
-    const input = event.target.querySelector<HTMLInputElement>(
-      '[name="playerName"]',
-    );
-    const status = event.target.querySelector<HTMLElement>('[role="status"]');
-
-    if (input === null || status === null) {
-      return;
-    }
-
-    if (!isValidPlayerName(input.value)) {
-      input.setCustomValidity(
-        "Enter 2–15 letters, numbers, spaces, underscores or hyphens.",
-      );
-      input.reportValidity();
-      return;
-    }
-
-    if (
-      !saveLeaderboardEntry(input.value, gameState.score, gameState.difficulty)
-    ) {
-      status.textContent = "Could not save your score. Please try again.";
-      return;
-    }
-
-    this.options.setEntryPending(false);
-    this.options.render();
-    this.focusAction("start-game");
-  };
+  get handleNameSubmit(): (event: SubmitEvent) => void {
+    return this.entryController.handleSubmit;
+  }
 
   private focusSelectedDifficulty(): void {
     this.options.applicationRoot

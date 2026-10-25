@@ -20,7 +20,11 @@ interface GameBrewingControllerOptions {
 }
 
 export class GameBrewingController {
-  constructor(private readonly options: GameBrewingControllerOptions) {}
+  private readonly options: GameBrewingControllerOptions;
+
+  constructor(options: GameBrewingControllerOptions) {
+    this.options = options;
+  }
 
   readonly canAddIngredient = (ingredientId: string): boolean => {
     const gameState = this.options.getGameState();

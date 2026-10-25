@@ -1,5 +1,5 @@
-import { createLeaderboardController } from "./game-controller/leaderboard-controller.ts";
 import { GameDialogController } from "./game-controller/game-dialog-controller.ts";
+import { LeaderboardController } from "./game-controller/leaderboard-controller.ts";
 import { DIFFICULTY_SETTINGS } from "./data/difficulty-settings.ts";
 import type { Difficulty } from "./data/recipes.ts";
 import { isBrewSuccessful } from "./logic/brew-check.ts";
@@ -43,7 +43,7 @@ export function initializeGameController(
     () => selectedDifficulty,
     render,
   );
-  const leaderboardController = createLeaderboardController({
+  const leaderboardController = new LeaderboardController({
     applicationRoot,
     getGameState: () => gameState,
     isEntryPending: () => leaderboardEntryPending,

@@ -68,7 +68,7 @@ export class GameBrewingController {
 
     const values = resolveCauldronReactions(
       gameState.cauldronIngredients,
-      gameState.difficulty,
+      gameState.activeReactionIds,
     ).values;
     const succeeded = isBrewSuccessful(
       values,

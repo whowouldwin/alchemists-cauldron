@@ -7,7 +7,9 @@ import {
 } from "../src/data/ingredients.ts";
 import { isBrewSuccessful } from "../src/logic/brew-check.ts";
 import {
-  getReactionsForDifficulty,
+  getAvailableReactionsForDifficulty,
+  isValidReactionSelection,
+  selectReactionIdsForDifficulty,
   REACTIONS,
 } from "../src/logic/reactions/reaction-catalog.ts";
 import {
@@ -28,19 +30,34 @@ test("defines all reactions in one typed catalogue with unique ids", () => {
   assert.equal(new Set(REACTIONS.map(({ id }) => id)).size, REACTIONS.length);
 });
 
-test("enables two available reactions on medium and three on hard", () => {
-  const mediumReactions = getReactionsForDifficulty("medium");
-  const hardReactions = getReactionsForDifficulty("hard");
+test("selects a distinct eligible reaction set for each difficulty", () => {
+  const mediumIds = selectReactionIdsForDifficulty("medium", () => 0);
+  const anotherMediumIds = selectReactionIdsForDifficulty(
+    "medium",
+    () => 0.999,
+  );
+  const hardIds = selectReactionIdsForDifficulty("hard", () => 0.5);
   const mediumIngredients = getIngredientsForDifficulty("medium");
   const mediumIngredientIds = new Set(mediumIngredients.map(({ id }) => id));
-
-  assert.equal(getReactionsForDifficulty("easy").length, 0);
-  assert.equal(mediumReactions.length, 2);
-  assert.equal(hardReactions.length, 3);
-  assert.deepEqual(
-    mediumReactions.map(({ id }) => id),
-    ["bubbling", "solar-frost"],
+  const availableMediumReactionIds = new Set(
+    getAvailableReactionsForDifficulty("medium").map(({ id }) => id),
   );
+
+  assert.deepEqual(
+    selectReactionIdsForDifficulty("easy", () => 0),
+    [],
+  );
+  assert.equal(mediumIds.length, 2);
+  assert.equal(hardIds.length, 3);
+  assert.notDeepEqual(mediumIds, anotherMediumIds);
+  assert.equal(new Set(mediumIds).size, mediumIds.length);
+  assert.equal(new Set(hardIds).size, hardIds.length);
+  assert.ok(isValidReactionSelection(mediumIds, "medium"));
+  assert.ok(isValidReactionSelection(hardIds, "hard"));
+  assert.ok(availableMediumReactionIds.has("bubbling"));
+  assert.ok(availableMediumReactionIds.has("solar-frost"));
+  assert.ok(!availableMediumReactionIds.has("volatile-mix"));
+  assert.ok(!availableMediumReactionIds.has("rooted-steam"));
   assert.ok(mediumIngredientIds.has("fairy-dust"));
   assert.ok(mediumIngredientIds.has("caustic-acid"));
   assert.ok(mediumIngredientIds.has("dragon-tears"));
@@ -53,7 +70,7 @@ test("recalculates values from ingredients before applying active reactions", ()
     getIngredient("caustic-acid"),
   ];
 
-  const result = resolveCauldronReactions(ingredients, "medium");
+  const result = resolveCauldronReactions(ingredients, ["bubbling"]);
 
   assert.deepEqual(result.values, {
     temperature: 22,
@@ -69,7 +86,7 @@ test("recalculates values from ingredients before applying active reactions", ()
 test("applies Solar Frost to the current cauldron values", () => {
   const result = resolveCauldronReactions(
     [getIngredient("dragon-tears"), getIngredient("frost-lotus")],
-    "hard",
+    ["solar-frost"],
   );
 
   assert.deepEqual(result.values, {
@@ -89,11 +106,13 @@ test("reports a reaction only when it first becomes active", () => {
   const stillActive = [...current, getIngredient("dragon-tears")];
 
   assert.deepEqual(
-    getNewlyActivatedReactions(before, current, "medium").map(({ id }) => id),
+    getNewlyActivatedReactions(before, current, ["bubbling"]).map(
+      ({ id }) => id,
+    ),
     ["bubbling"],
   );
   assert.deepEqual(
-    getNewlyActivatedReactions(current, stillActive, "medium"),
+    getNewlyActivatedReactions(current, stillActive, ["bubbling"]),
     [],
   );
 });
@@ -103,7 +122,7 @@ test("uses reaction-adjusted values for brew checks", () => {
     getIngredient("fairy-dust"),
     getIngredient("caustic-acid"),
   ];
-  const { values } = resolveCauldronReactions(ingredients, "medium");
+  const { values } = resolveCauldronReactions(ingredients, ["bubbling"]);
   const recipe: Recipe = {
     id: "bubbling-test",
     name: "Bubbling Test",

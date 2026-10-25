@@ -36,7 +36,7 @@ export function renderActiveGame(state: GameState): HTMLElement {
   const gameLayout = createElement("div", "game-layout");
   const cauldronValues = resolveCauldronReactions(
     state.cauldronIngredients,
-    state.difficulty,
+    state.activeReactionIds,
   ).values;
   const targetRanges: CauldronTargetRanges = {
     temperature: state.activeRecipe.temperature,

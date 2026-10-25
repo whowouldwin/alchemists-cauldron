@@ -3,6 +3,7 @@ import test from "node:test";
 import { LEVEL_ONE_INGREDIENTS } from "../src/data/ingredients.ts";
 import { DIFFICULTY_SETTINGS } from "../src/data/difficulty-settings.ts";
 import { getRecipesByDifficulty } from "../src/logic/recipe-generator.ts";
+import { isValidReactionSelection } from "../src/logic/reactions/reaction-catalog.ts";
 import { MAX_CAULDRON_INGREDIENTS } from "../src/state/game-state.ts";
 import { createGameState } from "../src/state/create-game-state.ts";
 import { addIngredient, canAddIngredient } from "../src/state/game-actions.ts";
@@ -69,6 +70,8 @@ test("creates the initial state from the selected difficulty settings", () => {
       DIFFICULTY_SETTINGS[state.difficulty].reactionCount,
       reactionCount,
     );
+    assert.equal(state.activeReactionIds.length, reactionCount);
+    assert.ok(isValidReactionSelection(state.activeReactionIds, difficulty));
   }
 });
 

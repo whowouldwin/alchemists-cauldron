@@ -10,6 +10,7 @@ export interface ReactionEffects {
 export interface IReaction {
   readonly id: string;
   readonly name: string;
+  readonly requiredIngredientIds?: readonly string[];
   readonly isActive: (
     ingredients: readonly Ingredient[],
     values: CauldronValues,

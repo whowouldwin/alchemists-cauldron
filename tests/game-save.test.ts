@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createGameState } from "../src/state/create-game-state.ts";
+import { isValidReactionSelection } from "../src/logic/reactions/reaction-catalog.ts";
 import { finishGame } from "../src/state/game-status.ts";
 import {
   clearSave,
+  GAME_SAVE_STORAGE_KEY,
   loadGame,
   restoreGameState,
   saveGame,
@@ -34,8 +36,9 @@ test("saves and loads a valid game snapshot", () => {
   assert.equal(saveGame(state, storage, 10_000), true);
   assert.notEqual(getValue(), null);
   assert.deepEqual(loadGame(storage), {
-    version: 1,
+    version: 2,
     difficulty: "hard",
+    activeReactionIds: state.activeReactionIds,
     score: 0,
     timeLeft: 150,
     lives: 3,
@@ -59,9 +62,38 @@ test("restores a saved game paused with the same shelf stock", () => {
   const restoredState = restoreGameState(savedGame, 50_000);
 
   assert.equal(restoredState.difficulty, state.difficulty);
+  assert.deepEqual(restoredState.activeReactionIds, state.activeReactionIds);
   assert.equal(restoredState.remainingTimeAtPauseMs, 150_000);
   assert.deepEqual(restoredState.shelfStock, state.shelfStock);
   assert.equal(restoredState.activeRecipe.id, state.activeRecipe.id);
+});
+
+test("migrates a legacy save and keeps a stable reaction selection", () => {
+  const { storage, getValue } = createMemoryStorage();
+  const state = createGameState(() => 0, 10_000, "hard");
+
+  assert.equal(saveGame(state, storage, 10_000), true);
+
+  const savedValue = getValue();
+
+  assert.ok(savedValue !== null);
+
+  const legacySave: Record<string, unknown> = JSON.parse(savedValue);
+
+  legacySave.version = 1;
+  delete legacySave.activeReactionIds;
+  storage.setItem(GAME_SAVE_STORAGE_KEY, JSON.stringify(legacySave));
+
+  const migratedSave = loadGame(storage);
+
+  assert.ok(migratedSave);
+  assert.equal(migratedSave.version, 2);
+  assert.equal(migratedSave.activeReactionIds.length, 3);
+  assert.ok(isValidReactionSelection(migratedSave.activeReactionIds, "hard"));
+  assert.deepEqual(
+    migratedSave.activeReactionIds,
+    loadGame(storage)?.activeReactionIds,
+  );
 });
 
 test("clears a finished game instead of saving it", () => {

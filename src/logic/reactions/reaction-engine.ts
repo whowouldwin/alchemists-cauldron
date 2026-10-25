@@ -1,24 +1,20 @@
 import type { Ingredient } from "../../data/ingredients.ts";
-import type { Difficulty } from "../../data/recipes.ts";
 import { calculateCauldron } from "../calculate-cauldron.ts";
-import { getReactionsForDifficulty } from "./reaction-catalog.ts";
+import { getReactionsByIds } from "./reaction-catalog.ts";
 import type { IReaction, ReactionResolution } from "./reaction-types.ts";
 
 export function resolveCauldronReactions(
   ingredients: readonly Ingredient[],
-  difficulty: Difficulty,
+  activeReactionIds: readonly string[],
 ): ReactionResolution {
-  let values = calculateCauldron(ingredients);
-  const activeReactions: IReaction[] = [];
-
-  for (const reaction of getReactionsForDifficulty(difficulty)) {
-    if (!reaction.isActive(ingredients, values)) {
-      continue;
-    }
-
-    activeReactions.push(reaction);
-    values = reaction.apply(values);
-  }
+  const baseValues = calculateCauldron(ingredients);
+  const activeReactions = getReactionsByIds(activeReactionIds).filter(
+    (reaction) => reaction.isActive(ingredients, baseValues),
+  );
+  const values = activeReactions.reduce(
+    (currentValues, reaction) => reaction.apply(currentValues),
+    baseValues,
+  );
 
   return { values, activeReactions };
 }
@@ -26,17 +22,17 @@ export function resolveCauldronReactions(
 export function getNewlyActivatedReactions(
   previousIngredients: readonly Ingredient[],
   currentIngredients: readonly Ingredient[],
-  difficulty: Difficulty,
+  activeReactionIds: readonly string[],
 ): readonly IReaction[] {
   const previouslyActiveIds = new Set(
     resolveCauldronReactions(
       previousIngredients,
-      difficulty,
+      activeReactionIds,
     ).activeReactions.map(({ id }) => id),
   );
   const activeReactions = resolveCauldronReactions(
     currentIngredients,
-    difficulty,
+    activeReactionIds,
   ).activeReactions;
 
   return activeReactions.filter(({ id }) => !previouslyActiveIds.has(id));

@@ -1,5 +1,8 @@
 import { DIFFICULTY_SETTINGS } from "../../data/difficulty-settings.ts";
-import type { Ingredient } from "../../data/ingredients.ts";
+import {
+  getIngredientsForDifficulty,
+  type Ingredient,
+} from "../../data/ingredients.ts";
 import type { Difficulty } from "../../data/recipes.ts";
 import type { IReaction } from "./reaction-types.ts";
 
@@ -18,6 +21,10 @@ export const REACTIONS: readonly IReaction[] = [
   {
     id: "bubbling",
     name: "Bubbling",
+    requiredIngredientIds: [
+      INGREDIENT_IDS.fairyDust,
+      INGREDIENT_IDS.causticAcid,
+    ],
     isActive: (ingredients) =>
       hasIngredients(
         ingredients,
@@ -33,6 +40,10 @@ export const REACTIONS: readonly IReaction[] = [
   {
     id: "solar-frost",
     name: "Solar Frost",
+    requiredIngredientIds: [
+      INGREDIENT_IDS.dragonTears,
+      INGREDIENT_IDS.frostLotus,
+    ],
     isActive: (ingredients) =>
       hasIngredients(
         ingredients,
@@ -48,6 +59,10 @@ export const REACTIONS: readonly IReaction[] = [
   {
     id: "volatile-mix",
     name: "Volatile Mix",
+    requiredIngredientIds: [
+      INGREDIENT_IDS.phoenixFeather,
+      INGREDIENT_IDS.essenceOfTheVoid,
+    ],
     isActive: (ingredients) =>
       hasIngredients(
         ingredients,
@@ -60,6 +75,10 @@ export const REACTIONS: readonly IReaction[] = [
   {
     id: "rooted-steam",
     name: "Rooted Steam",
+    requiredIngredientIds: [
+      INGREDIENT_IDS.mandrakeRoot,
+      INGREDIENT_IDS.toadSlime,
+    ],
     isActive: (ingredients) =>
       hasIngredients(
         ingredients,
@@ -75,6 +94,10 @@ export const REACTIONS: readonly IReaction[] = [
   {
     id: "ashen-bloom",
     name: "Ashen Bloom",
+    requiredIngredientIds: [
+      INGREDIENT_IDS.phoenixFeather,
+      INGREDIENT_IDS.fairyDust,
+    ],
     isActive: (ingredients) =>
       hasIngredients(
         ingredients,
@@ -142,6 +165,10 @@ export const REACTIONS: readonly IReaction[] = [
   {
     id: "steam-burst",
     name: "Steam Burst",
+    requiredIngredientIds: [
+      INGREDIENT_IDS.dragonTears,
+      INGREDIENT_IDS.causticAcid,
+    ],
     isActive: (ingredients, values) =>
       hasIngredients(
         ingredients,
@@ -154,6 +181,10 @@ export const REACTIONS: readonly IReaction[] = [
   {
     id: "black-ice",
     name: "Black Ice",
+    requiredIngredientIds: [
+      INGREDIENT_IDS.frostLotus,
+      INGREDIENT_IDS.essenceOfTheVoid,
+    ],
     isActive: (ingredients, values) =>
       hasIngredients(
         ingredients,
@@ -169,6 +200,7 @@ export const REACTIONS: readonly IReaction[] = [
   {
     id: "heavy-spark",
     name: "Heavy Spark",
+    requiredIngredientIds: [INGREDIENT_IDS.fairyDust, INGREDIENT_IDS.toadSlime],
     isActive: (ingredients, values) =>
       hasIngredients(
         ingredients,
@@ -184,6 +216,10 @@ export const REACTIONS: readonly IReaction[] = [
   {
     id: "burning-root",
     name: "Burning Root",
+    requiredIngredientIds: [
+      INGREDIENT_IDS.mandrakeRoot,
+      INGREDIENT_IDS.phoenixFeather,
+    ],
     isActive: (ingredients, values) =>
       hasIngredients(
         ingredients,
@@ -199,6 +235,10 @@ export const REACTIONS: readonly IReaction[] = [
   {
     id: "void-resonance",
     name: "Void Resonance",
+    requiredIngredientIds: [
+      INGREDIENT_IDS.essenceOfTheVoid,
+      INGREDIENT_IDS.dragonTears,
+    ],
     isActive: (ingredients, values) =>
       hasIngredients(
         ingredients,
@@ -213,10 +253,98 @@ export const REACTIONS: readonly IReaction[] = [
   },
 ];
 
-export function getReactionsForDifficulty(
+export function getAvailableReactionsForDifficulty(
   difficulty: Difficulty,
 ): readonly IReaction[] {
-  return REACTIONS.slice(0, DIFFICULTY_SETTINGS[difficulty].reactionCount);
+  const availableIngredientIds = new Set(
+    getIngredientsForDifficulty(difficulty).map(({ id }) => id),
+  );
+
+  return REACTIONS.filter(
+    (reaction) =>
+      reaction.requiredIngredientIds?.every((id) =>
+        availableIngredientIds.has(id),
+      ) ?? true,
+  );
+}
+
+export function selectReactionIdsForDifficulty(
+  difficulty: Difficulty,
+  random: () => number = Math.random,
+): readonly string[] {
+  const candidates = [...getAvailableReactionsForDifficulty(difficulty)];
+  const reactionCount = DIFFICULTY_SETTINGS[difficulty].reactionCount;
+
+  if (candidates.length < reactionCount) {
+    throw new RangeError(
+      `Difficulty "${difficulty}" requires ${reactionCount} reactions, but only ${candidates.length} are available.`,
+    );
+  }
+
+  for (let index = 0; index < reactionCount; index += 1) {
+    const remainingCount = candidates.length - index;
+    const selectedIndex = Math.floor(random() * remainingCount);
+
+    if (selectedIndex < 0 || selectedIndex >= remainingCount) {
+      throw new RangeError(
+        "The random generator must return a value in [0, 1).",
+      );
+    }
+
+    const swapIndex = index + selectedIndex;
+    const currentReaction = candidates[index];
+    const selectedReaction = candidates[swapIndex];
+
+    if (currentReaction === undefined || selectedReaction === undefined) {
+      throw new RangeError("The selected reaction is unavailable.");
+    }
+
+    [candidates[index], candidates[swapIndex]] = [
+      selectedReaction,
+      currentReaction,
+    ];
+  }
+
+  return candidates.slice(0, reactionCount).map(({ id }) => id);
+}
+
+export function getReactionsByIds(
+  reactionIds: readonly string[],
+): readonly IReaction[] {
+  return reactionIds.flatMap((id) => {
+    const reaction = REACTIONS.find((candidate) => candidate.id === id);
+
+    return reaction === undefined ? [] : [reaction];
+  });
+}
+
+export function isValidReactionSelection(
+  value: unknown,
+  difficulty: Difficulty,
+): value is readonly string[] {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  const reactionIds: string[] = [];
+
+  for (const reactionId of value) {
+    if (typeof reactionId !== "string") {
+      return false;
+    }
+
+    reactionIds.push(reactionId);
+  }
+
+  const availableReactionIds = new Set(
+    getAvailableReactionsForDifficulty(difficulty).map(({ id }) => id),
+  );
+
+  return (
+    reactionIds.length === DIFFICULTY_SETTINGS[difficulty].reactionCount &&
+    new Set(reactionIds).size === reactionIds.length &&
+    reactionIds.every((id) => availableReactionIds.has(id))
+  );
 }
 
 function hasIngredients(

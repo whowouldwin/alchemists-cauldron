@@ -15,6 +15,7 @@ export type GameOverReason = "time" | "lives" | "out-of-ingredients";
 
 export interface GameState {
   readonly difficulty: Difficulty;
+  readonly activeReactionIds: readonly string[];
   readonly cauldronIngredients: readonly Ingredient[];
   readonly shelfStock: Readonly<Record<string, number>>;
   readonly activeRecipe: Recipe;

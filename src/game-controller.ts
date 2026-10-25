@@ -1,4 +1,5 @@
 import { createLeaderboardController } from "./game-controller/leaderboard-controller.ts";
+import { GameDialogController } from "./game-controller/game-dialog-controller.ts";
 import { DIFFICULTY_SETTINGS } from "./data/difficulty-settings.ts";
 import type { Difficulty } from "./data/recipes.ts";
 import { isBrewSuccessful } from "./logic/brew-check.ts";
@@ -36,9 +37,12 @@ export function initializeGameController(
   let gameState: GameState | null = null;
   let savedGame = loadGame();
   let selectedDifficulty: Difficulty = savedGame?.difficulty ?? "medium";
-  let isDifficultySettingsOpen = false;
-  let isHelpOpen = false;
   let leaderboardEntryPending = false;
+  const dialogs = new GameDialogController(
+    applicationRoot,
+    () => selectedDifficulty,
+    render,
+  );
   const leaderboardController = createLeaderboardController({
     applicationRoot,
     getGameState: () => gameState,
@@ -65,22 +69,20 @@ export function initializeGameController(
       ? leaderboardController.render()
       : renderGame(gameState, leaderboardEntryPending, {
           selectedDifficulty,
-          isDifficultySettingsOpen,
-          isHelpOpen,
+          isDifficultySettingsOpen: dialogs.isSettingsOpen,
+          isHelpOpen: dialogs.isHelpOpen,
           hasSavedGame: savedGame !== null,
         });
 
     applicationRoot.replaceChildren(screen);
     leaderboardController.afterRender();
-    afterRenderHelp();
-    afterRenderDifficultySettings();
+    dialogs.afterRender();
   }
 
   function startGame(): void {
     gameState = createGameState(Math.random, Date.now(), selectedDifficulty);
     savedGame = null;
-    isDifficultySettingsOpen = false;
-    isHelpOpen = false;
+    dialogs.reset();
     leaderboardEntryPending = false;
     leaderboardController.reset();
     saveCurrentGame();
@@ -96,104 +98,16 @@ export function initializeGameController(
     gameState = restoreGameState(savedGame);
     selectedDifficulty = savedGame.difficulty;
     savedGame = null;
-    isDifficultySettingsOpen = false;
-    isHelpOpen = false;
+    dialogs.reset();
     leaderboardEntryPending = false;
     leaderboardController.reset();
     render();
     focusResumeButton();
   }
 
-  function openDifficultySettings(): void {
-    isDifficultySettingsOpen = true;
-    isHelpOpen = false;
-    render();
-  }
-
-  function closeDifficultySettings(): void {
-    isDifficultySettingsOpen = false;
-    render();
-    applicationRoot
-      .querySelector<HTMLButtonElement>(
-        '[data-action="open-difficulty-settings"]',
-      )
-      ?.focus();
-  }
-
-  function openHelp(): void {
-    isHelpOpen = true;
-    isDifficultySettingsOpen = false;
-    render();
-  }
-
-  function closeHelp(): void {
-    isHelpOpen = false;
-    render();
-    applicationRoot
-      .querySelector<HTMLButtonElement>('[data-action="open-help"]')
-      ?.focus();
-  }
-
-  function afterRenderHelp(): void {
-    if (!isHelpOpen) {
-      return;
-    }
-
-    const dialog =
-      applicationRoot.querySelector<HTMLDialogElement>("#game-help");
-
-    if (dialog === null) {
-      return;
-    }
-
-    dialog.addEventListener("cancel", handleHelpDialogCancel, { once: true });
-    dialog.showModal();
-    dialog
-      .querySelector<HTMLButtonElement>('[data-action="close-help"]')
-      ?.focus();
-  }
-
-  function handleHelpDialogCancel(event: Event): void {
-    event.preventDefault();
-    closeHelp();
-  }
-
-  function afterRenderDifficultySettings(): void {
-    if (!isDifficultySettingsOpen) {
-      return;
-    }
-
-    const dialog = applicationRoot.querySelector<HTMLDialogElement>(
-      "#difficulty-settings",
-    );
-
-    if (dialog === null) {
-      return;
-    }
-
-    dialog.addEventListener("cancel", handleDifficultySettingsCancel, {
-      once: true,
-    });
-    dialog.showModal();
-    focusSelectedDifficulty();
-  }
-
-  function handleDifficultySettingsCancel(event: Event): void {
-    event.preventDefault();
-    closeDifficultySettings();
-  }
-
   function selectDifficulty(difficulty: Difficulty): void {
     selectedDifficulty = difficulty;
     render();
-  }
-
-  function focusSelectedDifficulty(): void {
-    applicationRoot
-      .querySelector<HTMLButtonElement>(
-        `[data-action="select-difficulty"][data-difficulty="${selectedDifficulty}"]`,
-      )
-      ?.focus();
   }
 
   function handleIngredientClick(ingredientId: string): void {
@@ -375,11 +289,11 @@ export function initializeGameController(
     createGameClickHandler({
       startGame,
       continueGame,
-      openDifficultySettings,
-      closeDifficultySettings,
+      openDifficultySettings: () => dialogs.openSettings(),
+      closeDifficultySettings: () => dialogs.closeSettings(),
       selectDifficulty,
-      openHelp,
-      closeHelp,
+      openHelp: () => dialogs.openHelp(),
+      closeHelp: () => dialogs.closeHelp(),
       selectLeaderboardDifficulty: leaderboardController.selectDifficulty,
       pauseGame: handlePause,
       resumeGame: handleResume,

@@ -18,7 +18,11 @@ export function renderActiveGame(state: GameState): HTMLElement {
     "main",
     isPaused ? "app-shell app-shell--paused" : "app-shell",
   );
-  const gameContent = createElement("div", "game-content");
+  const gameContentClassName =
+    state.lastBrewResult === "failure"
+      ? "game-content game-content--brew-failure"
+      : "game-content";
+  const gameContent = createElement("div", gameContentClassName);
   const topbar = renderTopbar();
   const gameIntro = createElement("section", "game-intro");
   const introContent = createElement("div");

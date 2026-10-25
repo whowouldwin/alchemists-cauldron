@@ -1,4 +1,5 @@
 import type { GameState } from "../state/game-state.ts";
+import { focusGameAction } from "./focus-game-action.ts";
 import {
   isValidPlayerName,
   saveLeaderboardEntry,
@@ -56,12 +57,6 @@ export class LeaderboardEntryController {
 
     this.options.setEntryPending(false);
     this.options.render();
-    this.focusAction("start-game");
+    focusGameAction(this.options.applicationRoot, "start-game");
   };
-
-  private focusAction(action: string): void {
-    this.options.applicationRoot
-      .querySelector<HTMLButtonElement>(`[data-action="${action}"]`)
-      ?.focus();
-  }
 }

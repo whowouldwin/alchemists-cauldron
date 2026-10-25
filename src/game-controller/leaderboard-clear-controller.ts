@@ -1,4 +1,5 @@
 import type { Difficulty } from "../data/recipes.ts";
+import { focusGameAction } from "./focus-game-action.ts";
 import { clearLeaderboard } from "../storage/leaderboard.ts";
 
 interface LeaderboardClearControllerOptions {
@@ -44,7 +45,7 @@ export class LeaderboardClearController {
       once: true,
     });
     dialog.showModal();
-    this.focusAction("cancel-leaderboard-clear");
+    focusGameAction(this.options.applicationRoot, "cancel-leaderboard-clear");
   };
 
   readonly open = (): void => {
@@ -57,7 +58,10 @@ export class LeaderboardClearController {
     this.isOpen = false;
     this.errorMessage = null;
     this.options.render();
-    this.focusAction("open-leaderboard-clear-confirmation");
+    focusGameAction(
+      this.options.applicationRoot,
+      "open-leaderboard-clear-confirmation",
+    );
   };
 
   readonly confirm = (): void => {
@@ -70,17 +74,14 @@ export class LeaderboardClearController {
     this.isOpen = false;
     this.errorMessage = null;
     this.options.render();
-    this.focusAction("open-leaderboard-clear-confirmation");
+    focusGameAction(
+      this.options.applicationRoot,
+      "open-leaderboard-clear-confirmation",
+    );
   };
 
   private readonly handleDialogCancel = (event: Event): void => {
     event.preventDefault();
     this.cancel();
   };
-
-  private focusAction(action: string): void {
-    this.options.applicationRoot
-      .querySelector<HTMLButtonElement>(`[data-action="${action}"]`)
-      ?.focus();
-  }
 }

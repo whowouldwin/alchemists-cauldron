@@ -1,5 +1,6 @@
 import type { GameState } from "../state/game-state.ts";
 import { pauseGame, resumeGame } from "../state/game-status.ts";
+import { focusGameAction } from "./focus-game-action.ts";
 import { createTimerDisplayRefresh } from "../ui/game-status/timer-display-refresh.ts";
 
 interface GameLifecycleControllerOptions {
@@ -34,7 +35,7 @@ export class GameLifecycleController {
 
   readonly pauseGame = (): void => {
     if (this.pauseActiveGame()) {
-      this.focusAction("resume-game");
+      focusGameAction(this.options.applicationRoot, "resume-game");
     }
   };
 
@@ -49,7 +50,7 @@ export class GameLifecycleController {
     this.options.saveCurrentGame();
     this.options.render();
     this.startTimer();
-    this.focusAction("pause-game");
+    focusGameAction(this.options.applicationRoot, "pause-game");
   };
 
   readonly handleVisibilityChange = (): void => {
@@ -61,7 +62,7 @@ export class GameLifecycleController {
     const gameState = this.options.getGameState();
 
     if (gameState !== null && gameState.remainingTimeAtPauseMs !== null) {
-      this.focusAction("resume-game");
+      focusGameAction(this.options.applicationRoot, "resume-game");
     }
   };
 
@@ -88,11 +89,5 @@ export class GameLifecycleController {
     this.options.render();
 
     return true;
-  }
-
-  private focusAction(action: string): void {
-    this.options.applicationRoot
-      .querySelector<HTMLButtonElement>(`[data-action="${action}"]`)
-      ?.focus();
   }
 }

@@ -1,6 +1,7 @@
 import type { Difficulty } from "../data/recipes.ts";
 import { GameBrewingController } from "./game-brewing-controller.ts";
 import { GameLifecycleController } from "./game-lifecycle-controller.ts";
+import { focusGameAction } from "./focus-game-action.ts";
 import { qualifiesForLeaderboard } from "../storage/leaderboard.ts";
 import {
   clearSave,
@@ -125,7 +126,7 @@ export class GameSessionController {
     this.leaderboardEntryPending = false;
     this.options.resetOtherControllers();
     this.options.render();
-    this.focusAction("resume-game");
+    focusGameAction(this.options.applicationRoot, "resume-game");
   };
 
   readonly selectDifficulty = (difficulty: Difficulty): void => {
@@ -147,7 +148,7 @@ export class GameSessionController {
     clearSave();
     this.lifecycleController.stopTimer();
     this.options.render();
-    this.focusAction("start-game");
+    focusGameAction(this.options.applicationRoot, "start-game");
   };
 
   readonly handlePageHide = (): void => {
@@ -187,11 +188,5 @@ export class GameSessionController {
     if (this.gameState !== null) {
       saveGame(this.gameState);
     }
-  }
-
-  private focusAction(action: string): void {
-    this.options.applicationRoot
-      .querySelector<HTMLButtonElement>(`[data-action="${action}"]`)
-      ?.focus();
   }
 }

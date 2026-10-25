@@ -1,4 +1,5 @@
 import type { Difficulty } from "../data/recipes.ts";
+import { focusGameAction } from "./focus-game-action.ts";
 
 export class GameDialogController {
   private helpDialogIsOpen = false;
@@ -32,7 +33,7 @@ export class GameDialogController {
   closeSettings(): void {
     this.settingsDialogIsOpen = false;
     this.render();
-    this.focusAction("open-difficulty-settings");
+    focusGameAction(this.applicationRoot, "open-difficulty-settings");
   }
 
   openHelp(): void {
@@ -44,7 +45,7 @@ export class GameDialogController {
   closeHelp(): void {
     this.helpDialogIsOpen = false;
     this.render();
-    this.focusAction("open-help");
+    focusGameAction(this.applicationRoot, "open-help");
   }
 
   afterRender(): void {
@@ -108,12 +109,6 @@ export class GameDialogController {
       .querySelector<HTMLButtonElement>(
         `[data-action="select-difficulty"][data-difficulty="${this.getSelectedDifficulty()}"]`,
       )
-      ?.focus();
-  }
-
-  private focusAction(action: string): void {
-    this.applicationRoot
-      .querySelector<HTMLButtonElement>(`[data-action="${action}"]`)
       ?.focus();
   }
 }

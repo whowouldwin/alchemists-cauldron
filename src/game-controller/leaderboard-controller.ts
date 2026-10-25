@@ -2,6 +2,7 @@ import type { Difficulty } from "../data/recipes.ts";
 import type { GameState } from "../state/game-state.ts";
 import { LeaderboardClearController } from "./leaderboard-clear-controller.ts";
 import { LeaderboardEntryController } from "./leaderboard-entry-controller.ts";
+import { focusGameAction } from "./focus-game-action.ts";
 import { readLeaderboard } from "../storage/leaderboard.ts";
 import { renderLeaderboard } from "../ui/screens/render-leaderboard.ts";
 
@@ -58,13 +59,13 @@ export class LeaderboardController {
     this.isLeaderboardVisible = true;
     this.selectedDifficulty = this.options.getCurrentDifficulty();
     this.options.render();
-    this.focusAction("close-leaderboard");
+    focusGameAction(this.options.applicationRoot, "close-leaderboard");
   };
 
   readonly close = (): void => {
     this.isLeaderboardVisible = false;
     this.options.render();
-    this.focusAction("open-leaderboard");
+    focusGameAction(this.options.applicationRoot, "open-leaderboard");
   };
 
   readonly selectDifficulty = (difficulty: Difficulty): void => {
@@ -88,12 +89,6 @@ export class LeaderboardController {
       .querySelector<HTMLButtonElement>(
         `[data-action="select-leaderboard-difficulty"][data-difficulty="${this.selectedDifficulty}"]`,
       )
-      ?.focus();
-  }
-
-  private focusAction(action: string): void {
-    this.options.applicationRoot
-      .querySelector<HTMLButtonElement>(`[data-action="${action}"]`)
       ?.focus();
   }
 }

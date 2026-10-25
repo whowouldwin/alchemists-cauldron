@@ -68,7 +68,14 @@ export function renderCauldron(state: GameState): HTMLElement {
   const maximumIngredients =
     DIFFICULTY_SETTINGS[state.difficulty].maxCauldronIngredients;
   const isFull = state.cauldronIngredients.length >= maximumIngredients;
-  const panel = createElement("section", "panel cauldron-panel");
+  const feedbackClassName =
+    state.lastBrewResult === null
+      ? ""
+      : ` cauldron-panel--brew-${state.lastBrewResult}`;
+  const panel = createElement(
+    "section",
+    `panel cauldron-panel${feedbackClassName}`,
+  );
   const panelHeading = createElement("div", "panel-heading");
   const headingContent = createElement("div");
   const eyebrowText = createElement("p", "eyebrow", "The mixing vessel");

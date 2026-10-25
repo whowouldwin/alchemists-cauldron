@@ -86,6 +86,7 @@ $target-glow-color: #79b98a;
     background: var(--color-ink);
     box-shadow: 0 0 0 1px var(--color-ink);
     transform: translate(-50%, -50%);
+    transition: left 350ms ease-out;
   }
 
   &__target-zone {
@@ -102,4 +103,10 @@ $target-glow-color: #79b98a;
   box-shadow:
     0 0 0 1px $target-match-color,
     0 0 10px $target-glow-color;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parameter-bar__marker {
+    transition: none;
+  }
 }

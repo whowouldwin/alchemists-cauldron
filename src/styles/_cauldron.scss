@@ -27,6 +27,87 @@
   }
 }
 
+.cauldron-panel--brew-success .cauldron-art {
+  animation: cauldron-success 750ms ease-out;
+}
+
+.cauldron-panel--brew-failure .cauldron-art-wrap::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 96px;
+  aspect-ratio: 1;
+  background: #f2c964;
+  clip-path: polygon(
+    50% 0,
+    61% 33%,
+    94% 14%,
+    72% 45%,
+    100% 65%,
+    65% 66%,
+    50% 100%,
+    39% 66%,
+    4% 84%,
+    30% 51%,
+    0 25%,
+    39% 35%
+  );
+  content: "";
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.15) rotate(-18deg);
+  animation: cauldron-explosion 600ms ease-out;
+}
+
+.game-content--brew-failure {
+  animation: brew-failure-shake 320ms ease-in-out;
+}
+
+@keyframes cauldron-success {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 #f2c96400);
+    transform: scale(1);
+  }
+
+  45% {
+    filter: drop-shadow(0 0 16px #f2c964);
+    transform: scale(1.08);
+  }
+}
+
+@keyframes cauldron-explosion {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.15) rotate(-18deg);
+  }
+
+  35% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1.1) rotate(12deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.45) rotate(32deg);
+  }
+}
+
+@keyframes brew-failure-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25%,
+  75% {
+    transform: translateX(-5px);
+  }
+
+  50% {
+    transform: translateX(5px);
+  }
+}
+
 .cauldron-panel--drop-target {
   outline: 3px solid #f0c75e;
   outline-offset: 4px;
@@ -107,6 +188,11 @@
   .ingredient-icon {
     width: 29px;
     height: 29px;
+    animation: ingredient-float 2.8s ease-in-out infinite;
+  }
+
+  &:nth-child(even) .ingredient-icon {
+    animation-delay: -1.4s;
   }
 
   &__name {
@@ -123,6 +209,27 @@
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+  }
+}
+
+@keyframes ingredient-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cauldron-art,
+  .cauldron-ingredient .ingredient-icon,
+  .cauldron-panel--brew-success .cauldron-art,
+  .cauldron-panel--brew-failure .cauldron-art-wrap::after,
+  .game-content--brew-failure {
+    animation: none;
   }
 }
 

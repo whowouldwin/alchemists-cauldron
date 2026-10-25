@@ -4,7 +4,11 @@ import type { Difficulty } from "./data/recipes.ts";
 import { isBrewSuccessful } from "./logic/brew-check.ts";
 import { calculateCauldron } from "./logic/calculate-cauldron.ts";
 import { createGameState } from "./state/create-game-state.ts";
-import { addIngredient, applyBrewResult } from "./state/game-actions.ts";
+import {
+  addIngredient,
+  applyBrewResult,
+  canAddIngredient,
+} from "./state/game-actions.ts";
 import type { GameState } from "./state/game-state.ts";
 import {
   finishGame,
@@ -21,6 +25,7 @@ import {
 } from "./storage/game-save.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
+import { createGameDragHandler } from "./ui/game-drag-handler.ts";
 import { createTimerDisplayRefresh } from "./ui/game-status/timer-display-refresh.ts";
 import { renderGame } from "./ui/screens/render-game.ts";
 
@@ -49,6 +54,11 @@ export function initializeGameController(
     () => gameState,
     finishGameIfNeeded,
   );
+  const gameDragHandler = createGameDragHandler({
+    canAddIngredient: (ingredientId) =>
+      gameState !== null && canAddIngredient(gameState, ingredientId),
+    addIngredient: handleIngredientClick,
+  });
 
   function render(): void {
     const screen = leaderboardController.isVisible()
@@ -384,6 +394,17 @@ export function initializeGameController(
       confirmLeaderboardClear: leaderboardController.confirmClear,
     }),
   );
+  applicationRoot.addEventListener(
+    "dragstart",
+    gameDragHandler.handleDragStart,
+  );
+  applicationRoot.addEventListener("dragover", gameDragHandler.handleDragOver);
+  applicationRoot.addEventListener(
+    "dragleave",
+    gameDragHandler.handleDragLeave,
+  );
+  applicationRoot.addEventListener("drop", gameDragHandler.handleDrop);
+  applicationRoot.addEventListener("dragend", gameDragHandler.handleDragEnd);
   document.addEventListener("visibilitychange", handleVisibilityChange);
   window.addEventListener("pagehide", handlePageHide);
   applicationRoot.addEventListener(

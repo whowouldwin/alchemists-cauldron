@@ -10,6 +10,7 @@ export interface GameAnnouncements {
     cauldronWasCleared?: boolean,
   ): void;
   brewResult(succeeded: boolean, scoreAwarded: number): void;
+  cauldronPouredOut(): void;
   gameOver(reason: GameOverReason): void;
 }
 
@@ -46,6 +47,9 @@ export function createGameAnnouncements(): GameAnnouncements {
       region.textContent = succeeded
         ? `Brew successful. ${scoreAwarded} points awarded. A new recipe is ready.`
         : "Brew failed. One life was lost.";
+    },
+    cauldronPouredOut() {
+      region.textContent = "The cauldron was poured out. No life was lost.";
     },
     gameOver(reason) {
       const message = {

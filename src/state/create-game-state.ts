@@ -3,6 +3,7 @@ import { DIFFICULTY_SETTINGS } from "../data/difficulty-settings.ts";
 import type { Difficulty } from "../data/recipes.ts";
 import { createShelfStock } from "../logic/create-shelf-stock.ts";
 import { pickRandomRecipe } from "../logic/recipe-generator.ts";
+import { selectReactionIdsForDifficulty } from "../logic/reactions/reaction-catalog.ts";
 import { MILLISECONDS_PER_SECOND } from "../logic/timer.ts";
 import { LEVEL_ONE_RECIPE_DIFFICULTY, type GameState } from "./game-state.ts";
 
@@ -13,12 +14,16 @@ export function createGameState(
 ): GameState {
   const settings = DIFFICULTY_SETTINGS[difficulty];
   const shelfIngredients = getIngredientsForDifficulty(difficulty);
+  const shelfStock = createShelfStock(shelfIngredients, random);
+  const activeRecipe = pickRandomRecipe(difficulty, random);
+  const activeReactionIds = selectReactionIdsForDifficulty(difficulty, random);
 
   return {
     difficulty,
+    activeReactionIds,
     cauldronIngredients: [],
-    shelfStock: createShelfStock(shelfIngredients, random),
-    activeRecipe: pickRandomRecipe(difficulty, random),
+    shelfStock,
+    activeRecipe,
     score: 0,
     endTime:
       currentTime + settings.startingTimeSeconds * MILLISECONDS_PER_SECOND,

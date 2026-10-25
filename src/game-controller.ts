@@ -13,6 +13,7 @@ import {
   resumeGame,
 } from "./state/game-status.ts";
 import { qualifiesForLeaderboard } from "./storage/leaderboard.ts";
+import { clearSave, saveGame } from "./storage/game-save.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
 import { createTimerDisplayRefresh } from "./ui/game-status/timer-display-refresh.ts";
@@ -64,6 +65,7 @@ export function initializeGameController(
     isHelpOpen = false;
     leaderboardEntryPending = false;
     leaderboardController.reset();
+    saveCurrentGame();
     render();
     timerDisplayRefresh.start();
   }
@@ -178,6 +180,7 @@ export function initializeGameController(
     }
 
     gameState = nextState;
+    saveCurrentGame();
     render();
     announcements.ingredientAdded(
       addedIngredient.name,
@@ -211,6 +214,7 @@ export function initializeGameController(
 
     gameState = pausedState;
     timerDisplayRefresh.stop();
+    saveCurrentGame();
     render();
 
     return true;
@@ -239,6 +243,7 @@ export function initializeGameController(
     }
 
     gameState = resumeGame(gameState);
+    saveCurrentGame();
     render();
     timerDisplayRefresh.start();
     applicationRoot
@@ -253,6 +258,7 @@ export function initializeGameController(
 
     gameState = null;
     leaderboardEntryPending = false;
+    clearSave();
     timerDisplayRefresh.stop();
     render();
     applicationRoot
@@ -282,6 +288,7 @@ export function initializeGameController(
       return;
     }
 
+    saveCurrentGame();
     render();
     announcements.brewResult(
       succeeded,
@@ -305,6 +312,7 @@ export function initializeGameController(
     }
 
     gameState = finishGame(gameState, reason);
+    clearSave();
     leaderboardEntryPending = qualifiesForLeaderboard(
       gameState.score,
       gameState.difficulty,
@@ -314,6 +322,16 @@ export function initializeGameController(
     announcements.gameOver(reason);
 
     return true;
+  }
+
+  function saveCurrentGame(): void {
+    if (gameState !== null) {
+      saveGame(gameState);
+    }
+  }
+
+  function handlePageHide(): void {
+    saveCurrentGame();
   }
 
   applicationRoot.addEventListener(
@@ -340,6 +358,7 @@ export function initializeGameController(
     }),
   );
   document.addEventListener("visibilitychange", handleVisibilityChange);
+  window.addEventListener("pagehide", handlePageHide);
   applicationRoot.addEventListener(
     "submit",
     leaderboardController.handleNameSubmit,

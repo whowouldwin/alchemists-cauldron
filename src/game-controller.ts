@@ -25,6 +25,7 @@ export function initializeGameController(
   let gameState: GameState | null = null;
   let selectedDifficulty: Difficulty = "medium";
   let isDifficultySettingsOpen = false;
+  let isHelpOpen = false;
   let leaderboardEntryPending = false;
   const leaderboardController = createLeaderboardController({
     applicationRoot,
@@ -47,15 +48,18 @@ export function initializeGameController(
       : renderGame(gameState, leaderboardEntryPending, {
           selectedDifficulty,
           isDifficultySettingsOpen,
+          isHelpOpen,
         });
 
     applicationRoot.replaceChildren(screen);
     leaderboardController.afterRender();
+    afterRenderHelp();
   }
 
   function startGame(): void {
     gameState = createGameState(Math.random, Date.now(), selectedDifficulty);
     isDifficultySettingsOpen = false;
+    isHelpOpen = false;
     leaderboardEntryPending = false;
     leaderboardController.reset();
     render();
@@ -64,6 +68,7 @@ export function initializeGameController(
 
   function openDifficultySettings(): void {
     isDifficultySettingsOpen = true;
+    isHelpOpen = false;
     render();
     focusSelectedDifficulty();
   }
@@ -76,6 +81,44 @@ export function initializeGameController(
         '[data-action="open-difficulty-settings"]',
       )
       ?.focus();
+  }
+
+  function openHelp(): void {
+    isHelpOpen = true;
+    isDifficultySettingsOpen = false;
+    render();
+  }
+
+  function closeHelp(): void {
+    isHelpOpen = false;
+    render();
+    applicationRoot
+      .querySelector<HTMLButtonElement>('[data-action="open-help"]')
+      ?.focus();
+  }
+
+  function afterRenderHelp(): void {
+    if (!isHelpOpen) {
+      return;
+    }
+
+    const dialog =
+      applicationRoot.querySelector<HTMLDialogElement>("#game-help");
+
+    if (dialog === null) {
+      return;
+    }
+
+    dialog.addEventListener("cancel", handleHelpDialogCancel, { once: true });
+    dialog.showModal();
+    dialog
+      .querySelector<HTMLButtonElement>('[data-action="close-help"]')
+      ?.focus();
+  }
+
+  function handleHelpDialogCancel(event: Event): void {
+    event.preventDefault();
+    closeHelp();
   }
 
   function selectDifficulty(difficulty: Difficulty): void {
@@ -252,6 +295,8 @@ export function initializeGameController(
       openDifficultySettings,
       closeDifficultySettings,
       selectDifficulty,
+      openHelp,
+      closeHelp,
       pauseGame: handlePause,
       resumeGame: handleResume,
       exitToMenu: handleExitToMenu,

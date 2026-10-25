@@ -41,7 +41,14 @@
   }
 
   .topbar {
+    flex-wrap: wrap;
     margin-bottom: 26px;
+  }
+
+  .start-screen-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-left: auto;
   }
 
   .topbar-tag {

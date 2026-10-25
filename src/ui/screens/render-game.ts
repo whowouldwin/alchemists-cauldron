@@ -10,6 +10,7 @@ export function renderGame(
   startScreenOptions: StartScreenOptions = {
     selectedDifficulty: "medium",
     isDifficultySettingsOpen: false,
+    isHelpOpen: false,
   },
 ): HTMLElement {
   if (state === null) {

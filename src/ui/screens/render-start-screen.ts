@@ -7,10 +7,12 @@ import {
 import { createElement } from "../shared/create-element.ts";
 import type { Difficulty } from "../../data/recipes.ts";
 import { renderDifficultySettings } from "./render-difficulty-settings.ts";
+import { renderHelpPanel } from "./render-help-panel.ts";
 
 export interface StartScreenOptions {
   readonly selectedDifficulty: Difficulty;
   readonly isDifficultySettingsOpen: boolean;
+  readonly isHelpOpen: boolean;
 }
 
 export function renderStartScreen(options: StartScreenOptions): HTMLElement {
@@ -80,6 +82,7 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
     "leaderboard-link",
     "Settings",
   );
+  const helpButton = createElement("button", "leaderboard-link", "Help");
   const topbarActions = createElement("div", "start-screen-actions");
   const startActions = createElement("div", "start-actions");
 
@@ -90,15 +93,26 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
     String(options.isDifficultySettingsOpen),
   );
   settingsButton.setAttribute("aria-controls", "difficulty-settings");
-  topbarActions.append(settingsButton, renderLeaderboardButton());
+  helpButton.type = "button";
+  helpButton.dataset.action = "open-help";
+  helpButton.setAttribute("aria-expanded", String(options.isHelpOpen));
+  helpButton.setAttribute("aria-controls", "game-help");
+  topbarActions.append(helpButton, settingsButton, renderLeaderboardButton());
   topbar.append(topbarActions);
   startActions.append(startButton);
   const difficultySettings = renderDifficultySettings(
     options.selectedDifficulty,
   );
   difficultySettings.hidden = !options.isDifficultySettingsOpen;
+  const helpPanel = renderHelpPanel();
 
-  appShell.append(topbar, welcomePanel, startActions, difficultySettings);
+  appShell.append(
+    topbar,
+    welcomePanel,
+    startActions,
+    helpPanel,
+    difficultySettings,
+  );
   appShell.append(preGameStats, gameLayout);
 
   return appShell;

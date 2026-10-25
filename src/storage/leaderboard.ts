@@ -1,3 +1,5 @@
+import type { Difficulty } from "../data/recipes.ts";
+
 export const LEADERBOARD_LIMIT = 10;
 
 const LEADERBOARD_STORAGE_KEY = "alchemists-cauldron.leaderboard";
@@ -26,13 +28,14 @@ export function isValidPlayerName(name: string): boolean {
 
 export function qualifiesForLeaderboard(
   score: number,
+  difficulty: Difficulty,
   storage?: LeaderboardStorage,
 ): boolean {
   if (!Number.isFinite(score) || score < 0) {
     return false;
   }
 
-  const entries = readLeaderboard(storage);
+  const entries = readLeaderboard(difficulty, storage);
   const lowestRankedEntry = entries.at(-1);
 
   return (
@@ -42,10 +45,16 @@ export function qualifiesForLeaderboard(
 }
 
 export function readLeaderboard(
+  difficulty: Difficulty,
   storage?: LeaderboardStorage,
 ): readonly LeaderboardEntry[] {
   try {
-    const rawEntries = getStorage(storage).getItem(LEADERBOARD_STORAGE_KEY);
+    const activeStorage = getStorage(storage);
+    const rawEntries =
+      activeStorage.getItem(getLeaderboardStorageKey(difficulty)) ??
+      (difficulty === "medium"
+        ? activeStorage.getItem(LEADERBOARD_STORAGE_KEY)
+        : null);
 
     if (rawEntries === null) {
       return [];
@@ -66,6 +75,7 @@ export function readLeaderboard(
 export function saveLeaderboardEntry(
   name: string,
   score: number,
+  difficulty: Difficulty,
   storage?: LeaderboardStorage,
   achievedAt: number = Date.now(),
 ): boolean {
@@ -79,13 +89,16 @@ export function saveLeaderboardEntry(
 
   try {
     const activeStorage = getStorage(storage);
-    const existingEntries = readLeaderboard(activeStorage);
+    const existingEntries = readLeaderboard(difficulty, activeStorage);
     const nextEntries = getTopEntries([
       ...existingEntries,
       { name, score, achievedAt },
     ]);
 
-    activeStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(nextEntries));
+    activeStorage.setItem(
+      getLeaderboardStorageKey(difficulty),
+      JSON.stringify(nextEntries),
+    );
 
     return true;
   } catch {
@@ -93,13 +106,26 @@ export function saveLeaderboardEntry(
   }
 }
 
-export function clearLeaderboard(storage?: LeaderboardStorage): boolean {
+export function clearLeaderboard(
+  difficulty: Difficulty,
+  storage?: LeaderboardStorage,
+): boolean {
   try {
-    getStorage(storage).removeItem(LEADERBOARD_STORAGE_KEY);
+    const activeStorage = getStorage(storage);
+    activeStorage.removeItem(getLeaderboardStorageKey(difficulty));
+
+    if (difficulty === "medium") {
+      activeStorage.removeItem(LEADERBOARD_STORAGE_KEY);
+    }
+
     return true;
   } catch {
     return false;
   }
+}
+
+function getLeaderboardStorageKey(difficulty: Difficulty): string {
+  return `${LEADERBOARD_STORAGE_KEY}.${difficulty}`;
 }
 
 function getStorage(storage?: LeaderboardStorage): LeaderboardStorage {

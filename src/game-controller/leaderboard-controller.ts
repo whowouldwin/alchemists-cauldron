@@ -1,4 +1,5 @@
 import type { GameState } from "../state/game-state.ts";
+import type { Difficulty } from "../data/recipes.ts";
 import {
   clearLeaderboard,
   isValidPlayerName,
@@ -12,6 +13,7 @@ interface LeaderboardControllerOptions {
   readonly getGameState: () => GameState | null;
   readonly isEntryPending: () => boolean;
   readonly setEntryPending: (pending: boolean) => void;
+  readonly getCurrentDifficulty: () => Difficulty;
   readonly render: () => void;
 }
 
@@ -22,6 +24,7 @@ export interface LeaderboardController {
   readonly reset: () => void;
   readonly open: () => void;
   readonly close: () => void;
+  readonly selectDifficulty: (difficulty: Difficulty) => void;
   readonly openClearConfirmation: () => void;
   readonly cancelClear: () => void;
   readonly confirmClear: () => void;
@@ -33,17 +36,20 @@ export function createLeaderboardController({
   getGameState,
   isEntryPending,
   setEntryPending,
+  getCurrentDifficulty,
   render,
 }: LeaderboardControllerOptions): LeaderboardController {
   let isVisible = false;
+  let selectedDifficulty = getCurrentDifficulty();
   let isClearConfirmationOpen = false;
   let clearErrorMessage: string | null = null;
 
   function renderScreen(): HTMLElement {
     return renderLeaderboard(
-      readLeaderboard(),
+      readLeaderboard(selectedDifficulty),
       isClearConfirmationOpen,
       clearErrorMessage,
+      selectedDifficulty,
     );
   }
 
@@ -69,12 +75,14 @@ export function createLeaderboardController({
 
   function reset(): void {
     isVisible = false;
+    selectedDifficulty = getCurrentDifficulty();
     isClearConfirmationOpen = false;
     clearErrorMessage = null;
   }
 
   function open(): void {
     isVisible = true;
+    selectedDifficulty = getCurrentDifficulty();
     render();
     focusAction("close-leaderboard");
   }
@@ -83,6 +91,20 @@ export function createLeaderboardController({
     isVisible = false;
     render();
     focusAction("open-leaderboard");
+  }
+
+  function selectDifficulty(difficulty: Difficulty): void {
+    selectedDifficulty = difficulty;
+    render();
+    focusSelectedDifficulty();
+  }
+
+  function focusSelectedDifficulty(): void {
+    applicationRoot
+      .querySelector<HTMLButtonElement>(
+        `[data-action="select-leaderboard-difficulty"][data-difficulty="${selectedDifficulty}"]`,
+      )
+      ?.focus();
   }
 
   function openClearConfirmation(): void {
@@ -104,7 +126,7 @@ export function createLeaderboardController({
   }
 
   function confirmClear(): void {
-    if (!clearLeaderboard()) {
+    if (!clearLeaderboard(selectedDifficulty)) {
       clearErrorMessage = "Could not clear the leaderboard. Please try again.";
       render();
       return;
@@ -148,7 +170,9 @@ export function createLeaderboardController({
       return;
     }
 
-    if (!saveLeaderboardEntry(input.value, gameState.score)) {
+    if (
+      !saveLeaderboardEntry(input.value, gameState.score, gameState.difficulty)
+    ) {
       status.textContent = "Could not save your score. Please try again.";
       return;
     }
@@ -171,6 +195,7 @@ export function createLeaderboardController({
     reset,
     open,
     close,
+    selectDifficulty,
     openClearConfirmation,
     cancelClear,
     confirmClear,

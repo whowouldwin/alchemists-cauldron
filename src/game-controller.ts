@@ -34,6 +34,7 @@ export function initializeGameController(
     setEntryPending: (pending) => {
       leaderboardEntryPending = pending;
     },
+    getCurrentDifficulty: () => gameState?.difficulty ?? selectedDifficulty,
     render,
   });
   const timerDisplayRefresh = createTimerDisplayRefresh(
@@ -304,7 +305,10 @@ export function initializeGameController(
     }
 
     gameState = finishGame(gameState, reason);
-    leaderboardEntryPending = qualifiesForLeaderboard(gameState.score);
+    leaderboardEntryPending = qualifiesForLeaderboard(
+      gameState.score,
+      gameState.difficulty,
+    );
     timerDisplayRefresh.stop();
     render();
     announcements.gameOver(reason);
@@ -321,6 +325,7 @@ export function initializeGameController(
       selectDifficulty,
       openHelp,
       closeHelp,
+      selectLeaderboardDifficulty: leaderboardController.selectDifficulty,
       pauseGame: handlePause,
       resumeGame: handleResume,
       exitToMenu: handleExitToMenu,

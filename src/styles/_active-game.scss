@@ -154,7 +154,10 @@
     progress {
       accent-color: #a33a3a;
 
-      &::-webkit-progress-value,
+      &::-webkit-progress-value {
+        background: #a33a3a;
+      }
+
       &::-moz-progress-bar {
         background: #a33a3a;
       }

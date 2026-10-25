@@ -1,6 +1,6 @@
 import { DIFFICULTY_SETTINGS } from "../data/difficulty-settings.ts";
 import { isBrewSuccessful } from "../logic/brew-check.ts";
-import { calculateCauldron } from "../logic/calculate-cauldron.ts";
+import { resolveCauldronReactions } from "../logic/reactions/reaction-engine.ts";
 import type { GameState } from "../state/game-state.ts";
 import {
   addIngredient,
@@ -66,7 +66,10 @@ export class GameBrewingController {
       return;
     }
 
-    const values = calculateCauldron(gameState.cauldronIngredients);
+    const values = resolveCauldronReactions(
+      gameState.cauldronIngredients,
+      gameState.difficulty,
+    ).values;
     const succeeded = isBrewSuccessful(
       values,
       gameState.activeRecipe,

@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import type { Recipe } from "../src/data/recipes.ts";
 import {
   getIngredientsForDifficulty,
   INGREDIENTS,
 } from "../src/data/ingredients.ts";
+import { isBrewSuccessful } from "../src/logic/brew-check.ts";
 import {
   getReactionsForDifficulty,
   REACTIONS,
@@ -93,5 +95,27 @@ test("reports a reaction only when it first becomes active", () => {
   assert.deepEqual(
     getNewlyActivatedReactions(current, stillActive, "medium"),
     [],
+  );
+});
+
+test("uses reaction-adjusted values for brew checks", () => {
+  const ingredients = [
+    getIngredient("fairy-dust"),
+    getIngredient("caustic-acid"),
+  ];
+  const { values } = resolveCauldronReactions(ingredients, "medium");
+  const recipe: Recipe = {
+    id: "bubbling-test",
+    name: "Bubbling Test",
+    difficulty: "medium",
+    temperature: { minimum: 22, maximum: 22 },
+    density: { minimum: 23, maximum: 23 },
+    magicPower: { minimum: 51, maximum: 51 },
+  };
+
+  assert.equal(isBrewSuccessful(values, recipe, "medium"), true);
+  assert.equal(
+    isBrewSuccessful({ ...values, magicPower: 34 }, recipe, "medium"),
+    false,
   );
 });

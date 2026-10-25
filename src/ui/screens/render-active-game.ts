@@ -1,5 +1,5 @@
 import type { GameState } from "../../state/game-state.ts";
-import { calculateCauldron } from "../../logic/calculate-cauldron.ts";
+import { resolveCauldronReactions } from "../../logic/reactions/reaction-engine.ts";
 import { renderCauldron } from "../cauldron/render-cauldron.ts";
 import { renderIngredientShelf } from "../ingredient-shelf/render-ingredient-shelf.ts";
 import {
@@ -34,7 +34,10 @@ export function renderActiveGame(state: GameState): HTMLElement {
     "Choose from the shelf. Each ingredient changes the nature of your brew.",
   );
   const gameLayout = createElement("div", "game-layout");
-  const cauldronValues = calculateCauldron(state.cauldronIngredients);
+  const cauldronValues = resolveCauldronReactions(
+    state.cauldronIngredients,
+    state.difficulty,
+  ).values;
   const targetRanges: CauldronTargetRanges = {
     temperature: state.activeRecipe.temperature,
     density: state.activeRecipe.density,

@@ -1,6 +1,6 @@
 import type { RecipeRange } from "../../data/recipes.ts";
+import { DIFFICULTY_SETTINGS } from "../../data/difficulty-settings.ts";
 import type { BrewResult, GameState } from "../../state/game-state.ts";
-import { MAX_CAULDRON_INGREDIENTS } from "../../state/game-state.ts";
 import { createElement } from "../shared/create-element.ts";
 import { formatIngredientValue } from "../shared/format-ingredient-value.ts";
 
@@ -45,14 +45,16 @@ export function renderRecipePanel(state: GameState): HTMLElement {
     state.activeRecipe.name,
   );
   const ingredientCount = state.cauldronIngredients.length;
+  const maximumIngredients =
+    DIFFICULTY_SETTINGS[state.difficulty].maxCauldronIngredients;
   const countClassName =
-    ingredientCount >= MAX_CAULDRON_INGREDIENTS
+    ingredientCount >= maximumIngredients
       ? "recipe-panel__counter recipe-panel__counter--full"
       : "recipe-panel__counter";
   const counter = createElement(
     "p",
     countClassName,
-    `Ingredients: ${ingredientCount} / ${MAX_CAULDRON_INGREDIENTS}`,
+    `Ingredients: ${ingredientCount} / ${maximumIngredients}`,
   );
   const ranges = createElement("dl", "recipe-panel__ranges");
   const actions = createElement("div", "recipe-panel__actions");

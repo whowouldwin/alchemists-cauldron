@@ -130,6 +130,137 @@ h2 {
   line-height: 1.65;
 }
 
+.start-screen-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin: 28px 0;
+}
+
+.help-dialog,
+.difficulty-dialog {
+  width: min(100% - 32px, 900px);
+  max-height: min(80vh, 720px);
+  overflow-y: auto;
+  margin: auto;
+  padding: clamp(22px, 4vw, 32px);
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-offset);
+
+  &::backdrop {
+    background: rgb(31 31 31 / 45%);
+  }
+}
+
+.help-dialog {
+  max-width: 620px;
+}
+
+.help-dialog__heading,
+.difficulty-dialog__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+
+  h2 {
+    margin: 0;
+    font-size: clamp(22px, 3vw, 30px);
+    letter-spacing: -0.04em;
+  }
+}
+
+.difficulty-dialog__description {
+  margin-bottom: 18px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.help-dialog {
+  &__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+
+    h2 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 30px);
+      letter-spacing: -0.04em;
+    }
+  }
+
+  &__rules {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding-left: 24px;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.6;
+
+    li::marker {
+      color: var(--color-ink);
+      font-weight: 800;
+    }
+  }
+}
+
+.difficulty-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.difficulty-option {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 17px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  cursor: pointer;
+  text-align: left;
+
+  &:hover,
+  &--selected {
+    background: var(--color-neutral-light);
+    box-shadow: 2px 2px 0 #dedede;
+  }
+
+  &--selected {
+    border-width: 2px;
+  }
+
+  &__name {
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  &__details {
+    color: var(--color-muted);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+}
+
 .primary-button {
   display: inline-flex;
   min-width: 190px;

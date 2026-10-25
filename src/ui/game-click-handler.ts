@@ -1,5 +1,13 @@
+import type { Difficulty } from "../data/recipes.ts";
+
 export interface GameClickActions {
   readonly startGame: () => void;
+  readonly continueGame: () => void;
+  readonly openDifficultySettings: () => void;
+  readonly closeDifficultySettings: () => void;
+  readonly selectDifficulty: (difficulty: Difficulty) => void;
+  readonly openHelp: () => void;
+  readonly closeHelp: () => void;
   readonly pauseGame: () => void;
   readonly resumeGame: () => void;
   readonly exitToMenu: () => void;
@@ -7,6 +15,7 @@ export interface GameClickActions {
   readonly addIngredient: (ingredientId: string) => void;
   readonly openLeaderboard: () => void;
   readonly closeLeaderboard: () => void;
+  readonly selectLeaderboardDifficulty: (difficulty: Difficulty) => void;
   readonly openLeaderboardClearConfirmation: () => void;
   readonly cancelLeaderboardClear: () => void;
   readonly confirmLeaderboardClear: () => void;
@@ -29,6 +38,64 @@ export function createGameClickHandler(
       return;
     }
 
+    const continueButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="continue-game"]',
+    );
+
+    if (continueButton !== null) {
+      actions.continueGame();
+      return;
+    }
+
+    const openSettingsButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="open-difficulty-settings"]',
+    );
+
+    if (openSettingsButton !== null) {
+      actions.openDifficultySettings();
+      return;
+    }
+
+    const openHelpButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="open-help"]',
+    );
+
+    if (openHelpButton !== null) {
+      actions.openHelp();
+      return;
+    }
+
+    const closeSettingsButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="close-difficulty-settings"]',
+    );
+
+    if (closeSettingsButton !== null) {
+      actions.closeDifficultySettings();
+      return;
+    }
+
+    const closeHelpButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="close-help"]',
+    );
+
+    if (closeHelpButton !== null) {
+      actions.closeHelp();
+      return;
+    }
+
+    const difficultyButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="select-difficulty"]',
+    );
+
+    if (difficultyButton !== null) {
+      const difficulty = difficultyButton.dataset.difficulty;
+
+      if (isDifficulty(difficulty)) {
+        actions.selectDifficulty(difficulty);
+      }
+      return;
+    }
+
     const openLeaderboardButton = event.target.closest<HTMLButtonElement>(
       '[data-action="open-leaderboard"]',
     );
@@ -44,6 +111,19 @@ export function createGameClickHandler(
 
     if (closeLeaderboardButton !== null) {
       actions.closeLeaderboard();
+      return;
+    }
+
+    const leaderboardDifficultyButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="select-leaderboard-difficulty"]',
+    );
+
+    if (leaderboardDifficultyButton !== null) {
+      const difficulty = leaderboardDifficultyButton.dataset.difficulty;
+
+      if (isDifficulty(difficulty)) {
+        actions.selectLeaderboardDifficulty(difficulty);
+      }
       return;
     }
 
@@ -134,4 +214,8 @@ export function createGameClickHandler(
       actions.addIngredient(ingredientId);
     }
   };
+}
+
+function isDifficulty(value: string | undefined): value is Difficulty {
+  return value === "easy" || value === "medium" || value === "hard";
 }

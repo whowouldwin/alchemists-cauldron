@@ -1,3 +1,6 @@
+import { DIFFICULTY_SETTINGS } from "./difficulty-settings.ts";
+import type { Difficulty } from "./recipes.ts";
+
 export interface Ingredient {
   readonly id: string;
   readonly name: string;
@@ -71,3 +74,12 @@ export const LEVEL_ONE_INGREDIENTS = INGREDIENTS.slice(
   0,
   LEVEL_ONE_INGREDIENT_COUNT,
 );
+
+export function getIngredientsForDifficulty(
+  difficulty: Difficulty,
+): readonly Ingredient[] {
+  return INGREDIENTS.slice(
+    0,
+    DIFFICULTY_SETTINGS[difficulty].shelfIngredientCount,
+  );
+}

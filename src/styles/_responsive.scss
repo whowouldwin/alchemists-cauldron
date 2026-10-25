@@ -41,7 +41,14 @@
   }
 
   .topbar {
+    flex-wrap: wrap;
     margin-bottom: 26px;
+  }
+
+  .start-screen-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-left: auto;
   }
 
   .topbar-tag {
@@ -58,6 +65,10 @@
     h1 {
       font-size: clamp(36px, 8vw, 48px);
     }
+  }
+
+  .difficulty-options {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .welcome-description {

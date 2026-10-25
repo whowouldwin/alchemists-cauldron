@@ -1,6 +1,6 @@
 import type { Ingredient } from "../../data/ingredients.ts";
+import { DIFFICULTY_SETTINGS } from "../../data/difficulty-settings.ts";
 import type { GameState } from "../../state/game-state.ts";
-import { MAX_CAULDRON_INGREDIENTS } from "../../state/game-state.ts";
 import { createElement } from "../shared/create-element.ts";
 import { formatIngredientValue } from "../shared/format-ingredient-value.ts";
 import { renderIngredientIcon } from "../shared/render-ingredient-icon.ts";
@@ -65,7 +65,9 @@ function renderContents(state: GameState): HTMLElement {
 }
 
 export function renderCauldron(state: GameState): HTMLElement {
-  const isFull = state.cauldronIngredients.length >= MAX_CAULDRON_INGREDIENTS;
+  const maximumIngredients =
+    DIFFICULTY_SETTINGS[state.difficulty].maxCauldronIngredients;
+  const isFull = state.cauldronIngredients.length >= maximumIngredients;
   const panel = createElement("section", "panel cauldron-panel");
   const panelHeading = createElement("div", "panel-heading");
   const headingContent = createElement("div");
@@ -74,7 +76,7 @@ export function renderCauldron(state: GameState): HTMLElement {
   const itemCount = createElement(
     "span",
     isFull ? "item-count item-count--full" : "item-count",
-    `${state.cauldronIngredients.length} / ${MAX_CAULDRON_INGREDIENTS}`,
+    `${state.cauldronIngredients.length} / ${maximumIngredients}`,
   );
   const cauldronArtWrap = createElement("div", "cauldron-art-wrap");
   const cauldronImage = createElement("img", "cauldron-art");
@@ -87,7 +89,7 @@ export function renderCauldron(state: GameState): HTMLElement {
   const maximumNote = createElement(
     "span",
     undefined,
-    `Maximum ${MAX_CAULDRON_INGREDIENTS}`,
+    `Maximum ${maximumIngredients}`,
   );
 
   panel.setAttribute("aria-labelledby", "cauldron-heading");

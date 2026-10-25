@@ -1,4 +1,6 @@
 import { createLeaderboardController } from "./game-controller/leaderboard-controller.ts";
+import { DIFFICULTY_SETTINGS } from "./data/difficulty-settings.ts";
+import type { Difficulty } from "./data/recipes.ts";
 import { isBrewSuccessful } from "./logic/brew-check.ts";
 import { calculateCauldron } from "./logic/calculate-cauldron.ts";
 import { createGameState } from "./state/create-game-state.ts";
@@ -11,6 +13,12 @@ import {
   resumeGame,
 } from "./state/game-status.ts";
 import { qualifiesForLeaderboard } from "./storage/leaderboard.ts";
+import {
+  clearSave,
+  loadGame,
+  restoreGameState,
+  saveGame,
+} from "./storage/game-save.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
 import { createTimerDisplayRefresh } from "./ui/game-status/timer-display-refresh.ts";
@@ -21,6 +29,10 @@ export function initializeGameController(
   announcements: GameAnnouncements,
 ): void {
   let gameState: GameState | null = null;
+  let savedGame = loadGame();
+  let selectedDifficulty: Difficulty = savedGame?.difficulty ?? "medium";
+  let isDifficultySettingsOpen = false;
+  let isHelpOpen = false;
   let leaderboardEntryPending = false;
   const leaderboardController = createLeaderboardController({
     applicationRoot,
@@ -29,6 +41,7 @@ export function initializeGameController(
     setEntryPending: (pending) => {
       leaderboardEntryPending = pending;
     },
+    getCurrentDifficulty: () => gameState?.difficulty ?? selectedDifficulty,
     render,
   });
   const timerDisplayRefresh = createTimerDisplayRefresh(
@@ -40,18 +53,137 @@ export function initializeGameController(
   function render(): void {
     const screen = leaderboardController.isVisible()
       ? leaderboardController.render()
-      : renderGame(gameState, leaderboardEntryPending);
+      : renderGame(gameState, leaderboardEntryPending, {
+          selectedDifficulty,
+          isDifficultySettingsOpen,
+          isHelpOpen,
+          hasSavedGame: savedGame !== null,
+        });
 
     applicationRoot.replaceChildren(screen);
     leaderboardController.afterRender();
+    afterRenderHelp();
+    afterRenderDifficultySettings();
   }
 
   function startGame(): void {
-    gameState = createGameState();
+    gameState = createGameState(Math.random, Date.now(), selectedDifficulty);
+    savedGame = null;
+    isDifficultySettingsOpen = false;
+    isHelpOpen = false;
+    leaderboardEntryPending = false;
+    leaderboardController.reset();
+    saveCurrentGame();
+    render();
+    timerDisplayRefresh.start();
+  }
+
+  function continueGame(): void {
+    if (savedGame === null) {
+      return;
+    }
+
+    gameState = restoreGameState(savedGame);
+    selectedDifficulty = savedGame.difficulty;
+    savedGame = null;
+    isDifficultySettingsOpen = false;
+    isHelpOpen = false;
     leaderboardEntryPending = false;
     leaderboardController.reset();
     render();
-    timerDisplayRefresh.start();
+    focusResumeButton();
+  }
+
+  function openDifficultySettings(): void {
+    isDifficultySettingsOpen = true;
+    isHelpOpen = false;
+    render();
+  }
+
+  function closeDifficultySettings(): void {
+    isDifficultySettingsOpen = false;
+    render();
+    applicationRoot
+      .querySelector<HTMLButtonElement>(
+        '[data-action="open-difficulty-settings"]',
+      )
+      ?.focus();
+  }
+
+  function openHelp(): void {
+    isHelpOpen = true;
+    isDifficultySettingsOpen = false;
+    render();
+  }
+
+  function closeHelp(): void {
+    isHelpOpen = false;
+    render();
+    applicationRoot
+      .querySelector<HTMLButtonElement>('[data-action="open-help"]')
+      ?.focus();
+  }
+
+  function afterRenderHelp(): void {
+    if (!isHelpOpen) {
+      return;
+    }
+
+    const dialog =
+      applicationRoot.querySelector<HTMLDialogElement>("#game-help");
+
+    if (dialog === null) {
+      return;
+    }
+
+    dialog.addEventListener("cancel", handleHelpDialogCancel, { once: true });
+    dialog.showModal();
+    dialog
+      .querySelector<HTMLButtonElement>('[data-action="close-help"]')
+      ?.focus();
+  }
+
+  function handleHelpDialogCancel(event: Event): void {
+    event.preventDefault();
+    closeHelp();
+  }
+
+  function afterRenderDifficultySettings(): void {
+    if (!isDifficultySettingsOpen) {
+      return;
+    }
+
+    const dialog = applicationRoot.querySelector<HTMLDialogElement>(
+      "#difficulty-settings",
+    );
+
+    if (dialog === null) {
+      return;
+    }
+
+    dialog.addEventListener("cancel", handleDifficultySettingsCancel, {
+      once: true,
+    });
+    dialog.showModal();
+    focusSelectedDifficulty();
+  }
+
+  function handleDifficultySettingsCancel(event: Event): void {
+    event.preventDefault();
+    closeDifficultySettings();
+  }
+
+  function selectDifficulty(difficulty: Difficulty): void {
+    selectedDifficulty = difficulty;
+    render();
+  }
+
+  function focusSelectedDifficulty(): void {
+    applicationRoot
+      .querySelector<HTMLButtonElement>(
+        `[data-action="select-difficulty"][data-difficulty="${selectedDifficulty}"]`,
+      )
+      ?.focus();
   }
 
   function handleIngredientClick(ingredientId: string): void {
@@ -72,10 +204,12 @@ export function initializeGameController(
     }
 
     gameState = nextState;
+    saveCurrentGame();
     render();
     announcements.ingredientAdded(
       addedIngredient.name,
       nextState.cauldronIngredients.length,
+      DIFFICULTY_SETTINGS[nextState.difficulty].maxCauldronIngredients,
     );
   }
 
@@ -104,6 +238,7 @@ export function initializeGameController(
 
     gameState = pausedState;
     timerDisplayRefresh.stop();
+    saveCurrentGame();
     render();
 
     return true;
@@ -132,6 +267,7 @@ export function initializeGameController(
     }
 
     gameState = resumeGame(gameState);
+    saveCurrentGame();
     render();
     timerDisplayRefresh.start();
     applicationRoot
@@ -145,7 +281,9 @@ export function initializeGameController(
     }
 
     gameState = null;
+    savedGame = null;
     leaderboardEntryPending = false;
+    clearSave();
     timerDisplayRefresh.stop();
     render();
     applicationRoot
@@ -163,7 +301,11 @@ export function initializeGameController(
     }
 
     const values = calculateCauldron(gameState.cauldronIngredients);
-    const succeeded = isBrewSuccessful(values, gameState.activeRecipe);
+    const succeeded = isBrewSuccessful(
+      values,
+      gameState.activeRecipe,
+      gameState.difficulty,
+    );
 
     gameState = applyBrewResult(gameState, succeeded);
 
@@ -171,8 +313,12 @@ export function initializeGameController(
       return;
     }
 
+    saveCurrentGame();
     render();
-    announcements.brewResult(succeeded);
+    announcements.brewResult(
+      succeeded,
+      DIFFICULTY_SETTINGS[gameState.difficulty].scorePerBrew,
+    );
   }
 
   function finishGameIfNeeded(): boolean {
@@ -191,7 +337,12 @@ export function initializeGameController(
     }
 
     gameState = finishGame(gameState, reason);
-    leaderboardEntryPending = qualifiesForLeaderboard(gameState.score);
+    savedGame = null;
+    clearSave();
+    leaderboardEntryPending = qualifiesForLeaderboard(
+      gameState.score,
+      gameState.difficulty,
+    );
     timerDisplayRefresh.stop();
     render();
     announcements.gameOver(reason);
@@ -199,10 +350,27 @@ export function initializeGameController(
     return true;
   }
 
+  function saveCurrentGame(): void {
+    if (gameState !== null) {
+      saveGame(gameState);
+    }
+  }
+
+  function handlePageHide(): void {
+    saveCurrentGame();
+  }
+
   applicationRoot.addEventListener(
     "click",
     createGameClickHandler({
       startGame,
+      continueGame,
+      openDifficultySettings,
+      closeDifficultySettings,
+      selectDifficulty,
+      openHelp,
+      closeHelp,
+      selectLeaderboardDifficulty: leaderboardController.selectDifficulty,
       pauseGame: handlePause,
       resumeGame: handleResume,
       exitToMenu: handleExitToMenu,
@@ -217,6 +385,7 @@ export function initializeGameController(
     }),
   );
   document.addEventListener("visibilitychange", handleVisibilityChange);
+  window.addEventListener("pagehide", handlePageHide);
   applicationRoot.addEventListener(
     "submit",
     leaderboardController.handleNameSubmit,

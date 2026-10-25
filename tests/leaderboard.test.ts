@@ -10,22 +10,25 @@ import {
   type LeaderboardStorage,
 } from "../src/storage/leaderboard.ts";
 
-function createMemoryStorage(initialValue: string | null = null) {
-  let value = initialValue;
+const MEDIUM_STORAGE_KEY = "alchemists-cauldron.leaderboard.medium";
+const LEGACY_STORAGE_KEY = "alchemists-cauldron.leaderboard";
+
+function createMemoryStorage(initialValues: Record<string, string> = {}) {
+  const values = new Map(Object.entries(initialValues));
 
   const storage: LeaderboardStorage = {
-    getItem() {
-      return value;
+    getItem(key) {
+      return values.get(key) ?? null;
     },
-    setItem(_key, nextValue) {
-      value = nextValue;
+    setItem(key, value) {
+      values.set(key, value);
     },
-    removeItem() {
-      value = null;
+    removeItem(key) {
+      values.delete(key);
     },
   };
 
-  return { storage, getValue: () => value };
+  return { storage, getValue: (key: string) => values.get(key) ?? null };
 }
 
 test("accepts player names with the allowed characters and length", () => {
@@ -38,47 +41,83 @@ test("accepts player names with the allowed characters and length", () => {
   assert.equal(isValidPlayerName("Mage!"), false);
 });
 
-test("stores entries sorted by score and preserves earlier equal scores", () => {
+test("sorts scores within a difficulty and preserves earlier equal scores", () => {
   const { storage } = createMemoryStorage();
 
-  assert.equal(saveLeaderboardEntry("Second", 200, storage, 20), true);
-  assert.equal(saveLeaderboardEntry("First", 200, storage, 10), true);
-  assert.equal(saveLeaderboardEntry("Champion", 400, storage, 30), true);
+  assert.equal(
+    saveLeaderboardEntry("Second", 200, "medium", storage, 20),
+    true,
+  );
+  assert.equal(saveLeaderboardEntry("First", 200, "medium", storage, 10), true);
+  assert.equal(
+    saveLeaderboardEntry("Champion", 400, "medium", storage, 30),
+    true,
+  );
 
-  assert.deepEqual(readLeaderboard(storage), [
+  assert.deepEqual(readLeaderboard("medium", storage), [
     { name: "Champion", score: 400, achievedAt: 30 },
     { name: "First", score: 200, achievedAt: 10 },
     { name: "Second", score: 200, achievedAt: 20 },
   ]);
 });
 
-test("keeps only the top ten entries", () => {
+test("keeps an independent top ten for each difficulty", () => {
   const { storage } = createMemoryStorage();
 
   for (let score = 1; score <= LEADERBOARD_LIMIT + 2; score += 1) {
     assert.equal(
-      saveLeaderboardEntry(`Mage${score}`, score, storage, score),
+      saveLeaderboardEntry(`Mage${score}`, score, "easy", storage, score),
       true,
     );
   }
 
-  const entries = readLeaderboard(storage);
+  assert.equal(saveLeaderboardEntry("HardMage", 900, "hard", storage), true);
 
-  assert.equal(entries.length, LEADERBOARD_LIMIT);
-  assert.equal(entries[0].score, LEADERBOARD_LIMIT + 2);
-  assert.equal(entries.at(-1)?.score, 3);
+  const easyEntries = readLeaderboard("easy", storage);
+
+  assert.equal(easyEntries.length, LEADERBOARD_LIMIT);
+  assert.equal(easyEntries[0].score, LEADERBOARD_LIMIT + 2);
+  assert.equal(easyEntries.at(-1)?.score, 3);
+  assert.deepEqual(readLeaderboard("medium", storage), []);
+  const hardEntries = readLeaderboard("hard", storage);
+
+  assert.equal(hardEntries.length, 1);
+  assert.equal(hardEntries[0].name, "HardMage");
+  assert.equal(hardEntries[0].score, 900);
 });
 
-test("ignores invalid entries in stored data and handles malformed JSON", () => {
+test("uses old Level 1 scores as Medium leaderboard entries", () => {
+  const legacyEntry = { name: "Mage", score: 300, achievedAt: 10 };
+  const { storage, getValue } = createMemoryStorage({
+    [LEGACY_STORAGE_KEY]: JSON.stringify([legacyEntry]),
+  });
+
+  assert.deepEqual(readLeaderboard("medium", storage), [legacyEntry]);
+  assert.deepEqual(readLeaderboard("easy", storage), []);
+  assert.equal(
+    saveLeaderboardEntry("NewMage", 400, "medium", storage, 20),
+    true,
+  );
+  assert.deepEqual(readLeaderboard("medium", storage), [
+    { name: "NewMage", score: 400, achievedAt: 20 },
+    legacyEntry,
+  ]);
+  assert.notEqual(getValue(MEDIUM_STORAGE_KEY), null);
+});
+
+test("ignores invalid entries in storage and handles malformed JSON", () => {
   const validEntry = { name: "Mage", score: 100, achievedAt: 10 };
   const invalidEntry = { name: "Bad!", score: 200, achievedAt: 20 };
-  const validStorage = createMemoryStorage(
-    JSON.stringify([validEntry, invalidEntry]),
-  );
-  const malformedStorage = createMemoryStorage("not-json");
+  const { storage } = createMemoryStorage({
+    "alchemists-cauldron.leaderboard.easy": JSON.stringify([
+      validEntry,
+      invalidEntry,
+    ]),
+    [MEDIUM_STORAGE_KEY]: "not-json",
+  });
 
-  assert.deepEqual(readLeaderboard(validStorage.storage), [validEntry]);
-  assert.deepEqual(readLeaderboard(malformedStorage.storage), []);
+  assert.deepEqual(readLeaderboard("easy", storage), [validEntry]);
+  assert.deepEqual(readLeaderboard("medium", storage), []);
 });
 
 test("does not crash when storage operations fail", () => {
@@ -94,37 +133,57 @@ test("does not crash when storage operations fail", () => {
     },
   };
 
-  assert.deepEqual(readLeaderboard(failingStorage), []);
-  assert.equal(saveLeaderboardEntry("Mage", 100, failingStorage), false);
-  assert.equal(clearLeaderboard(failingStorage), false);
+  assert.deepEqual(readLeaderboard("medium", failingStorage), []);
+  assert.equal(
+    saveLeaderboardEntry("Mage", 100, "medium", failingStorage),
+    false,
+  );
+  assert.equal(clearLeaderboard("medium", failingStorage), false);
 });
 
 test("rejects invalid leaderboard entries before storing", () => {
   const { storage, getValue } = createMemoryStorage();
 
-  assert.equal(saveLeaderboardEntry("M", 100, storage), false);
-  assert.equal(saveLeaderboardEntry("Mage", -1, storage), false);
-  assert.equal(getValue(), null);
+  assert.equal(saveLeaderboardEntry("M", 100, "medium", storage), false);
+  assert.equal(saveLeaderboardEntry("Mage", -1, "medium", storage), false);
+  assert.equal(getValue(MEDIUM_STORAGE_KEY), null);
 });
 
-test("clears the saved leaderboard", () => {
+test("clears only the selected difficulty leaderboard", () => {
   const { storage } = createMemoryStorage();
 
-  assert.equal(saveLeaderboardEntry("Mage", 100, storage), true);
-  assert.equal(clearLeaderboard(storage), true);
-  assert.deepEqual(readLeaderboard(storage), []);
+  assert.equal(saveLeaderboardEntry("EasyMage", 100, "easy", storage), true);
+  assert.equal(
+    saveLeaderboardEntry("MediumMage", 200, "medium", storage),
+    true,
+  );
+  assert.equal(clearLeaderboard("easy", storage), true);
+  assert.deepEqual(readLeaderboard("easy", storage), []);
+  assert.equal(readLeaderboard("medium", storage).length, 1);
 });
 
-test("qualifies scores below the list limit and above the tenth score", () => {
+test("clears the migrated Level 1 scores with the Medium leaderboard", () => {
+  const { storage } = createMemoryStorage({
+    [LEGACY_STORAGE_KEY]: JSON.stringify([
+      { name: "Mage", score: 100, achievedAt: 10 },
+    ]),
+  });
+
+  assert.equal(clearLeaderboard("medium", storage), true);
+  assert.deepEqual(readLeaderboard("medium", storage), []);
+});
+
+test("qualifies scores against only the selected difficulty list", () => {
   const { storage } = createMemoryStorage();
 
-  assert.equal(qualifiesForLeaderboard(0, storage), true);
+  assert.equal(qualifiesForLeaderboard(0, "easy", storage), true);
 
   for (let score = 1; score <= LEADERBOARD_LIMIT; score += 1) {
-    saveLeaderboardEntry(`Mage${score}`, score * 100, storage, score);
+    saveLeaderboardEntry(`Mage${score}`, score * 100, "easy", storage, score);
   }
 
-  assert.equal(qualifiesForLeaderboard(101, storage), true);
-  assert.equal(qualifiesForLeaderboard(100, storage), false);
-  assert.equal(qualifiesForLeaderboard(-1, storage), false);
+  assert.equal(qualifiesForLeaderboard(101, "easy", storage), true);
+  assert.equal(qualifiesForLeaderboard(100, "easy", storage), false);
+  assert.equal(qualifiesForLeaderboard(100, "hard", storage), true);
+  assert.equal(qualifiesForLeaderboard(-1, "easy", storage), false);
 });

@@ -1,16 +1,24 @@
 import type { LeaderboardEntry } from "../../storage/leaderboard.ts";
+import type { Difficulty } from "../../data/recipes.ts";
 import { createElement } from "../shared/create-element.ts";
 import { renderTopbar } from "../shared/render-layout.ts";
+
+const DIFFICULTIES: readonly Difficulty[] = ["easy", "medium", "hard"];
 
 export function renderLeaderboard(
   entries: readonly LeaderboardEntry[],
   showClearConfirmation: boolean,
   clearErrorMessage: string | null,
+  difficulty: Difficulty,
 ): HTMLElement {
   const appShell = createElement("main", "app-shell");
   const panel = createElement("section", "leaderboard-panel");
   const panelHeading = createElement("div", "leaderboard-panel__heading");
-  const eyebrow = createElement("p", "eyebrow", "Level 1");
+  const eyebrow = createElement(
+    "p",
+    "eyebrow",
+    `${toTitleCase(difficulty)} difficulty`,
+  );
   const heading = createElement("h1", undefined, "Leaderboard");
   const backButton = createElement("button", "leaderboard-link", "Back");
   const clearButton = createElement(
@@ -28,23 +36,16 @@ export function renderLeaderboard(
   clearButton.dataset.action = "open-leaderboard-clear-confirmation";
   headingActions.append(clearButton, backButton);
   panelHeading.append(eyebrow, heading, headingActions);
-  panel.append(panelHeading);
-
-  if (entries.length === 0) {
-    const emptyMessage = createElement(
-      "p",
-      "leaderboard-empty",
-      "No scores yet. Play a game to claim the first place.",
-    );
-    panel.append(emptyMessage);
-  } else {
-    panel.append(renderEntriesTable(entries));
-  }
+  panel.append(
+    panelHeading,
+    renderDifficultySelector(difficulty),
+    renderEntriesTable(entries, difficulty),
+  );
 
   appShell.append(renderTopbar(), panel);
 
   if (showClearConfirmation) {
-    appShell.append(renderClearConfirmation(clearErrorMessage));
+    appShell.append(renderClearConfirmation(clearErrorMessage, difficulty));
   }
 
   return appShell;
@@ -52,13 +53,19 @@ export function renderLeaderboard(
 
 function renderClearConfirmation(
   errorMessage: string | null,
+  difficulty: Difficulty,
 ): HTMLDialogElement {
   const dialog = createElement("dialog", "leaderboard-confirmation");
-  const heading = createElement("h2", undefined, "Clear the leaderboard?");
+  const difficultyName = toTitleCase(difficulty);
+  const heading = createElement(
+    "h2",
+    undefined,
+    `Clear the ${difficultyName} leaderboard?`,
+  );
   const message = createElement(
     "p",
     "leaderboard-confirmation__message",
-    "This will permanently remove all saved Level 1 scores from this browser.",
+    `This will permanently remove all saved ${difficultyName} scores from this browser.`,
   );
   const status = createElement(
     "p",
@@ -89,19 +96,47 @@ function renderClearConfirmation(
   return dialog;
 }
 
-function renderEntriesTable(entries: readonly LeaderboardEntry[]): HTMLElement {
+function renderDifficultySelector(selectedDifficulty: Difficulty): HTMLElement {
+  const selector = createElement("nav", "leaderboard-difficulties");
+
+  selector.setAttribute("aria-label", "Leaderboard difficulty");
+
+  for (const difficulty of DIFFICULTIES) {
+    const isSelected = difficulty === selectedDifficulty;
+    const button = createElement(
+      "button",
+      isSelected
+        ? "leaderboard-difficulty leaderboard-difficulty--selected"
+        : "leaderboard-difficulty",
+      toTitleCase(difficulty),
+    );
+
+    button.type = "button";
+    button.dataset.action = "select-leaderboard-difficulty";
+    button.dataset.difficulty = difficulty;
+    button.setAttribute("aria-pressed", String(isSelected));
+    selector.append(button);
+  }
+
+  return selector;
+}
+
+function renderEntriesTable(
+  entries: readonly LeaderboardEntry[],
+  difficulty: Difficulty,
+): HTMLElement {
   const tableWrap = createElement("div", "leaderboard-table-wrap");
   const table = createElement("table", "leaderboard-table");
   const caption = createElement(
     "caption",
     "visually-hidden",
-    "Level 1 leaderboard, sorted by score",
+    `${toTitleCase(difficulty)} leaderboard, sorted by score`,
   );
   const header = createElement("thead");
   const headerRow = createElement("tr");
   const body = createElement("tbody");
 
-  for (const label of ["Rank", "Name", "Score", "Date"]) {
+  for (const label of ["Rank", "Name", "Difficulty", "Score", "Date"]) {
     const cell = createElement("th", undefined, label);
     cell.scope = "col";
     headerRow.append(cell);
@@ -109,11 +144,25 @@ function renderEntriesTable(entries: readonly LeaderboardEntry[]): HTMLElement {
 
   header.append(headerRow);
 
+  if (entries.length === 0) {
+    const row = createElement("tr");
+    const emptyMessage = createElement(
+      "td",
+      "leaderboard-empty",
+      "No scores yet. Play a game to claim the first place.",
+    );
+
+    emptyMessage.colSpan = 5;
+    row.append(emptyMessage);
+    body.append(row);
+  }
+
   entries.forEach((entry, index) => {
     const row = createElement("tr");
     row.append(
       createCell(String(index + 1)),
       createCell(entry.name),
+      createCell(toTitleCase(difficulty)),
       createCell(String(entry.score)),
       createCell(formatLeaderboardDate(entry.achievedAt)),
     );
@@ -124,6 +173,10 @@ function renderEntriesTable(entries: readonly LeaderboardEntry[]): HTMLElement {
   tableWrap.append(table);
 
   return tableWrap;
+}
+
+function toTitleCase(value: string): string {
+  return `${value[0].toUpperCase()}${value.slice(1)}`;
 }
 
 function createCell(text: string): HTMLTableCellElement {

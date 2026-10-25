@@ -58,7 +58,7 @@ export function renderActiveGame(state: GameState): HTMLElement {
     gameIntro,
     renderRecipePanel(state),
     gameLayout,
-    renderParameterBars(cauldronValues, targetRanges),
+    renderParameterBars(cauldronValues, targetRanges, state.difficulty),
   );
   appShell.append(gameContent);
 

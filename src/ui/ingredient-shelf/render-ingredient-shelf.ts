@@ -43,6 +43,7 @@ export function renderIngredientShelf(state: GameState): HTMLElement {
         ingredient,
         state.shelfStock[ingredient.id] ?? 0,
         cauldronIsFull,
+        state.difficulty === "hard",
       ),
     );
   });

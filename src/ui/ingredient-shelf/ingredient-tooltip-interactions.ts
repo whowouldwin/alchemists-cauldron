@@ -47,7 +47,10 @@ export function initializeIngredientTooltips(root: HTMLElement): void {
   root.addEventListener("pointerout", hideInactiveTooltip);
   root.addEventListener("focusout", hideInactiveTooltip);
   root.addEventListener("dragstart", () => hideTooltips(root));
-  root.addEventListener("click", preventTooltipClick, { capture: true });
+  root.addEventListener("pointerdown", preventTooltipInteraction, {
+    capture: true,
+  });
+  root.addEventListener("click", preventTooltipInteraction, { capture: true });
   window.addEventListener("resize", repositionTooltips);
   window.addEventListener("scroll", repositionTooltips, {
     capture: true,
@@ -96,9 +99,14 @@ function positionTooltip(card: HTMLElement): void {
 
   tooltip.style.left = `${position.left - bounds.left - card.clientLeft}px`;
   tooltip.style.top = `${position.top - bounds.top - card.clientTop}px`;
+  tooltip.dataset.side = position.side;
+  tooltip.style.setProperty(
+    "--tooltip-arrow-offset",
+    `${position.arrowOffset}px`,
+  );
 }
 
-function preventTooltipClick(event: MouseEvent): void {
+function preventTooltipInteraction(event: MouseEvent): void {
   if (
     event.target instanceof Element &&
     event.target.closest(".ingredient-tooltip") !== null

@@ -1,28 +1,35 @@
+.shelf-panel {
+  display: flex;
+  flex-direction: column;
+}
+
 .shelf-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 13px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 8px;
+  flex: 1;
 }
 
 .ingredient-card {
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 140px;
+  min-height: 104px;
   flex-direction: column;
   align-items: stretch;
-  padding: 13px;
+  padding: 10px;
   overflow: visible;
   border: 1px solid var(--color-line);
   border-radius: 14px;
   background: #ffffff;
-  box-shadow: 2px 2px 0 #dedede;
+  box-shadow: 0 1px 2px #0000000a;
   color: var(--color-ink);
   cursor: pointer;
   text-align: left;
   transition:
-    box-shadow 150ms ease,
-    transform 150ms ease;
+    border-color 150ms ease,
+    background 150ms ease;
 
   &::after {
     position: absolute;
@@ -39,8 +46,8 @@
   }
 
   &:hover:not(:disabled) {
-    box-shadow: 3px 3px 0 #d0d0d0;
-    transform: translate(-1px, -1px);
+    border-color: var(--color-ink);
+    background: #f7f7f7;
   }
 
   &:hover:not(:disabled),
@@ -57,16 +64,16 @@
     position: relative;
     z-index: 1;
     display: flex;
-    min-height: 51px;
+    min-height: 38px;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 9px;
+    margin-bottom: 6px;
   }
 
   &__icon-wrap {
     display: grid;
-    width: 51px;
-    height: 51px;
+    width: 38px;
+    height: 38px;
     place-items: center;
     border: 1px solid var(--color-line);
     border-radius: 12px;
@@ -75,18 +82,17 @@
 
   &__name {
     display: block;
-    min-height: 34px;
+    min-height: 32px;
     margin-bottom: 0;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 900;
-    letter-spacing: -0.025em;
-    line-height: 1.2;
+    line-height: 1.3;
   }
 
   &__status {
     position: absolute;
-    top: 69px;
-    left: 13px;
+    top: 60px;
+    left: 10px;
     color: var(--color-ink);
     font-size: 10px;
     font-weight: 900;
@@ -111,8 +117,8 @@
 
 .ingredient-icon {
   display: block;
-  width: 41px;
-  height: 41px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 

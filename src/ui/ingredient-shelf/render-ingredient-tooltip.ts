@@ -10,8 +10,15 @@ const INGREDIENT_PROPERTIES = [
 
 export function renderIngredientTooltip(ingredient: Ingredient): HTMLElement {
   const tooltip = createElement("span", "ingredient-tooltip");
+  const title = createElement(
+    "span",
+    "ingredient-tooltip__title",
+    ingredient.name,
+  );
 
   tooltip.setAttribute("role", "tooltip");
+  title.setAttribute("aria-hidden", "true");
+  tooltip.append(title);
 
   INGREDIENT_PROPERTIES.forEach(([label, property]) => {
     const row = createElement("span", "ingredient-tooltip__row");

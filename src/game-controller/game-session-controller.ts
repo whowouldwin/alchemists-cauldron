@@ -1,7 +1,5 @@
-import { DIFFICULTY_SETTINGS } from "../data/difficulty-settings.ts";
 import type { Difficulty } from "../data/recipes.ts";
-import { isBrewSuccessful } from "../logic/brew-check.ts";
-import { calculateCauldron } from "../logic/calculate-cauldron.ts";
+import { GameBrewingController } from "./game-brewing-controller.ts";
 import { qualifiesForLeaderboard } from "../storage/leaderboard.ts";
 import {
   clearSave,
@@ -10,11 +8,6 @@ import {
   saveGame,
 } from "../storage/game-save.ts";
 import type { GameState } from "../state/game-state.ts";
-import {
-  addIngredient,
-  applyBrewResult,
-  canAddIngredient,
-} from "../state/game-actions.ts";
 import { createGameState } from "../state/create-game-state.ts";
 import {
   finishGame,
@@ -38,11 +31,22 @@ export class GameSessionController {
   private selectedDifficulty: Difficulty =
     this.savedGame?.difficulty ?? "medium";
   private leaderboardEntryPending = false;
+  private readonly brewingController: GameBrewingController;
   private readonly timerDisplayRefresh: ReturnType<
     typeof createTimerDisplayRefresh
   >;
 
   constructor(private readonly options: GameSessionControllerOptions) {
+    this.brewingController = new GameBrewingController({
+      getGameState: () => this.gameState,
+      setGameState: (gameState) => {
+        this.gameState = gameState;
+      },
+      finishGameIfNeeded: () => this.finishGameIfNeeded(),
+      saveCurrentGame: () => this.saveCurrentGame(),
+      render: options.render,
+      announcements: options.announcements,
+    });
     this.timerDisplayRefresh = createTimerDisplayRefresh(
       options.applicationRoot,
       () => this.gameState,
@@ -68,6 +72,18 @@ export class GameSessionController {
 
   get selectedGameDifficulty(): Difficulty {
     return this.selectedDifficulty;
+  }
+
+  get canAddIngredient(): (ingredientId: string) => boolean {
+    return this.brewingController.canAddIngredient;
+  }
+
+  get addIngredient(): (ingredientId: string) => void {
+    return this.brewingController.addIngredient;
+  }
+
+  get brew(): () => void {
+    return this.brewingController.brew;
   }
 
   readonly setLeaderboardEntryPending = (pending: boolean): void => {
@@ -107,36 +123,6 @@ export class GameSessionController {
     this.options.render();
   };
 
-  readonly canAddIngredient = (ingredientId: string): boolean =>
-    this.gameState !== null && canAddIngredient(this.gameState, ingredientId);
-
-  readonly addIngredient = (ingredientId: string): void => {
-    if (this.gameState === null || this.finishGameIfNeeded()) {
-      return;
-    }
-
-    const nextState = addIngredient(this.gameState, ingredientId);
-
-    if (nextState === this.gameState) {
-      return;
-    }
-
-    const addedIngredient = nextState.cauldronIngredients.at(-1);
-
-    if (addedIngredient === undefined) {
-      return;
-    }
-
-    this.gameState = nextState;
-    this.saveCurrentGame();
-    this.options.render();
-    this.options.announcements.ingredientAdded(
-      addedIngredient.name,
-      nextState.cauldronIngredients.length,
-      DIFFICULTY_SETTINGS[nextState.difficulty].maxCauldronIngredients,
-    );
-  };
-
   readonly pauseGame = (): void => {
     if (this.pauseActiveGame()) {
       this.focusResumeButton();
@@ -173,36 +159,6 @@ export class GameSessionController {
     this.timerDisplayRefresh.stop();
     this.options.render();
     this.focusAction("start-game");
-  };
-
-  readonly brew = (): void => {
-    if (
-      this.gameState === null ||
-      this.finishGameIfNeeded() ||
-      this.gameState.cauldronIngredients.length === 0
-    ) {
-      return;
-    }
-
-    const values = calculateCauldron(this.gameState.cauldronIngredients);
-    const succeeded = isBrewSuccessful(
-      values,
-      this.gameState.activeRecipe,
-      this.gameState.difficulty,
-    );
-
-    this.gameState = applyBrewResult(this.gameState, succeeded);
-
-    if (this.finishGameIfNeeded()) {
-      return;
-    }
-
-    this.saveCurrentGame();
-    this.options.render();
-    this.options.announcements.brewResult(
-      succeeded,
-      DIFFICULTY_SETTINGS[this.gameState.difficulty].scorePerBrew,
-    );
   };
 
   readonly handleVisibilityChange = (): void => {

@@ -5,6 +5,10 @@ import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
 import { createGameKeyboardHandler } from "./ui/game-keyboard-handler.ts";
 import { GameDragHandler } from "./ui/game-drag-handler.ts";
+import {
+  getFocusedGameButton,
+  restoreGameButtonFocus,
+} from "./ui/game-focus.ts";
 import { initializeIngredientTooltips } from "./ui/ingredient-shelf/ingredient-tooltip-interactions.ts";
 import { renderGame } from "./ui/screens/render-game.ts";
 
@@ -13,6 +17,7 @@ export function initializeGameController(
   announcements: GameAnnouncements,
 ): void {
   function render(): void {
+    const focusedButton = getFocusedGameButton(applicationRoot);
     const screen = leaderboardController.isVisible()
       ? leaderboardController.render()
       : renderGame(
@@ -27,6 +32,7 @@ export function initializeGameController(
         );
 
     applicationRoot.replaceChildren(screen);
+    restoreGameButtonFocus(applicationRoot, focusedButton);
     leaderboardController.afterRender();
     dialogs.afterRender();
   }

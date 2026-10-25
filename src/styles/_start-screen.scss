@@ -216,6 +216,15 @@ h2 {
       font-weight: 800;
     }
   }
+
+  &__shortcuts {
+    margin: 18px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-neutral-mid);
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
 }
 
 .difficulty-options {

@@ -13,7 +13,12 @@ import {
   resumeGame,
 } from "./state/game-status.ts";
 import { qualifiesForLeaderboard } from "./storage/leaderboard.ts";
-import { clearSave, saveGame } from "./storage/game-save.ts";
+import {
+  clearSave,
+  loadGame,
+  restoreGameState,
+  saveGame,
+} from "./storage/game-save.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
 import { createTimerDisplayRefresh } from "./ui/game-status/timer-display-refresh.ts";
@@ -24,7 +29,8 @@ export function initializeGameController(
   announcements: GameAnnouncements,
 ): void {
   let gameState: GameState | null = null;
-  let selectedDifficulty: Difficulty = "medium";
+  let savedGame = loadGame();
+  let selectedDifficulty: Difficulty = savedGame?.difficulty ?? "medium";
   let isDifficultySettingsOpen = false;
   let isHelpOpen = false;
   let leaderboardEntryPending = false;
@@ -51,6 +57,7 @@ export function initializeGameController(
           selectedDifficulty,
           isDifficultySettingsOpen,
           isHelpOpen,
+          hasSavedGame: savedGame !== null,
         });
 
     applicationRoot.replaceChildren(screen);
@@ -61,6 +68,7 @@ export function initializeGameController(
 
   function startGame(): void {
     gameState = createGameState(Math.random, Date.now(), selectedDifficulty);
+    savedGame = null;
     isDifficultySettingsOpen = false;
     isHelpOpen = false;
     leaderboardEntryPending = false;
@@ -68,6 +76,22 @@ export function initializeGameController(
     saveCurrentGame();
     render();
     timerDisplayRefresh.start();
+  }
+
+  function continueGame(): void {
+    if (savedGame === null) {
+      return;
+    }
+
+    gameState = restoreGameState(savedGame);
+    selectedDifficulty = savedGame.difficulty;
+    savedGame = null;
+    isDifficultySettingsOpen = false;
+    isHelpOpen = false;
+    leaderboardEntryPending = false;
+    leaderboardController.reset();
+    render();
+    focusResumeButton();
   }
 
   function openDifficultySettings(): void {
@@ -257,6 +281,7 @@ export function initializeGameController(
     }
 
     gameState = null;
+    savedGame = null;
     leaderboardEntryPending = false;
     clearSave();
     timerDisplayRefresh.stop();
@@ -312,6 +337,7 @@ export function initializeGameController(
     }
 
     gameState = finishGame(gameState, reason);
+    savedGame = null;
     clearSave();
     leaderboardEntryPending = qualifiesForLeaderboard(
       gameState.score,
@@ -338,6 +364,7 @@ export function initializeGameController(
     "click",
     createGameClickHandler({
       startGame,
+      continueGame,
       openDifficultySettings,
       closeDifficultySettings,
       selectDifficulty,

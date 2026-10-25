@@ -2,6 +2,7 @@ import type { Difficulty } from "../data/recipes.ts";
 
 export interface GameClickActions {
   readonly startGame: () => void;
+  readonly continueGame: () => void;
   readonly openDifficultySettings: () => void;
   readonly closeDifficultySettings: () => void;
   readonly selectDifficulty: (difficulty: Difficulty) => void;
@@ -34,6 +35,15 @@ export function createGameClickHandler(
 
     if (startButton !== null) {
       actions.startGame();
+      return;
+    }
+
+    const continueButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="continue-game"]',
+    );
+
+    if (continueButton !== null) {
+      actions.continueGame();
       return;
     }
 

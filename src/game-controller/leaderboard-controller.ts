@@ -1,7 +1,7 @@
 import type { Difficulty } from "../data/recipes.ts";
 import type { GameState } from "../state/game-state.ts";
+import { LeaderboardClearController } from "./leaderboard-clear-controller.ts";
 import {
-  clearLeaderboard,
   isValidPlayerName,
   readLeaderboard,
   saveLeaderboardEntry,
@@ -20,11 +20,15 @@ interface LeaderboardControllerOptions {
 export class LeaderboardController {
   private isLeaderboardVisible = false;
   private selectedDifficulty: Difficulty;
-  private isClearConfirmationOpen = false;
-  private clearErrorMessage: string | null = null;
+  private readonly clearConfirmation: LeaderboardClearController;
 
   constructor(private readonly options: LeaderboardControllerOptions) {
     this.selectedDifficulty = options.getCurrentDifficulty();
+    this.clearConfirmation = new LeaderboardClearController({
+      applicationRoot: options.applicationRoot,
+      getSelectedDifficulty: () => this.selectedDifficulty,
+      render: options.render,
+    });
   }
 
   readonly isVisible = (): boolean => this.isLeaderboardVisible;
@@ -32,37 +36,17 @@ export class LeaderboardController {
   readonly render = (): HTMLElement =>
     renderLeaderboard(
       readLeaderboard(this.selectedDifficulty),
-      this.isClearConfirmationOpen,
-      this.clearErrorMessage,
+      this.clearConfirmation.isConfirmationOpen,
+      this.clearConfirmation.clearErrorMessage,
       this.selectedDifficulty,
     );
 
-  readonly afterRender = (): void => {
-    if (!this.isClearConfirmationOpen) {
-      return;
-    }
-
-    const dialog =
-      this.options.applicationRoot.querySelector<HTMLDialogElement>(
-        ".leaderboard-confirmation",
-      );
-
-    if (dialog === null) {
-      return;
-    }
-
-    dialog.addEventListener("cancel", this.handleClearDialogCancel, {
-      once: true,
-    });
-    dialog.showModal();
-    this.focusAction("cancel-leaderboard-clear");
-  };
+  readonly afterRender = (): void => this.clearConfirmation.afterRender();
 
   readonly reset = (): void => {
     this.isLeaderboardVisible = false;
     this.selectedDifficulty = this.options.getCurrentDifficulty();
-    this.isClearConfirmationOpen = false;
-    this.clearErrorMessage = null;
+    this.clearConfirmation.reset();
   };
 
   readonly open = (): void => {
@@ -84,32 +68,11 @@ export class LeaderboardController {
     this.focusSelectedDifficulty();
   };
 
-  readonly openClearConfirmation = (): void => {
-    this.clearErrorMessage = null;
-    this.isClearConfirmationOpen = true;
-    this.options.render();
-  };
+  readonly openClearConfirmation = (): void => this.clearConfirmation.open();
 
-  readonly cancelClear = (): void => {
-    this.isClearConfirmationOpen = false;
-    this.clearErrorMessage = null;
-    this.options.render();
-    this.focusAction("open-leaderboard-clear-confirmation");
-  };
+  readonly cancelClear = (): void => this.clearConfirmation.cancel();
 
-  readonly confirmClear = (): void => {
-    if (!clearLeaderboard(this.selectedDifficulty)) {
-      this.clearErrorMessage =
-        "Could not clear the leaderboard. Please try again.";
-      this.options.render();
-      return;
-    }
-
-    this.isClearConfirmationOpen = false;
-    this.clearErrorMessage = null;
-    this.options.render();
-    this.focusAction("open-leaderboard-clear-confirmation");
-  };
+  readonly confirmClear = (): void => this.clearConfirmation.confirm();
 
   readonly handleNameSubmit = (event: SubmitEvent): void => {
     const gameState = this.options.getGameState();
@@ -153,11 +116,6 @@ export class LeaderboardController {
     this.options.setEntryPending(false);
     this.options.render();
     this.focusAction("start-game");
-  };
-
-  private readonly handleClearDialogCancel = (event: Event): void => {
-    event.preventDefault();
-    this.cancelClear();
   };
 
   private focusSelectedDifficulty(): void {

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { LEVEL_ONE_INGREDIENTS } from "../src/data/ingredients.ts";
+import { DIFFICULTY_SETTINGS } from "../src/data/difficulty-settings.ts";
 import { getRecipesByDifficulty } from "../src/logic/recipe-generator.ts";
 import { MAX_CAULDRON_INGREDIENTS } from "../src/state/game-state.ts";
 import { createGameState } from "../src/state/create-game-state.ts";
@@ -27,9 +28,27 @@ test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
 
 test("creates the initial state from the selected difficulty settings", () => {
   const expectedSettings = [
-    { difficulty: "easy", shelfSize: 4, startingTime: 180, lives: 5 },
-    { difficulty: "medium", shelfSize: 6, startingTime: 150, lives: 3 },
-    { difficulty: "hard", shelfSize: 8, startingTime: 150, lives: 3 },
+    {
+      difficulty: "easy",
+      shelfSize: 4,
+      startingTime: 180,
+      lives: 5,
+      reactionCount: 0,
+    },
+    {
+      difficulty: "medium",
+      shelfSize: 6,
+      startingTime: 150,
+      lives: 3,
+      reactionCount: 2,
+    },
+    {
+      difficulty: "hard",
+      shelfSize: 8,
+      startingTime: 150,
+      lives: 3,
+      reactionCount: 3,
+    },
   ] as const;
 
   for (const {
@@ -37,6 +56,7 @@ test("creates the initial state from the selected difficulty settings", () => {
     shelfSize,
     startingTime,
     lives,
+    reactionCount,
   } of expectedSettings) {
     const state = createGameState(() => 0, 10_000, difficulty);
 
@@ -45,6 +65,10 @@ test("creates the initial state from the selected difficulty settings", () => {
     assert.equal(state.endTime, 10_000 + startingTime * 1_000);
     assert.equal(state.lives, lives);
     assert.equal(state.activeRecipe.difficulty, difficulty);
+    assert.equal(
+      DIFFICULTY_SETTINGS[state.difficulty].reactionCount,
+      reactionCount,
+    );
   }
 });
 

@@ -1,7 +1,7 @@
 import { createElement } from "../shared/create-element.ts";
 
 const GAME_RULES = [
-  "Choose a difficulty in Settings before starting. It sets the shelf, cauldron limit, time, lives, recipe tolerance, points, and time bonus.",
+  "Choose a difficulty in Settings before starting. It sets the shelf, cauldron limit, time, lives, recipe tolerance, points, time bonus, and reaction count.",
   "Add ingredients from the shelf to change the cauldron's temperature, density, and magic power. Each addition uses one item from its stock.",
   "Match all three values to the active recipe's target ranges. The selected difficulty sets how much tolerance each range allows.",
   "Press Brew to check your mixture. A successful brew earns points and extra time, then gives you a new recipe. A failed brew costs one life. Both clear the cauldron.",

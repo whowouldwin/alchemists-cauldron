@@ -69,12 +69,23 @@ function renderDifficultyOption(
     "difficulty-option__details",
     `±${settings.recipeTolerance} tolerance · ${settings.scorePerBrew} points · +${settings.timeBonusSeconds}s`,
   );
+  const reactionDetails = createElement(
+    "span",
+    "difficulty-option__details",
+    `Reaction count: ${settings.reactionCount}`,
+  );
 
   option.type = "button";
   option.dataset.action = "select-difficulty";
   option.dataset.difficulty = difficulty;
   option.setAttribute("aria-pressed", String(isSelected));
-  option.append(name, firstDetails, secondDetails, thirdDetails);
+  option.append(
+    name,
+    firstDetails,
+    secondDetails,
+    thirdDetails,
+    reactionDetails,
+  );
 
   return option;
 }

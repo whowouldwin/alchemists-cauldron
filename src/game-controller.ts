@@ -73,6 +73,7 @@ export function initializeGameController(
       resumeGame: gameSession.resumeGame,
       exitToMenu: gameSession.exitToMenu,
       brew: gameSession.brew,
+      pourOut: gameSession.pourOut,
       addIngredient: gameSession.addIngredient,
       openLeaderboard: leaderboardController.open,
       closeLeaderboard: leaderboardController.close,

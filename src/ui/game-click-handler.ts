@@ -12,6 +12,7 @@ export interface GameClickActions {
   readonly resumeGame: () => void;
   readonly exitToMenu: () => void;
   readonly brew: () => void;
+  readonly pourOut: () => void;
   readonly addIngredient: (ingredientId: string) => void;
   readonly openLeaderboard: () => void;
   readonly closeLeaderboard: () => void;
@@ -95,6 +96,9 @@ function handleActionButton(
       return true;
     case "brew":
       invokeIfEnabled(button, actions.brew);
+      return true;
+    case "pour-out":
+      invokeIfEnabled(button, actions.pourOut);
       return true;
     default:
       return false;

@@ -5,7 +5,11 @@ import { LEVEL_ONE_INGREDIENTS } from "../src/data/ingredients.ts";
 import { LEVEL_ONE_MAX_TIME } from "../src/state/game-state.ts";
 import { createGameState } from "../src/state/create-game-state.ts";
 import { getGameTimeRemaining, pauseGame } from "../src/state/game-status.ts";
-import { addIngredient, applyBrewResult } from "../src/state/game-actions.ts";
+import {
+  addIngredient,
+  applyBrewResult,
+  pourOut,
+} from "../src/state/game-actions.ts";
 
 function createStateWithIngredient(currentTime: number) {
   const state = createGameState(() => 0, currentTime);
@@ -55,6 +59,32 @@ test("deducts a life and clears the cauldron on failure", () => {
   assert.equal(nextState.lives, state.lives - 1);
   assert.equal(nextState.activeRecipe, state.activeRecipe);
   assert.equal(nextState.lastBrewResult, "failure");
+});
+
+test("pours out the cauldron for ten seconds without changing other state", () => {
+  const state = {
+    ...createStateWithIngredient(0),
+    score: 400,
+    lives: 2,
+    endTime: 80_000,
+  };
+  const nextState = pourOut(state);
+
+  assert.deepEqual(nextState.cauldronIngredients, []);
+  assert.equal(nextState.endTime, 70_000);
+  assert.equal(nextState.score, state.score);
+  assert.equal(nextState.lives, state.lives);
+  assert.equal(nextState.activeRecipe, state.activeRecipe);
+  assert.deepEqual(nextState.shelfStock, state.shelfStock);
+  assert.deepEqual(nextState.activeReactionIds, state.activeReactionIds);
+});
+
+test("does not charge time when pouring out an empty or paused cauldron", () => {
+  const emptyState = createGameState(() => 0, 0);
+  const pausedState = pauseGame(createStateWithIngredient(0), 1_000);
+
+  assert.equal(pourOut(emptyState), emptyState);
+  assert.equal(pourOut(pausedState), pausedState);
 });
 
 test("does not apply a brew result to an empty cauldron", () => {

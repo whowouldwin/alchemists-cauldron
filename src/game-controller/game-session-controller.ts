@@ -85,6 +85,10 @@ export class GameSessionController {
     return this.brewingController.brew;
   }
 
+  get pourOut(): () => void {
+    return this.brewingController.pourOut;
+  }
+
   get pauseGame(): () => void {
     return this.lifecycleController.pauseGame;
   }

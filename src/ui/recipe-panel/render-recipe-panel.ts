@@ -61,6 +61,7 @@ export function renderRecipePanel(state: GameState): HTMLElement {
   const brewButton = createElement("button", "primary-button brew-button");
   const brewButtonLabel = createElement("span", undefined, "Brew");
   const brewButtonIcon = createElement("span", undefined, "↗");
+  const pourOutButton = createElement("button", "pour-out-button", "Pour Out");
   const brewResult = renderBrewResult(state.lastBrewResult);
 
   panel.setAttribute("aria-labelledby", "recipe-panel-name");
@@ -68,6 +69,9 @@ export function renderRecipePanel(state: GameState): HTMLElement {
   brewButton.type = "button";
   brewButton.dataset.action = "brew";
   brewButton.disabled = ingredientCount === 0;
+  pourOutButton.type = "button";
+  pourOutButton.dataset.action = "pour-out";
+  pourOutButton.disabled = ingredientCount === 0;
   brewButtonIcon.setAttribute("aria-hidden", "true");
   brewButton.append(brewButtonLabel, brewButtonIcon);
   headingContent.append(eyebrow, heading);
@@ -77,7 +81,7 @@ export function renderRecipePanel(state: GameState): HTMLElement {
     renderRecipeRange("Density", state.activeRecipe.density),
     renderRecipeRange("Magic Power", state.activeRecipe.magicPower),
   );
-  actions.append(brewButton);
+  actions.append(brewButton, pourOutButton);
 
   if (brewResult !== null) {
     actions.prepend(brewResult);

@@ -6,6 +6,7 @@ import {
   addIngredientWithReactions,
   applyBrewResult,
   canAddIngredient,
+  pourOut,
 } from "../state/game-actions.ts";
 import type { GameAnnouncements } from "../ui/game-announcements.ts";
 
@@ -19,7 +20,11 @@ interface GameBrewingControllerOptions {
 }
 
 export class GameBrewingController {
-  constructor(private readonly options: GameBrewingControllerOptions) {}
+  private readonly options: GameBrewingControllerOptions;
+
+  constructor(options: GameBrewingControllerOptions) {
+    this.options = options;
+  }
 
   readonly canAddIngredient = (ingredientId: string): boolean => {
     const gameState = this.options.getGameState();
@@ -95,5 +100,33 @@ export class GameBrewingController {
       succeeded,
       DIFFICULTY_SETTINGS[nextState.difficulty].scorePerBrew,
     );
+  };
+
+  readonly pourOut = (): void => {
+    const gameState = this.options.getGameState();
+
+    if (
+      gameState === null ||
+      this.options.finishGameIfNeeded() ||
+      gameState.cauldronIngredients.length === 0
+    ) {
+      return;
+    }
+
+    const nextState = pourOut(gameState);
+
+    if (nextState === gameState) {
+      return;
+    }
+
+    this.options.setGameState(nextState);
+
+    if (this.options.finishGameIfNeeded()) {
+      return;
+    }
+
+    this.options.saveCurrentGame();
+    this.options.render();
+    this.options.announcements.cauldronPouredOut();
   };
 }

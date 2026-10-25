@@ -103,7 +103,6 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
   const difficultySettings = renderDifficultySettings(
     options.selectedDifficulty,
   );
-  difficultySettings.hidden = !options.isDifficultySettingsOpen;
   const helpPanel = renderHelpPanel();
 
   appShell.append(

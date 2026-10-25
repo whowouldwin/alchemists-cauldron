@@ -7,26 +7,23 @@ const DIFFICULTIES: readonly Difficulty[] = ["easy", "medium", "hard"];
 
 export function renderDifficultySettings(
   selectedDifficulty: Difficulty,
-): HTMLElement {
-  const panel = createElement("section", "difficulty-panel");
+): HTMLDialogElement {
+  const panel = createElement("dialog", "difficulty-dialog");
   const heading = createElement("h2", undefined, "Choose a difficulty");
   const description = createElement(
     "p",
-    "difficulty-panel__description",
+    "difficulty-dialog__description",
     "The rules change with each experiment.",
   );
-  const closeButton = createElement(
-    "button",
-    "leaderboard-link",
-    "Close settings",
-  );
-  const headingRow = createElement("div", "difficulty-panel__heading");
+  const closeButton = createElement("button", "leaderboard-link", "Close");
+  const headingRow = createElement("div", "difficulty-dialog__heading");
   const options = createElement("div", "difficulty-options");
 
   panel.id = "difficulty-settings";
   panel.setAttribute("aria-labelledby", "difficulty-settings-heading");
   heading.id = "difficulty-settings-heading";
   closeButton.type = "button";
+  closeButton.setAttribute("aria-label", "Close difficulty settings");
   closeButton.dataset.action = "close-difficulty-settings";
   headingRow.append(heading, closeButton);
 

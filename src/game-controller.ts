@@ -54,6 +54,7 @@ export function initializeGameController(
     applicationRoot.replaceChildren(screen);
     leaderboardController.afterRender();
     afterRenderHelp();
+    afterRenderDifficultySettings();
   }
 
   function startGame(): void {
@@ -70,7 +71,6 @@ export function initializeGameController(
     isDifficultySettingsOpen = true;
     isHelpOpen = false;
     render();
-    focusSelectedDifficulty();
   }
 
   function closeDifficultySettings(): void {
@@ -121,10 +121,34 @@ export function initializeGameController(
     closeHelp();
   }
 
+  function afterRenderDifficultySettings(): void {
+    if (!isDifficultySettingsOpen) {
+      return;
+    }
+
+    const dialog = applicationRoot.querySelector<HTMLDialogElement>(
+      "#difficulty-settings",
+    );
+
+    if (dialog === null) {
+      return;
+    }
+
+    dialog.addEventListener("cancel", handleDifficultySettingsCancel, {
+      once: true,
+    });
+    dialog.showModal();
+    focusSelectedDifficulty();
+  }
+
+  function handleDifficultySettingsCancel(event: Event): void {
+    event.preventDefault();
+    closeDifficultySettings();
+  }
+
   function selectDifficulty(difficulty: Difficulty): void {
     selectedDifficulty = difficulty;
     render();
-    focusSelectedDifficulty();
   }
 
   function focusSelectedDifficulty(): void {

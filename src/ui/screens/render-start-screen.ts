@@ -13,6 +13,7 @@ export interface StartScreenOptions {
   readonly selectedDifficulty: Difficulty;
   readonly isDifficultySettingsOpen: boolean;
   readonly isHelpOpen: boolean;
+  readonly hasSavedGame: boolean;
 }
 
 export function renderStartScreen(options: StartScreenOptions): HTMLElement {
@@ -30,6 +31,9 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
   const startButton = createElement("button", "primary-button");
   const buttonLabel = createElement("span", undefined, "Start Game");
   const buttonIcon = createElement("span", undefined, "↗");
+  const continueButton = options.hasSavedGame
+    ? createElement("button", "leaderboard-link", "Continue Game")
+    : null;
   const welcomeArt = createElement("div", "welcome-art");
   const cauldronImage = createElement("img");
   const preGameStats = createElement("div", "pre-game-stats");
@@ -48,6 +52,10 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
   startButton.dataset.action = "start-game";
   buttonIcon.setAttribute("aria-hidden", "true");
   startButton.append(buttonLabel, buttonIcon);
+  if (continueButton !== null) {
+    continueButton.type = "button";
+    continueButton.dataset.action = "continue-game";
+  }
   welcomeCopy.append(eyebrowText, heading, description);
 
   welcomeArt.setAttribute("aria-hidden", "true");
@@ -100,6 +108,10 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
   topbarActions.append(helpButton, settingsButton, renderLeaderboardButton());
   topbar.append(topbarActions);
   startActions.append(startButton);
+
+  if (continueButton !== null) {
+    startActions.append(continueButton);
+  }
   const difficultySettings = renderDifficultySettings(
     options.selectedDifficulty,
   );

@@ -11,6 +11,7 @@ export function renderGame(
     selectedDifficulty: "medium",
     isDifficultySettingsOpen: false,
     isHelpOpen: false,
+    hasSavedGame: false,
   },
 ): HTMLElement {
   if (state === null) {

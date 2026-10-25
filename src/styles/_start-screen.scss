@@ -142,37 +142,9 @@ h2 {
   margin: 28px 0;
 }
 
-.difficulty-panel {
-  margin-bottom: 28px;
-  padding: 24px;
-  border: 1px solid var(--color-line);
-  border-radius: 18px;
-  background: var(--color-surface);
-  box-shadow: var(--shadow-offset);
-
-  &__heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 8px;
-
-    h2 {
-      margin: 0;
-      font-size: clamp(22px, 3vw, 30px);
-      letter-spacing: -0.04em;
-    }
-  }
-
-  &__description {
-    margin-bottom: 18px;
-    color: var(--color-muted);
-    font-size: 14px;
-  }
-}
-
-.help-dialog {
-  width: min(100% - 32px, 620px);
+.help-dialog,
+.difficulty-dialog {
+  width: min(100% - 32px, 900px);
   max-height: min(80vh, 720px);
   overflow-y: auto;
   margin: auto;
@@ -186,7 +158,34 @@ h2 {
   &::backdrop {
     background: rgb(31 31 31 / 45%);
   }
+}
 
+.help-dialog {
+  max-width: 620px;
+}
+
+.help-dialog__heading,
+.difficulty-dialog__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+
+  h2 {
+    margin: 0;
+    font-size: clamp(22px, 3vw, 30px);
+    letter-spacing: -0.04em;
+  }
+}
+
+.difficulty-dialog__description {
+  margin-bottom: 18px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.help-dialog {
   &__heading {
     display: flex;
     align-items: center;

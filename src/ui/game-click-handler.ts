@@ -14,6 +14,7 @@ export interface GameClickActions {
   readonly addIngredient: (ingredientId: string) => void;
   readonly openLeaderboard: () => void;
   readonly closeLeaderboard: () => void;
+  readonly selectLeaderboardDifficulty: (difficulty: Difficulty) => void;
   readonly openLeaderboardClearConfirmation: () => void;
   readonly cancelLeaderboardClear: () => void;
   readonly confirmLeaderboardClear: () => void;
@@ -100,6 +101,19 @@ export function createGameClickHandler(
 
     if (closeLeaderboardButton !== null) {
       actions.closeLeaderboard();
+      return;
+    }
+
+    const leaderboardDifficultyButton = event.target.closest<HTMLButtonElement>(
+      '[data-action="select-leaderboard-difficulty"]',
+    );
+
+    if (leaderboardDifficultyButton !== null) {
+      const difficulty = leaderboardDifficultyButton.dataset.difficulty;
+
+      if (isDifficulty(difficulty)) {
+        actions.selectLeaderboardDifficulty(difficulty);
+      }
       return;
     }
 

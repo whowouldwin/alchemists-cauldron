@@ -6,6 +6,8 @@ export interface GameAnnouncements {
     ingredientName: string,
     ingredientCount: number,
     maximumIngredients: number,
+    activatedReactionNames?: readonly string[],
+    cauldronWasCleared?: boolean,
   ): void;
   brewResult(succeeded: boolean, scoreAwarded: number): void;
   gameOver(reason: GameOverReason): void;
@@ -21,13 +23,24 @@ export function createGameAnnouncements(): GameAnnouncements {
 
   return {
     region,
-    ingredientAdded(ingredientName, ingredientCount, maximumIngredients) {
-      const cauldronMessage =
-        ingredientCount >= maximumIngredients
-          ? `The cauldron is full at ${ingredientCount} of ${maximumIngredients}.`
-          : `The cauldron contains ${ingredientCount} of ${maximumIngredients} ingredients.`;
+    ingredientAdded(
+      ingredientName,
+      ingredientCount,
+      maximumIngredients,
+      activatedReactionNames = [],
+      cauldronWasCleared = false,
+    ) {
+      const reactionMessage =
+        activatedReactionNames.length === 0
+          ? ""
+          : ` Reaction activated: ${activatedReactionNames.join(", ")}.`;
+      const cauldronMessage = cauldronWasCleared
+        ? " The cauldron was cleared."
+        : ingredientCount >= maximumIngredients
+          ? ` The cauldron is full at ${ingredientCount} of ${maximumIngredients}.`
+          : ` The cauldron contains ${ingredientCount} of ${maximumIngredients} ingredients.`;
 
-      region.textContent = `${ingredientName} added. ${cauldronMessage}`;
+      region.textContent = `${ingredientName} added.${reactionMessage}${cauldronMessage}`;
     },
     brewResult(succeeded, scoreAwarded) {
       region.textContent = succeeded

@@ -6,7 +6,11 @@ import { getRecipesByDifficulty } from "../src/logic/recipe-generator.ts";
 import { isValidReactionSelection } from "../src/logic/reactions/reaction-catalog.ts";
 import { MAX_CAULDRON_INGREDIENTS } from "../src/state/game-state.ts";
 import { createGameState } from "../src/state/create-game-state.ts";
-import { addIngredient, canAddIngredient } from "../src/state/game-actions.ts";
+import {
+  addIngredient,
+  addIngredientWithReactions,
+  canAddIngredient,
+} from "../src/state/game-actions.ts";
 import { getGameTimeRemaining, pauseGame } from "../src/state/game-status.ts";
 
 test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
@@ -93,6 +97,64 @@ test("adds ingredients in order and spends one stock per addition", () => {
   assert.equal(afterSecondAddition.shelfStock[firstIngredientId], 8);
   assert.equal(afterSecondAddition.shelfStock[secondIngredientId], 8);
   assert.equal(initialState.shelfStock[firstIngredientId], 9);
+});
+
+test("applies Bubbling's time penalty only when it first activates", () => {
+  const generatedState = createGameState(() => 0.5);
+  const initialState = {
+    ...generatedState,
+    activeReactionIds: ["bubbling"],
+    endTime: 100_000,
+    shelfStock: {
+      ...generatedState.shelfStock,
+      "fairy-dust": 2,
+      "caustic-acid": 2,
+      "dragon-tears": 2,
+    },
+  };
+  const afterFairyDust = addIngredient(initialState, "fairy-dust");
+  const acidAddition = addIngredientWithReactions(
+    afterFairyDust,
+    "caustic-acid",
+  );
+  const afterAnotherIngredient = addIngredientWithReactions(
+    acidAddition.state,
+    "dragon-tears",
+  );
+
+  assert.deepEqual(
+    acidAddition.activatedReactions.map(({ id }) => id),
+    ["bubbling"],
+  );
+  assert.equal(acidAddition.state.endTime, 90_000);
+  assert.deepEqual(afterAnotherIngredient.activatedReactions, []);
+  assert.equal(afterAnotherIngredient.state.endTime, 90_000);
+});
+
+test("Volatile Mix removes one life and clears the cauldron", () => {
+  const generatedState = createGameState(() => 0.5, 0, "hard");
+  const initialState = {
+    ...generatedState,
+    activeReactionIds: ["volatile-mix"],
+    shelfStock: {
+      ...generatedState.shelfStock,
+      "phoenix-feather": 2,
+      "essence-of-the-void": 2,
+    },
+  };
+  const afterPhoenixFeather = addIngredient(initialState, "phoenix-feather");
+  const volatileMixAddition = addIngredientWithReactions(
+    afterPhoenixFeather,
+    "essence-of-the-void",
+  );
+
+  assert.deepEqual(
+    volatileMixAddition.activatedReactions.map(({ id }) => id),
+    ["volatile-mix"],
+  );
+  assert.equal(volatileMixAddition.state.lives, initialState.lives - 1);
+  assert.deepEqual(volatileMixAddition.state.cauldronIngredients, []);
+  assert.equal(volatileMixAddition.state.shelfStock["essence-of-the-void"], 1);
 });
 
 test("does not add an ingredient whose stock is empty", () => {

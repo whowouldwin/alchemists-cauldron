@@ -1,32 +1,60 @@
 import { INGREDIENTS } from "../data/ingredients.ts";
+import type { Ingredient } from "../data/ingredients.ts";
 import { DIFFICULTY_SETTINGS } from "../data/difficulty-settings.ts";
 import { pickRandomRecipe } from "../logic/recipe-generator.ts";
+import { getNewlyActivatedReactions } from "../logic/reactions/reaction-engine.ts";
+import type { IReaction } from "../logic/reactions/reaction-types.ts";
 import { MILLISECONDS_PER_SECOND } from "../logic/timer.ts";
 import type { GameState } from "./game-state.ts";
+
+export interface IngredientAdditionResult {
+  readonly state: GameState;
+  readonly ingredient: Ingredient | null;
+  readonly activatedReactions: readonly IReaction[];
+}
 
 export function addIngredient(
   state: GameState,
   ingredientId: string,
 ): GameState {
+  return addIngredientWithReactions(state, ingredientId).state;
+}
+
+export function addIngredientWithReactions(
+  state: GameState,
+  ingredientId: string,
+): IngredientAdditionResult {
   if (!canAddIngredient(state, ingredientId)) {
-    return state;
+    return { state, ingredient: null, activatedReactions: [] };
   }
 
   const ingredient = INGREDIENTS.find(({ id }) => id === ingredientId);
   const stock = state.shelfStock[ingredientId];
 
   if (ingredient === undefined || stock === undefined) {
-    return state;
+    return { state, ingredient: null, activatedReactions: [] };
   }
 
-  return {
+  const cauldronIngredients = [...state.cauldronIngredients, ingredient];
+  const activatedReactions = getNewlyActivatedReactions(
+    state.cauldronIngredients,
+    cauldronIngredients,
+    state.activeReactionIds,
+  );
+  const nextState: GameState = {
     ...state,
-    cauldronIngredients: [...state.cauldronIngredients, ingredient],
+    cauldronIngredients,
     lastBrewResult: null,
     shelfStock: {
       ...state.shelfStock,
       [ingredientId]: stock - 1,
     },
+  };
+
+  return {
+    state: applyReactionEffects(nextState, activatedReactions),
+    ingredient,
+    activatedReactions,
   };
 }
 
@@ -87,5 +115,29 @@ export function applyBrewResult(
     score: state.score + settings.scorePerBrew,
     endTime: Math.min(bonusEndTime, maximumEndTime),
     lastBrewResult: "success",
+  };
+}
+
+function applyReactionEffects(
+  state: GameState,
+  reactions: readonly IReaction[],
+): GameState {
+  const timePenaltySeconds = reactions.reduce(
+    (total, reaction) => total + (reaction.effects?.timePenaltySeconds ?? 0),
+    0,
+  );
+  const livesLost = reactions.reduce(
+    (total, reaction) => total + (reaction.effects?.livesLost ?? 0),
+    0,
+  );
+  const shouldClearCauldron = reactions.some(
+    ({ effects }) => effects?.clearCauldron === true,
+  );
+
+  return {
+    ...state,
+    endTime: state.endTime - timePenaltySeconds * MILLISECONDS_PER_SECOND,
+    lives: Math.max(state.lives - livesLost, 0),
+    cauldronIngredients: shouldClearCauldron ? [] : state.cauldronIngredients,
   };
 }

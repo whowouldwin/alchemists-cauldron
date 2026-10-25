@@ -3,7 +3,7 @@ import { isBrewSuccessful } from "../logic/brew-check.ts";
 import { resolveCauldronReactions } from "../logic/reactions/reaction-engine.ts";
 import type { GameState } from "../state/game-state.ts";
 import {
-  addIngredient,
+  addIngredientWithReactions,
   applyBrewResult,
   canAddIngredient,
 } from "../state/game-actions.ts";
@@ -33,25 +33,31 @@ export class GameBrewingController {
       return;
     }
 
-    const nextState = addIngredient(gameState, ingredientId);
+    const addition = addIngredientWithReactions(gameState, ingredientId);
+    const { state: nextState, ingredient, activatedReactions } = addition;
 
     if (nextState === gameState) {
       return;
     }
 
-    const addedIngredient = nextState.cauldronIngredients.at(-1);
-
-    if (addedIngredient === undefined) {
+    if (ingredient === null) {
       return;
     }
 
     this.options.setGameState(nextState);
+
+    if (this.options.finishGameIfNeeded()) {
+      return;
+    }
+
     this.options.saveCurrentGame();
     this.options.render();
     this.options.announcements.ingredientAdded(
-      addedIngredient.name,
+      ingredient.name,
       nextState.cauldronIngredients.length,
       DIFFICULTY_SETTINGS[nextState.difficulty].maxCauldronIngredients,
+      activatedReactions.map(({ name }) => name),
+      activatedReactions.some(({ effects }) => effects?.clearCauldron === true),
     );
   };
 

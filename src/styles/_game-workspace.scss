@@ -1,0 +1,226 @@
+.app-shell--playing {
+  width: min(100% - 40px, 1600px);
+  padding: 16px 0;
+
+  .game-content {
+    display: grid;
+    min-height: min(850px, calc(100dvh - 32px));
+    grid-template-rows: auto 1fr;
+    gap: 16px;
+  }
+}
+
+.game-header {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  &__identity,
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  &__difficulty {
+    color: var(--color-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) repeat(2, minmax(0, 1fr));
+  grid-template-areas: "shelf cauldron recipe";
+  align-items: stretch;
+  gap: 16px;
+
+  .shelf-panel {
+    grid-area: shelf;
+  }
+
+  .cauldron-panel {
+    grid-area: cauldron;
+  }
+
+  .recipe-panel {
+    grid-area: recipe;
+  }
+}
+
+@media (max-width: 1100px) {
+  .game-header__identity {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+@media (max-width: 900px) {
+  .app-shell--playing .game-content {
+    min-height: 0;
+    gap: 12px;
+  }
+
+  .game-layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "shelf cauldron"
+      "recipe recipe";
+    gap: 12px;
+  }
+
+  .game-layout .panel {
+    padding: 16px;
+  }
+
+  .recipe-panel .parameter-bars {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 901px) and (max-height: 700px) {
+  .app-shell--playing {
+    padding: 12px 0;
+
+    .game-content {
+      min-height: calc(100dvh - 24px);
+      gap: 12px;
+    }
+  }
+
+  .game-layout {
+    gap: 12px;
+
+    .panel {
+      padding: 16px;
+    }
+  }
+
+  .ingredient-card {
+    min-height: 88px;
+    padding: 8px;
+
+    &__top {
+      min-height: 32px;
+    }
+
+    &__icon-wrap {
+      width: 32px;
+      height: 32px;
+    }
+
+    &__name {
+      font-size: 12px;
+    }
+
+    &__status {
+      top: 54px;
+      left: 8px;
+    }
+
+    .ingredient-icon {
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .recipe-panel,
+  .parameter-bars {
+    gap: 16px;
+  }
+
+  .parameter-panel {
+    padding-top: 14px;
+
+    &__heading {
+      margin-bottom: 14px;
+    }
+  }
+
+  .parameter-bar {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 620px) {
+  .app-shell--playing {
+    width: calc(100% - 24px);
+    padding: 12px 0;
+  }
+
+  .game-header {
+    flex-wrap: wrap;
+    gap: 12px;
+
+    &__identity {
+      width: 100%;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    &__difficulty {
+      max-width: 75px;
+      font-size: 11px;
+      text-align: right;
+    }
+
+    &__controls {
+      width: 100%;
+      gap: 8px;
+    }
+
+    .active-stats {
+      flex: 1;
+
+      > div {
+        min-width: 0;
+        flex: 1;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        padding: 7px 8px;
+      }
+
+      strong {
+        font-size: 14px;
+      }
+
+      span {
+        font-size: 10px;
+      }
+    }
+  }
+
+  .game-layout,
+  .recipe-panel .parameter-bars {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .game-layout .panel {
+    padding: 16px;
+  }
+
+  .game-layout {
+    grid-template-areas:
+      "recipe"
+      "shelf"
+      "cauldron";
+  }
+
+  .cauldron-art-wrap {
+    min-height: 150px;
+  }
+
+  .cauldron-list,
+  .empty-cauldron {
+    min-height: 80px;
+  }
+}

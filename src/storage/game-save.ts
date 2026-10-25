@@ -5,8 +5,15 @@ import {
 import { DIFFICULTY_SETTINGS } from "../data/difficulty-settings.ts";
 import { RECIPES, type Difficulty, type Recipe } from "../data/recipes.ts";
 import { MILLISECONDS_PER_SECOND } from "../logic/timer.ts";
+import {
+  isValidReactionSelection,
+  selectReactionIdsForDifficulty,
+} from "../logic/reactions/reaction-catalog.ts";
 import type { GameState } from "../state/game-state.ts";
-import { getGameTimeRemaining } from "../state/game-status.ts";
+import {
+  getGameOverReason,
+  getGameTimeRemaining,
+} from "../state/game-status.ts";
 
 export const GAME_SAVE_STORAGE_KEY = "alchemists-cauldron.save";
 
@@ -17,8 +24,9 @@ export interface GameSaveStorage {
 }
 
 export interface SavedGame {
-  readonly version: 1;
+  readonly version: 2;
   readonly difficulty: Difficulty;
+  readonly activeReactionIds: GameState["activeReactionIds"];
   readonly score: number;
   readonly timeLeft: number;
   readonly lives: number;
@@ -26,6 +34,13 @@ export interface SavedGame {
   readonly cauldronIngredients: GameState["cauldronIngredients"];
   readonly shelfStock: GameState["shelfStock"];
   readonly status: "playing" | "paused";
+}
+
+interface LegacySavedGame extends Omit<
+  SavedGame,
+  "version" | "activeReactionIds"
+> {
+  readonly version: 1;
 }
 
 export function saveGame(
@@ -46,8 +61,9 @@ export function saveGame(
   }
 
   const savedGame: SavedGame = {
-    version: 1,
+    version: 2,
     difficulty: state.difficulty,
+    activeReactionIds: state.activeReactionIds,
     score: state.score,
     timeLeft,
     lives: state.lives,
@@ -77,13 +93,23 @@ export function loadGame(storage?: GameSaveStorage): SavedGame | null {
     }
 
     const parsedSave: unknown = JSON.parse(rawSave);
+    let savedGame: SavedGame | null = null;
 
-    if (!isValidSavedGame(parsedSave)) {
-      clearSave(storage);
-      return null;
+    if (isValidSavedGame(parsedSave)) {
+      savedGame = parsedSave;
+    } else if (isValidLegacySavedGame(parsedSave)) {
+      savedGame = migrateLegacySavedGame(parsedSave);
     }
 
-    return parsedSave;
+    if (
+      savedGame !== null &&
+      getGameOverReason(restoreGameState(savedGame)) === null
+    ) {
+      return savedGame;
+    }
+
+    clearSave(storage);
+    return null;
   } catch {
     clearSave(storage);
     return null;
@@ -107,6 +133,7 @@ export function restoreGameState(
 
   return {
     difficulty: savedGame.difficulty,
+    activeReactionIds: savedGame.activeReactionIds,
     score: savedGame.score,
     lives: savedGame.lives,
     activeRecipe: savedGame.activeRecipe,
@@ -120,27 +147,56 @@ export function restoreGameState(
 }
 
 function isValidSavedGame(value: unknown): value is SavedGame {
-  if (!isRecord(value)) {
-    return false;
-  }
-
   if (
-    value.version !== 1 ||
-    !isDifficulty(value.difficulty) ||
-    !isNonNegativeInteger(value.score) ||
-    !isPositiveInteger(value.timeLeft) ||
-    !isValidLives(value.lives, value.difficulty) ||
-    !isRecipeForDifficulty(value.activeRecipe, value.difficulty) ||
-    !isValidCauldronIngredients(value.cauldronIngredients, value.difficulty) ||
-    !isValidShelfStock(value.shelfStock, value.difficulty) ||
-    (value.status !== "playing" && value.status !== "paused")
+    !isRecord(value) ||
+    value.version !== 2 ||
+    !hasValidSavedGameData(value)
   ) {
     return false;
   }
 
+  return isValidReactionSelection(value.activeReactionIds, value.difficulty);
+}
+
+function isValidLegacySavedGame(value: unknown): value is LegacySavedGame {
   return (
-    value.timeLeft <= DIFFICULTY_SETTINGS[value.difficulty].startingTimeSeconds
+    isRecord(value) &&
+    value.version === 1 &&
+    !Object.hasOwn(value, "activeReactionIds") &&
+    hasValidSavedGameData(value)
   );
+}
+
+function hasValidSavedGameData(
+  value: Record<string, unknown>,
+): value is Record<string, unknown> & { difficulty: Difficulty } {
+  const difficulty = value.difficulty;
+
+  if (!isDifficulty(difficulty)) {
+    return false;
+  }
+
+  return (
+    isNonNegativeInteger(value.score) &&
+    isPositiveInteger(value.timeLeft) &&
+    isValidLives(value.lives, difficulty) &&
+    isRecipeForDifficulty(value.activeRecipe, difficulty) &&
+    isValidCauldronIngredients(value.cauldronIngredients, difficulty) &&
+    isValidShelfStock(value.shelfStock, difficulty) &&
+    (value.status === "playing" || value.status === "paused") &&
+    value.timeLeft <= DIFFICULTY_SETTINGS[difficulty].startingTimeSeconds
+  );
+}
+
+function migrateLegacySavedGame(savedGame: LegacySavedGame): SavedGame {
+  return {
+    ...savedGame,
+    version: 2,
+    activeReactionIds: selectReactionIdsForDifficulty(
+      savedGame.difficulty,
+      () => 0,
+    ),
+  };
 }
 
 function isDifficulty(value: unknown): value is Difficulty {

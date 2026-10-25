@@ -3,18 +3,19 @@ $target-match-color: #2f7042;
 $target-glow-color: #79b98a;
 
 .parameter-panel {
-  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #dedede;
 
   &__heading {
-    margin: 0 0 20px;
-    font-size: 20px;
-    letter-spacing: -0.04em;
+    margin: 0 0 18px;
+    font-size: 15px;
+    letter-spacing: -0.02em;
   }
 }
 
 .parameter-bars {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
 }
 
@@ -22,7 +23,15 @@ $target-glow-color: #79b98a;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+
+  &__target-label {
+    grid-column: 1 / -1;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+  }
 
   &__label {
     margin: 0;
@@ -86,6 +95,7 @@ $target-glow-color: #79b98a;
     background: var(--color-ink);
     box-shadow: 0 0 0 1px var(--color-ink);
     transform: translate(-50%, -50%);
+    transition: left 350ms ease-out;
   }
 
   &__target-zone {
@@ -102,4 +112,10 @@ $target-glow-color: #79b98a;
   box-shadow:
     0 0 0 1px $target-match-color,
     0 0 10px $target-glow-color;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parameter-bar__marker {
+    transition: none;
+  }
 }

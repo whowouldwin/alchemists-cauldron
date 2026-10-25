@@ -2,7 +2,6 @@ import type { Ingredient } from "../../data/ingredients.ts";
 import { DIFFICULTY_SETTINGS } from "../../data/difficulty-settings.ts";
 import type { GameState } from "../../state/game-state.ts";
 import { createElement } from "../shared/create-element.ts";
-import { formatIngredientValue } from "../shared/format-ingredient-value.ts";
 import { renderIngredientIcon } from "../shared/render-ingredient-icon.ts";
 import { CAULDRON_ICON } from "../shared/ui-assets.ts";
 
@@ -10,14 +9,6 @@ function renderAddedIngredient(
   ingredient: Ingredient,
   index: number,
 ): HTMLLIElement {
-  const values = [
-    ingredient.temperature,
-    ingredient.density,
-    ingredient.magicPower,
-  ]
-    .map(formatIngredientValue)
-    .join(" · ");
-
   const listItem = createElement("li", "cauldron-ingredient");
   const ingredientNumber = createElement(
     "span",
@@ -30,11 +21,6 @@ function renderAddedIngredient(
     "cauldron-ingredient__name",
     ingredient.name,
   );
-  const ingredientValues = createElement(
-    "span",
-    "cauldron-ingredient__values",
-    values,
-  );
 
   listItem.append(ingredientNumber);
 
@@ -42,7 +28,7 @@ function renderAddedIngredient(
     listItem.append(ingredientIcon);
   }
 
-  listItem.append(ingredientName, ingredientValues);
+  listItem.append(ingredientName);
 
   return listItem;
 }
@@ -52,7 +38,7 @@ function renderContents(state: GameState): HTMLElement {
     return createElement(
       "p",
       "empty-cauldron",
-      "Your mixture is waiting for its first ingredient.",
+      "Click an ingredient or drop it here to begin.",
     );
   }
 
@@ -68,7 +54,14 @@ export function renderCauldron(state: GameState): HTMLElement {
   const maximumIngredients =
     DIFFICULTY_SETTINGS[state.difficulty].maxCauldronIngredients;
   const isFull = state.cauldronIngredients.length >= maximumIngredients;
-  const panel = createElement("section", "panel cauldron-panel");
+  const feedbackClassName =
+    state.lastBrewResult === null
+      ? ""
+      : ` cauldron-panel--brew-${state.lastBrewResult}`;
+  const panel = createElement(
+    "section",
+    `panel cauldron-panel${feedbackClassName}`,
+  );
   const panelHeading = createElement("div", "panel-heading");
   const headingContent = createElement("div");
   const eyebrowText = createElement("p", "eyebrow", "The mixing vessel");
@@ -84,15 +77,11 @@ export function renderCauldron(state: GameState): HTMLElement {
   const orderNote = createElement(
     "span",
     undefined,
-    "Ingredients are listed in the order added.",
-  );
-  const maximumNote = createElement(
-    "span",
-    undefined,
-    `Maximum ${maximumIngredients}`,
+    "Listed in the order added",
   );
 
   panel.setAttribute("aria-labelledby", "cauldron-heading");
+  panel.dataset.dropTarget = "cauldron";
   heading.id = "cauldron-heading";
   headingContent.append(eyebrowText, heading);
   panelHeading.append(headingContent, itemCount);
@@ -102,7 +91,7 @@ export function renderCauldron(state: GameState): HTMLElement {
   cauldronImage.setAttribute("aria-hidden", "true");
   cauldronArtWrap.append(cauldronImage);
 
-  cauldronFooter.append(orderNote, maximumNote);
+  cauldronFooter.append(orderNote);
   panel.append(
     panelHeading,
     cauldronArtWrap,

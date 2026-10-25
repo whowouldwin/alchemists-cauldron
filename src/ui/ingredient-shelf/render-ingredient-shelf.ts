@@ -24,7 +24,7 @@ export function renderIngredientShelf(state: GameState): HTMLElement {
     cauldronIsFull ? "panel-note panel-note--warning" : "panel-note",
     cauldronIsFull
       ? "The cauldron is full."
-      : "Choose an ingredient to add it to the cauldron.",
+      : "Hover or focus for values. Click or drag to add.",
   );
   const shelfGrid = createElement("div", "shelf-grid");
 

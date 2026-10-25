@@ -15,7 +15,6 @@ import { formatIngredientValue } from "../shared/format-ingredient-value.ts";
 import type { ParameterBarConfig } from "./parameter-bar-config.ts";
 
 const previousMarkerPositions = new Map<CauldronParameter, number>();
-const MARKER_ANIMATION_DURATION = 350;
 
 function getAccessibleValueText(
   value: number,
@@ -80,22 +79,26 @@ function renderScaleLabels(
   return labels;
 }
 
-function animateMarker(
+function transitionMarker(
   marker: HTMLSpanElement,
   startPosition: number,
   endPosition: number,
 ): void {
-  if (
+  const shouldTransition =
     startPosition !== endPosition &&
-    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  ) {
-    marker.animate(
-      [{ left: `${startPosition}%` }, { left: `${endPosition}%` }],
-      { duration: MARKER_ANIMATION_DURATION, easing: "ease-out" },
-    );
-  }
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  marker.style.left = `${endPosition}%`;
+  marker.style.left = `${shouldTransition ? startPosition : endPosition}%`;
+
+  if (shouldTransition) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (marker.isConnected) {
+          marker.style.left = `${endPosition}%`;
+        }
+      });
+    });
+  }
 }
 
 export function renderParameterBar(
@@ -109,6 +112,7 @@ export function renderParameterBar(
     parameter.name,
     DIFFICULTY_SETTINGS[difficulty].maxCauldronIngredients,
     parameter.supportsNegativeValues,
+    value,
   );
   const position = calculateMarkerPosition(value, scale);
   const isInTargetRange =
@@ -153,10 +157,21 @@ export function renderParameterBar(
     bar.classList.add("parameter-bar--in-range");
   }
 
-  marker.style.left = `${startPosition}%`;
   track.append(marker);
-  bar.append(label, output, track, scaleLabels);
-  animateMarker(marker, startPosition, position);
+  bar.append(label, output);
+
+  if (targetRange !== undefined) {
+    bar.append(
+      createElement(
+        "span",
+        "parameter-bar__target-label",
+        `Target: ${formatIngredientValue(targetRange.minimum)} to ${formatIngredientValue(targetRange.maximum)}`,
+      ),
+    );
+  }
+
+  bar.append(track, scaleLabels);
+  transitionMarker(marker, startPosition, position);
   previousMarkerPositions.set(parameter.name, position);
 
   return bar;

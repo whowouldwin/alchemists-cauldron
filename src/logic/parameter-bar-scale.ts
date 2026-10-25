@@ -23,13 +23,17 @@ export function calculateParameterScale(
   parameter: CauldronParameter,
   ingredientLimit: number,
   supportsNegativeValues: boolean,
+  currentValue = 0,
 ): ParameterScale {
   const largestIngredientValue = ingredients.reduce(
     (largestValue, ingredient) =>
       Math.max(largestValue, Math.abs(ingredient[parameter])),
     0,
   );
-  const maximum = largestIngredientValue * ingredientLimit;
+  const maximum = Math.max(
+    largestIngredientValue * ingredientLimit,
+    Math.abs(currentValue),
+  );
 
   return {
     minimum: supportsNegativeValues ? -maximum : 0,

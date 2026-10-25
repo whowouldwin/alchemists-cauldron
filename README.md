@@ -4,16 +4,32 @@ Alchemist's Cauldron is a browser game where the player combines ingredients to 
 
 ## Project stages
 
-- **Precondition 1:** repository, folder structure, and development quality tools.
+- **Precondition 1:** repository, folder structure, TypeScript, ESLint, Prettier, and Git hooks.
 - **Level 1 — Basic:** ingredient shelf, cauldron, recipes, brewing, timer, pause, and leaderboard.
-- **Level 2 — Extended:** difficulty selection and saving or continuing an unfinished game.
+- **Level 2 — Extended:** difficulty selection and automatic save / continue for unfinished games.
 - **Level 3 — Full game:** drag and drop, ingredient tooltips, chemical reactions, Pour Out, visual feedback, and keyboard shortcuts.
 
-The game will use TypeScript, HTML, and CSS. Game rules will live separately from DOM rendering. Frameworks, game engines, CSS frameworks, and runtime libraries are out of scope.
+The game uses TypeScript, native DOM APIs, HTML, and SCSS. Game rules live separately from DOM rendering. It has no runtime dependencies or UI framework.
 
 ## Status
 
-Project setup is in progress. Gameplay has not been implemented yet.
+All three levels are implemented. The final Story 3 pull request is open for RS School Cross-Check.
+
+## How to play
+
+Choose a difficulty and start a game. Select ingredients from the shelf by clicking or dragging them into the cauldron. Each ingredient changes the cauldron's temperature, density, and magic power; match those values to the current recipe and brew before time or lives run out. A successful brew earns points and selects another recipe. A failed brew spends the ingredients and a life. In Level 3, use **Pour Out** to clear the cauldron without brewing.
+
+The game also provides Help and Settings panels, a Top-10 leaderboard, and a Continue Game option for a valid saved run. A continued game opens paused.
+
+### Keyboard controls
+
+- `1`–`8`: add the corresponding available ingredient.
+- `B`: brew the current mixture.
+- `O`: pour out the cauldron.
+- `P`: pause the active game.
+- On the pause screen, use the focusable **Resume** button with the browser's standard Enter or Space behavior.
+
+Game shortcuts work only during active play and are ignored while typing in text fields.
 
 ## Run locally
 

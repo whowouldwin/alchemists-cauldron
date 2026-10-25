@@ -3,9 +3,14 @@ import test from "node:test";
 import { LEVEL_ONE_INGREDIENTS } from "../src/data/ingredients.ts";
 import { DIFFICULTY_SETTINGS } from "../src/data/difficulty-settings.ts";
 import { getRecipesByDifficulty } from "../src/logic/recipe-generator.ts";
+import { isValidReactionSelection } from "../src/logic/reactions/reaction-catalog.ts";
 import { MAX_CAULDRON_INGREDIENTS } from "../src/state/game-state.ts";
 import { createGameState } from "../src/state/create-game-state.ts";
-import { addIngredient } from "../src/state/game-actions.ts";
+import {
+  addIngredient,
+  addIngredientWithReactions,
+  canAddIngredient,
+} from "../src/state/game-actions.ts";
 import { getGameTimeRemaining, pauseGame } from "../src/state/game-status.ts";
 
 test("starts with an empty cauldron and stock for the Level 1 shelf", () => {
@@ -69,6 +74,8 @@ test("creates the initial state from the selected difficulty settings", () => {
       DIFFICULTY_SETTINGS[state.difficulty].reactionCount,
       reactionCount,
     );
+    assert.equal(state.activeReactionIds.length, reactionCount);
+    assert.ok(isValidReactionSelection(state.activeReactionIds, difficulty));
   }
 });
 
@@ -76,6 +83,7 @@ test("adds ingredients in order and spends one stock per addition", () => {
   const initialState = createGameState(() => 0.5);
   const firstIngredientId = LEVEL_ONE_INGREDIENTS[0].id;
   const secondIngredientId = LEVEL_ONE_INGREDIENTS[1].id;
+  assert.equal(canAddIngredient(initialState, firstIngredientId), true);
   const afterFirstAddition = addIngredient(initialState, firstIngredientId);
   const afterSecondAddition = addIngredient(
     afterFirstAddition,
@@ -91,6 +99,64 @@ test("adds ingredients in order and spends one stock per addition", () => {
   assert.equal(initialState.shelfStock[firstIngredientId], 9);
 });
 
+test("applies Bubbling's time penalty only when it first activates", () => {
+  const generatedState = createGameState(() => 0.5);
+  const initialState = {
+    ...generatedState,
+    activeReactionIds: ["bubbling"],
+    endTime: 100_000,
+    shelfStock: {
+      ...generatedState.shelfStock,
+      "fairy-dust": 2,
+      "caustic-acid": 2,
+      "dragon-tears": 2,
+    },
+  };
+  const afterFairyDust = addIngredient(initialState, "fairy-dust");
+  const acidAddition = addIngredientWithReactions(
+    afterFairyDust,
+    "caustic-acid",
+  );
+  const afterAnotherIngredient = addIngredientWithReactions(
+    acidAddition.state,
+    "dragon-tears",
+  );
+
+  assert.deepEqual(
+    acidAddition.activatedReactions.map(({ id }) => id),
+    ["bubbling"],
+  );
+  assert.equal(acidAddition.state.endTime, 90_000);
+  assert.deepEqual(afterAnotherIngredient.activatedReactions, []);
+  assert.equal(afterAnotherIngredient.state.endTime, 90_000);
+});
+
+test("Volatile Mix removes one life and clears the cauldron", () => {
+  const generatedState = createGameState(() => 0.5, 0, "hard");
+  const initialState = {
+    ...generatedState,
+    activeReactionIds: ["volatile-mix"],
+    shelfStock: {
+      ...generatedState.shelfStock,
+      "phoenix-feather": 2,
+      "essence-of-the-void": 2,
+    },
+  };
+  const afterPhoenixFeather = addIngredient(initialState, "phoenix-feather");
+  const volatileMixAddition = addIngredientWithReactions(
+    afterPhoenixFeather,
+    "essence-of-the-void",
+  );
+
+  assert.deepEqual(
+    volatileMixAddition.activatedReactions.map(({ id }) => id),
+    ["volatile-mix"],
+  );
+  assert.equal(volatileMixAddition.state.lives, initialState.lives - 1);
+  assert.deepEqual(volatileMixAddition.state.cauldronIngredients, []);
+  assert.equal(volatileMixAddition.state.shelfStock["essence-of-the-void"], 1);
+});
+
 test("does not add an ingredient whose stock is empty", () => {
   const initialState = createGameState(() => 0);
   const ingredientId = LEVEL_ONE_INGREDIENTS[0].id;
@@ -100,6 +166,7 @@ test("does not add an ingredient whose stock is empty", () => {
   );
 
   assert.equal(stateAfterTwoAdditions.shelfStock[ingredientId], 0);
+  assert.equal(canAddIngredient(stateAfterTwoAdditions, ingredientId), false);
   assert.equal(
     addIngredient(stateAfterTwoAdditions, ingredientId),
     stateAfterTwoAdditions,
@@ -116,6 +183,7 @@ test("does not exceed the cauldron capacity", () => {
   }
 
   assert.equal(fullState.cauldronIngredients.length, MAX_CAULDRON_INGREDIENTS);
+  assert.equal(canAddIngredient(fullState, ingredientId), false);
   assert.equal(addIngredient(fullState, ingredientId), fullState);
   assert.equal(
     fullState.shelfStock[ingredientId],
@@ -148,5 +216,6 @@ test("does not add ingredients while the game is paused", () => {
   );
   const ingredientId = LEVEL_ONE_INGREDIENTS[0].id;
 
+  assert.equal(canAddIngredient(state, ingredientId), false);
   assert.equal(addIngredient(state, ingredientId), state);
 });

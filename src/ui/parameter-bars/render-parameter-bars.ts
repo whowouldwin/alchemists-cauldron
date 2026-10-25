@@ -14,7 +14,7 @@ export function renderParameterBars(
   targetRanges?: CauldronTargetRanges,
   difficulty: Difficulty = "medium",
 ): HTMLElement {
-  const panel = createElement("section", "panel parameter-panel");
+  const panel = createElement("section", "parameter-panel");
   const heading = createElement(
     "h2",
     "parameter-panel__heading",

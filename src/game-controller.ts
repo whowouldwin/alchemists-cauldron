@@ -3,7 +3,7 @@ import { LeaderboardController } from "./game-controller/leaderboard-controller.
 import { GameSessionController } from "./game-controller/game-session-controller.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
-import { createGameDragHandler } from "./ui/game-drag-handler.ts";
+import { GameDragHandler } from "./ui/game-drag-handler.ts";
 import { renderGame } from "./ui/screens/render-game.ts";
 
 export function initializeGameController(
@@ -53,7 +53,7 @@ export function initializeGameController(
     render,
   });
 
-  const gameDragHandler = createGameDragHandler({
+  const gameDragHandler = new GameDragHandler({
     canAddIngredient: gameSession.canAddIngredient,
     addIngredient: gameSession.addIngredient,
   });

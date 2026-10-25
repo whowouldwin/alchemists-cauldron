@@ -112,6 +112,7 @@ export function renderParameterBar(
     parameter.name,
     DIFFICULTY_SETTINGS[difficulty].maxCauldronIngredients,
     parameter.supportsNegativeValues,
+    value,
   );
   const position = calculateMarkerPosition(value, scale);
   const isInTargetRange =

@@ -10,7 +10,10 @@ import {
   selectReactionIdsForDifficulty,
 } from "../logic/reactions/reaction-catalog.ts";
 import type { GameState } from "../state/game-state.ts";
-import { getGameTimeRemaining } from "../state/game-status.ts";
+import {
+  getGameOverReason,
+  getGameTimeRemaining,
+} from "../state/game-status.ts";
 
 export const GAME_SAVE_STORAGE_KEY = "alchemists-cauldron.save";
 
@@ -90,13 +93,19 @@ export function loadGame(storage?: GameSaveStorage): SavedGame | null {
     }
 
     const parsedSave: unknown = JSON.parse(rawSave);
+    let savedGame: SavedGame | null = null;
 
     if (isValidSavedGame(parsedSave)) {
-      return parsedSave;
+      savedGame = parsedSave;
+    } else if (isValidLegacySavedGame(parsedSave)) {
+      savedGame = migrateLegacySavedGame(parsedSave);
     }
 
-    if (isValidLegacySavedGame(parsedSave)) {
-      return migrateLegacySavedGame(parsedSave);
+    if (
+      savedGame !== null &&
+      getGameOverReason(restoreGameState(savedGame)) === null
+    ) {
+      return savedGame;
     }
 
     clearSave(storage);

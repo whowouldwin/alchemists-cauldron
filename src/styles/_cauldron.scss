@@ -108,15 +108,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .cauldron-art,
-  .cauldron-panel--brew-success .cauldron-art,
-  .cauldron-panel--brew-failure .cauldron-art-wrap::after,
-  .game-content--brew-failure {
-    animation: none;
-  }
-}
-
 .cauldron-panel--drop-target {
   outline: 3px solid #f0c75e;
   outline-offset: 4px;
@@ -197,6 +188,11 @@
   .ingredient-icon {
     width: 29px;
     height: 29px;
+    animation: ingredient-float 2.8s ease-in-out infinite;
+  }
+
+  &:nth-child(even) .ingredient-icon {
+    animation-delay: -1.4s;
   }
 
   &__name {
@@ -213,6 +209,27 @@
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+  }
+}
+
+@keyframes ingredient-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cauldron-art,
+  .cauldron-ingredient .ingredient-icon,
+  .cauldron-panel--brew-success .cauldron-art,
+  .cauldron-panel--brew-failure .cauldron-art-wrap::after,
+  .game-content--brew-failure {
+    animation: none;
   }
 }
 

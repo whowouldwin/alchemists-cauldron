@@ -1,0 +1,68 @@
+.welcome-art__sparkle {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  font-size: 28px;
+  line-height: 1;
+
+  &--pink {
+    top: 14%;
+    left: 16%;
+    color: #a65373;
+  }
+
+  &--yellow {
+    right: 14%;
+    bottom: 14%;
+    color: #9a7818;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .welcome-art > img {
+    transition: transform 350ms ease;
+  }
+
+  .welcome-art__sparkle {
+    animation: welcome-sparkle 700ms ease-out;
+    transition: transform 350ms ease;
+  }
+
+  .start-actions .primary-button span:last-child {
+    transition: transform 180ms ease;
+  }
+
+  .start-screen:has([data-action="start-game"]:is(:hover, :focus-visible)) {
+    .welcome-art > img {
+      transform: translateY(-6px) rotate(-3deg);
+    }
+
+    .welcome-art__sparkle--pink {
+      transform: translate(-3px, -3px) rotate(20deg) scale(1.2);
+    }
+
+    .welcome-art__sparkle--yellow {
+      transform: translate(3px, -3px) rotate(-20deg) scale(1.2);
+    }
+
+    .start-actions .primary-button span:last-child {
+      transform: translate(2px, -2px);
+    }
+  }
+
+  .start-actions .primary-button:active {
+    transform: translate(3px, 3px) scale(0.98);
+  }
+}
+
+@keyframes welcome-sparkle {
+  from {
+    opacity: 0;
+    scale: 0.5;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}

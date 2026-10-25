@@ -83,8 +83,7 @@
     }
   }
 
-  .game-layout,
-  .game-layout--empty {
+  .game-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -162,10 +161,6 @@
     > img {
       width: 170px;
     }
-  }
-
-  .pre-game-stats {
-    margin: 16px auto 22px;
   }
 
   .game-intro {

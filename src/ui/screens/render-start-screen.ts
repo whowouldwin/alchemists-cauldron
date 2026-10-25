@@ -1,6 +1,5 @@
 import { CAULDRON_ICON } from "../shared/ui-assets.ts";
 import {
-  renderEmptyPanel,
   renderLeaderboardButton,
   renderTopbar,
 } from "../shared/render-layout.ts";
@@ -8,6 +7,7 @@ import { createElement } from "../shared/create-element.ts";
 import type { Difficulty } from "../../data/recipes.ts";
 import { renderDifficultySettings } from "./render-difficulty-settings.ts";
 import { renderHelpPanel } from "./render-help-panel.ts";
+import { renderStartStatus } from "./render-start-status.ts";
 
 export interface StartScreenOptions {
   readonly selectedDifficulty: Difficulty;
@@ -17,7 +17,7 @@ export interface StartScreenOptions {
 }
 
 export function renderStartScreen(options: StartScreenOptions): HTMLElement {
-  const appShell = createElement("main", "app-shell");
+  const appShell = createElement("main", "app-shell start-screen");
   const welcomePanel = createElement("section", "welcome-panel");
   const welcomeCopy = createElement("div", "welcome-copy");
   const eyebrowText = createElement("p", "eyebrow", "A new experiment awaits");
@@ -26,7 +26,7 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
   const description = createElement(
     "p",
     "welcome-description",
-    "Gather curious ingredients, mind your measures, and see what stirs beneath the surface.",
+    "Choose ingredients, match the recipe's three target ranges, then brew your potion.",
   );
   const startButton = createElement("button", "primary-button");
   const buttonLabel = createElement("span", undefined, "Start Game");
@@ -36,14 +36,16 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
     : null;
   const welcomeArt = createElement("div", "welcome-art");
   const cauldronImage = createElement("img");
-  const preGameStats = createElement("div", "pre-game-stats");
-  const score = createElement("div");
-  const scoreLabel = createElement("span", undefined, "Score");
-  const scoreValue = createElement("strong", undefined, "0");
-  const time = createElement("div");
-  const timeLabel = createElement("span", undefined, "Time");
-  const timeValue = createElement("strong", undefined, "0:00");
-  const gameLayout = createElement("div", "game-layout game-layout--empty");
+  const pinkSparkle = createElement(
+    "span",
+    "welcome-art__sparkle welcome-art__sparkle--pink",
+    "✦",
+  );
+  const yellowSparkle = createElement(
+    "span",
+    "welcome-art__sparkle welcome-art__sparkle--yellow",
+    "✦",
+  );
 
   welcomePanel.setAttribute("aria-labelledby", "welcome-heading");
   heading.id = "welcome-heading";
@@ -61,30 +63,10 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
   welcomeArt.setAttribute("aria-hidden", "true");
   cauldronImage.src = CAULDRON_ICON;
   cauldronImage.alt = "";
-  welcomeArt.append(cauldronImage);
+  welcomeArt.append(cauldronImage, pinkSparkle, yellowSparkle);
   welcomePanel.append(welcomeCopy, welcomeArt);
 
-  preGameStats.setAttribute("aria-label", "Game status");
-  score.append(scoreLabel, scoreValue);
-  time.append(timeLabel, timeValue);
-  preGameStats.append(score, time);
-
-  gameLayout.append(
-    renderEmptyPanel(
-      "shelf",
-      "Ingredient shelf",
-      "Your ingredients",
-      "Your ingredients will appear here when the game begins.",
-    ),
-    renderEmptyPanel(
-      "cauldron",
-      "Cauldron",
-      "The mixing vessel",
-      "Your cauldron is empty and ready for its first brew.",
-    ),
-  );
-
-  const topbar = renderTopbar("A little magic lab");
+  const topbar = renderTopbar();
   const settingsButton = createElement(
     "button",
     "leaderboard-link",
@@ -121,10 +103,10 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
     topbar,
     welcomePanel,
     startActions,
+    renderStartStatus(),
     helpPanel,
     difficultySettings,
   );
-  appShell.append(preGameStats, gameLayout);
 
   return appShell;
 }

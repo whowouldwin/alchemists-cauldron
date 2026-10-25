@@ -264,18 +264,3 @@
     color: var(--color-ink);
   }
 }
-
-.empty-panel {
-  min-height: 160px;
-  border-style: dashed;
-  box-shadow: var(--shadow-offset);
-
-  &__text {
-    max-width: 360px;
-    margin: 18px 0 0;
-    color: var(--color-muted);
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.6;
-  }
-}

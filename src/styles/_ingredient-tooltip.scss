@@ -1,0 +1,149 @@
+.ingredient-tooltip {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  display: none;
+  width: min(216px, calc(100vw - 24px));
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #393939;
+  border-radius: 12px;
+  background: #262626;
+  box-shadow:
+    0 8px 24px #00000024,
+    0 2px 6px #00000014;
+  color: #ffffff;
+  cursor: default;
+  line-height: 1.4;
+
+  &::before,
+  &::after {
+    position: absolute;
+    content: "";
+  }
+
+  &::after {
+    width: 8px;
+    height: 8px;
+    background: #262626;
+    transform: rotate(45deg);
+  }
+
+  &[data-side="right"],
+  &[data-side="left"] {
+    &::before {
+      top: 0;
+      bottom: 0;
+      width: 12px;
+    }
+
+    &::after {
+      top: calc(var(--tooltip-arrow-offset) - 4px);
+    }
+  }
+
+  &[data-side="right"] {
+    &::before {
+      right: 100%;
+    }
+
+    &::after {
+      left: -4px;
+    }
+  }
+
+  &[data-side="left"] {
+    &::before {
+      left: 100%;
+    }
+
+    &::after {
+      right: -4px;
+    }
+  }
+
+  &[data-side="top"],
+  &[data-side="bottom"] {
+    &::before {
+      right: 0;
+      left: 0;
+      height: 12px;
+    }
+
+    &::after {
+      left: calc(var(--tooltip-arrow-offset) - 4px);
+    }
+  }
+
+  &[data-side="top"] {
+    &::before {
+      top: 100%;
+    }
+
+    &::after {
+      bottom: -4px;
+    }
+  }
+
+  &[data-side="bottom"] {
+    &::before {
+      bottom: 100%;
+    }
+
+    &::after {
+      top: -4px;
+    }
+  }
+
+  &__title {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ffffff2b;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__label {
+    color: #dedede;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  &__value {
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.ingredient-card--tooltip-visible .ingredient-tooltip {
+  display: grid;
+  animation: ingredient-tooltip-appear 120ms ease-out 280ms both;
+}
+
+.ingredient-card:focus-visible .ingredient-tooltip {
+  animation-delay: 0ms;
+}
+
+.app-shell--paused .ingredient-tooltip {
+  display: none;
+}
+
+@keyframes ingredient-tooltip-appear {
+  from {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+}

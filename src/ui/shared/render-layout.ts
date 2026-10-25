@@ -29,26 +29,3 @@ export function renderLeaderboardButton(): HTMLButtonElement {
 
   return button;
 }
-
-export function renderEmptyPanel(
-  id: string,
-  title: string,
-  eyebrow: string,
-  message: string,
-): HTMLElement {
-  const headingId = `${id}-heading`;
-  const panel = createElement("section", "panel empty-panel");
-  const panelHeading = createElement("div", "panel-heading");
-  const headingContent = createElement("div");
-  const eyebrowText = createElement("p", "eyebrow", eyebrow);
-  const titleText = createElement("h2", undefined, title);
-  const messageText = createElement("p", "empty-panel__text", message);
-
-  panel.setAttribute("aria-labelledby", headingId);
-  titleText.id = headingId;
-  headingContent.append(eyebrowText, titleText);
-  panelHeading.append(headingContent);
-  panel.append(panelHeading, messageText);
-
-  return panel;
-}

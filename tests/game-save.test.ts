@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createGameState } from "../src/state/create-game-state.ts";
+import { addIngredient } from "../src/state/game-actions.ts";
 import { isValidReactionSelection } from "../src/logic/reactions/reaction-catalog.ts";
 import { finishGame } from "../src/state/game-status.ts";
 import {
@@ -104,6 +105,55 @@ test("clears a finished game instead of saving it", () => {
   assert.equal(saveGame(finishGame(state, "lives"), storage, 0), false);
   assert.equal(getValue(), null);
   assert.equal(loadGame(storage), null);
+});
+
+test("rejects exhausted saves in current and legacy formats", () => {
+  const { storage, getValue } = createMemoryStorage();
+  const state = createGameState(() => 0.5, 0);
+
+  saveGame(state, storage, 0);
+  const savedGame = loadGame(storage);
+
+  assert.ok(savedGame !== null);
+
+  const emptyStock = Object.fromEntries(
+    Object.keys(state.shelfStock).map((id) => [id, 0]),
+  );
+
+  for (const version of [1, 2]) {
+    const exhaustedSave: Record<string, unknown> = {
+      ...savedGame,
+      version,
+      shelfStock: emptyStock,
+    };
+
+    if (version === 1) {
+      delete exhaustedSave.activeReactionIds;
+    }
+
+    storage.setItem(GAME_SAVE_STORAGE_KEY, JSON.stringify(exhaustedSave));
+
+    assert.equal(loadGame(storage), null);
+    assert.equal(getValue(), null);
+  }
+});
+
+test("restores the last portion when the shelf is empty", () => {
+  const { storage } = createMemoryStorage();
+  const state = addIngredient(
+    createGameState(() => 0.5, 0),
+    "dragon-tears",
+  );
+  const emptyStock = Object.fromEntries(
+    Object.keys(state.shelfStock).map((id) => [id, 0]),
+  );
+
+  saveGame({ ...state, shelfStock: emptyStock }, storage, 0);
+  const savedGame = loadGame(storage);
+
+  assert.ok(savedGame !== null);
+  assert.deepEqual(savedGame.cauldronIngredients, state.cauldronIngredients);
+  assert.deepEqual(savedGame.shelfStock, emptyStock);
 });
 
 test("removes malformed saved data without throwing", () => {

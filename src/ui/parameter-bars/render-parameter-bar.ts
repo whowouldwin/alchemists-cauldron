@@ -112,6 +112,7 @@ export function renderParameterBar(
     parameter.name,
     DIFFICULTY_SETTINGS[difficulty].maxCauldronIngredients,
     parameter.supportsNegativeValues,
+    value,
   );
   const position = calculateMarkerPosition(value, scale);
   const isInTargetRange =
@@ -157,7 +158,19 @@ export function renderParameterBar(
   }
 
   track.append(marker);
-  bar.append(label, output, track, scaleLabels);
+  bar.append(label, output);
+
+  if (targetRange !== undefined) {
+    bar.append(
+      createElement(
+        "span",
+        "parameter-bar__target-label",
+        `Target: ${formatIngredientValue(targetRange.minimum)} to ${formatIngredientValue(targetRange.maximum)}`,
+      ),
+    );
+  }
+
+  bar.append(track, scaleLabels);
   transitionMarker(marker, startPosition, position);
   previousMarkerPositions.set(parameter.name, position);
 

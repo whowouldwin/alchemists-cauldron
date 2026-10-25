@@ -15,7 +15,7 @@ const GAME_OVER_CONTENT: Record<
   },
   lives: {
     title: "No lives left",
-    message: "The last brew used your final life.",
+    message: "You lost your last life.",
   },
   "out-of-ingredients": {
     title: "Out of ingredients",

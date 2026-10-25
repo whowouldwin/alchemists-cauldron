@@ -10,8 +10,15 @@ const INGREDIENT_PROPERTIES = [
 
 export function renderIngredientTooltip(ingredient: Ingredient): HTMLElement {
   const tooltip = createElement("span", "ingredient-tooltip");
+  const title = createElement(
+    "span",
+    "ingredient-tooltip__title",
+    ingredient.name,
+  );
 
   tooltip.setAttribute("role", "tooltip");
+  title.setAttribute("aria-hidden", "true");
+  tooltip.append(title);
 
   INGREDIENT_PROPERTIES.forEach(([label, property]) => {
     const row = createElement("span", "ingredient-tooltip__row");
@@ -31,46 +38,4 @@ export function renderIngredientTooltip(ingredient: Ingredient): HTMLElement {
   });
 
   return tooltip;
-}
-
-export function attachIngredientTooltipInteractions(
-  ingredientCard: HTMLElement,
-  tooltip: HTMLElement,
-): void {
-  const showTooltip = (): void => {
-    ingredientCard.classList.add("ingredient-card--tooltip-visible");
-    updateIngredientTooltipPosition(ingredientCard, tooltip);
-  };
-  const hideTooltipIfInactive = (): void => {
-    const cardHasFocus = ingredientCard.contains(document.activeElement);
-
-    if (!cardHasFocus && !ingredientCard.matches(":hover")) {
-      ingredientCard.classList.remove("ingredient-card--tooltip-visible");
-    }
-  };
-
-  ingredientCard.addEventListener("pointerenter", showTooltip);
-  ingredientCard.addEventListener("focusin", showTooltip);
-  ingredientCard.addEventListener("pointerleave", hideTooltipIfInactive);
-  ingredientCard.addEventListener("focusout", hideTooltipIfInactive);
-}
-
-function updateIngredientTooltipPosition(
-  ingredientCard: HTMLElement,
-  tooltip: HTMLElement,
-): void {
-  ingredientCard.classList.remove(
-    "ingredient-card--tooltip-left",
-    "ingredient-card--tooltip-up",
-  );
-
-  const tooltipBounds = tooltip.getBoundingClientRect();
-
-  if (tooltipBounds.right > window.innerWidth) {
-    ingredientCard.classList.add("ingredient-card--tooltip-left");
-  }
-
-  if (tooltipBounds.bottom > window.innerHeight) {
-    ingredientCard.classList.add("ingredient-card--tooltip-up");
-  }
 }

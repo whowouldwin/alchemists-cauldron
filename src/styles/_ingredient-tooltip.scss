@@ -1,0 +1,66 @@
+.ingredient-tooltip {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  display: none;
+  width: min(190px, calc(100vw - 24px));
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-surface);
+  box-shadow: 3px 3px 0 #dedede;
+  cursor: default;
+
+  &::before {
+    position: absolute;
+    z-index: -1;
+    inset: -8px;
+    content: "";
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  &__label {
+    color: var(--color-muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  &__value {
+    color: var(--color-ink);
+    font-size: 13px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.ingredient-card--tooltip-visible .ingredient-tooltip {
+  display: grid;
+}
+
+.app-shell--paused .ingredient-tooltip {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ingredient-card--tooltip-visible .ingredient-tooltip {
+    animation: ingredient-tooltip-appear 140ms ease-out;
+  }
+}
+
+@keyframes ingredient-tooltip-appear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

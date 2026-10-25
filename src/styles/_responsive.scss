@@ -20,7 +20,7 @@
   }
 
   .ingredient-card {
-    min-height: 165px;
+    min-height: 140px;
     padding: 11px;
   }
 
@@ -203,20 +203,12 @@
   }
 
   .ingredient-card {
-    min-height: 164px;
+    min-height: 136px;
     padding: 10px;
 
     &__name {
       font-size: 14px;
     }
-  }
-
-  .ingredient-stat__label {
-    font-size: 10px;
-  }
-
-  .ingredient-stat__value {
-    font-size: 12px;
   }
 
   .cauldron-ingredient {

@@ -2,26 +2,16 @@ import type { Ingredient } from "../../data/ingredients.ts";
 import { createElement } from "../shared/create-element.ts";
 import { renderIngredientIcon } from "../shared/render-ingredient-icon.ts";
 import { createIngredientCardLabel } from "./ingredient-card-label.ts";
-import { renderIngredientStats } from "./render-ingredient-stats.ts";
-import {
-  attachIngredientTooltipInteractions,
-  renderIngredientTooltip,
-} from "./render-ingredient-tooltip.ts";
+import { renderIngredientTooltip } from "./render-ingredient-tooltip.ts";
 
 export function renderIngredientCard(
   ingredient: Ingredient,
   stock: number,
   cauldronIsFull: boolean,
-  showTooltip = false,
 ): HTMLButtonElement {
   const isDepleted = stock === 0;
   const isDisabled = isDepleted || cauldronIsFull;
-  const card = createIngredientCardButton(
-    ingredient,
-    stock,
-    isDisabled,
-    showTooltip,
-  );
+  const card = createIngredientCardButton(ingredient, stock, isDisabled);
 
   card.append(renderIngredientCardTop(ingredient, stock));
 
@@ -31,7 +21,11 @@ export function renderIngredientCard(
   }
 
   card.append(createElement("span", "ingredient-card__name", ingredient.name));
-  appendIngredientDetails(card, ingredient, showTooltip);
+  const tooltip = renderIngredientTooltip(ingredient);
+
+  tooltip.id = `ingredient-tooltip-${ingredient.id}`;
+  card.setAttribute("aria-describedby", tooltip.id);
+  card.append(tooltip);
 
   return card;
 }
@@ -40,7 +34,6 @@ function createIngredientCardButton(
   ingredient: Ingredient,
   stock: number,
   isDisabled: boolean,
-  showTooltip: boolean,
 ): HTMLButtonElement {
   const card = createElement("button", "ingredient-card");
 
@@ -48,10 +41,7 @@ function createIngredientCardButton(
   card.draggable = !isDisabled;
   card.dataset.ingredientId = ingredient.id;
   card.disabled = isDisabled;
-  card.setAttribute(
-    "aria-label",
-    createIngredientCardLabel(ingredient, stock, showTooltip),
-  );
+  card.setAttribute("aria-label", createIngredientCardLabel(ingredient, stock));
 
   if (stock === 0) {
     card.classList.add("is-depleted");
@@ -80,22 +70,4 @@ function renderIngredientCardTop(
   cardTop.append(iconWrap, stockBadge);
 
   return cardTop;
-}
-
-function appendIngredientDetails(
-  card: HTMLButtonElement,
-  ingredient: Ingredient,
-  showTooltip: boolean,
-): void {
-  if (!showTooltip) {
-    card.append(renderIngredientStats(ingredient));
-    return;
-  }
-
-  const tooltip = renderIngredientTooltip(ingredient);
-
-  tooltip.id = `ingredient-tooltip-${ingredient.id}`;
-  card.setAttribute("aria-describedby", tooltip.id);
-  card.append(tooltip);
-  attachIngredientTooltipInteractions(card, tooltip);
 }

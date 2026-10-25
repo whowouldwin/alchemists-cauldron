@@ -29,7 +29,7 @@ export function renderActiveGame(state: GameState): HTMLElement {
   const eyebrowText = createElement(
     "p",
     "eyebrow",
-    "Level 1 · First experiments",
+    `${state.difficulty} difficulty`,
   );
   const heading = createElement("h1", undefined, "Prepare your mixture");
   const description = createElement(

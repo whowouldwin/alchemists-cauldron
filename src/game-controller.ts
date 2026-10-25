@@ -5,6 +5,7 @@ import type { GameAnnouncements } from "./ui/game-announcements.ts";
 import { createGameClickHandler } from "./ui/game-click-handler.ts";
 import { createGameKeyboardHandler } from "./ui/game-keyboard-handler.ts";
 import { GameDragHandler } from "./ui/game-drag-handler.ts";
+import { initializeIngredientTooltips } from "./ui/ingredient-shelf/ingredient-tooltip-interactions.ts";
 import { renderGame } from "./ui/screens/render-game.ts";
 
 export function initializeGameController(
@@ -116,5 +117,6 @@ export function initializeGameController(
     leaderboardController.handleNameSubmit,
   );
 
+  initializeIngredientTooltips(applicationRoot);
   render();
 }

@@ -8,7 +8,7 @@
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 176px;
+  min-height: 140px;
   flex-direction: column;
   align-items: stretch;
   padding: 13px;
@@ -76,20 +76,11 @@
   &__name {
     display: block;
     min-height: 34px;
-    margin-bottom: 10px;
+    margin-bottom: 0;
     font-size: 14px;
     font-weight: 900;
     letter-spacing: -0.025em;
     line-height: 1.2;
-  }
-
-  &__stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-    margin-top: auto;
-    padding-top: 8px;
-    border-top: 1px solid #d6d6d6;
   }
 
   &__status {
@@ -137,86 +128,6 @@
   font-size: 13px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
-}
-
-.ingredient-tooltip {
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  left: calc(100% + 10px);
-  display: grid;
-  width: 190px;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid var(--color-line);
-  border-radius: 10px;
-  background: var(--color-surface);
-  box-shadow: 3px 3px 0 #dedede;
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-
-  &__row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  &__label {
-    color: var(--color-muted);
-    font-size: 12px;
-    font-weight: 700;
-  }
-
-  &__value {
-    color: var(--color-ink);
-    font-size: 13px;
-    font-weight: 900;
-    font-variant-numeric: tabular-nums;
-  }
-}
-
-.ingredient-card--tooltip-visible .ingredient-tooltip {
-  opacity: 1;
-  visibility: visible;
-}
-
-.ingredient-card--tooltip-left .ingredient-tooltip {
-  right: calc(100% + 10px);
-  left: auto;
-}
-
-.ingredient-card--tooltip-up .ingredient-tooltip {
-  top: auto;
-  bottom: 0;
-}
-
-.app-shell--paused .ingredient-tooltip {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.ingredient-stat {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 3px;
-
-  &__label {
-    overflow: hidden;
-    color: var(--color-muted);
-    font-size: 11px;
-    font-weight: 600;
-    text-overflow: ellipsis;
-  }
-
-  &__value {
-    color: var(--color-ink);
-    font-size: 14px;
-    font-weight: 900;
-    font-variant-numeric: tabular-nums;
-  }
 }
 
 .is-depleted .stock-badge {

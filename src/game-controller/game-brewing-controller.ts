@@ -17,6 +17,8 @@ interface GameBrewingControllerOptions {
   readonly saveCurrentGame: () => void;
   readonly render: () => void;
   readonly announcements: GameAnnouncements;
+  readonly onSuccessfulBrew: (recipeId: string) => void;
+  readonly onReactionsActivated: (reactionIds: readonly string[]) => void;
 }
 
 export class GameBrewingController {
@@ -50,6 +52,10 @@ export class GameBrewingController {
     }
 
     this.options.setGameState(nextState);
+
+    if (activatedReactions.length > 0) {
+      this.options.onReactionsActivated(activatedReactions.map(({ id }) => id));
+    }
 
     if (this.options.finishGameIfNeeded()) {
       return;
@@ -88,7 +94,15 @@ export class GameBrewingController {
     );
     const nextState = applyBrewResult(gameState, succeeded);
 
+    if (nextState === gameState) {
+      return;
+    }
+
     this.options.setGameState(nextState);
+
+    if (succeeded) {
+      this.options.onSuccessfulBrew(gameState.activeRecipe.id);
+    }
 
     if (this.options.finishGameIfNeeded()) {
       return;

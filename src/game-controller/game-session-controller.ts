@@ -19,6 +19,8 @@ interface GameSessionControllerOptions {
   readonly announcements: GameAnnouncements;
   readonly render: () => void;
   readonly resetOtherControllers: () => void;
+  readonly onSuccessfulBrew: (recipeId: string) => void;
+  readonly onReactionsActivated: (reactionIds: readonly string[]) => void;
 }
 
 export class GameSessionController {
@@ -40,6 +42,8 @@ export class GameSessionController {
       saveCurrentGame: () => this.saveCurrentGame(),
       render: options.render,
       announcements: options.announcements,
+      onSuccessfulBrew: options.onSuccessfulBrew,
+      onReactionsActivated: options.onReactionsActivated,
     });
     this.lifecycleController = new GameLifecycleController({
       applicationRoot: options.applicationRoot,

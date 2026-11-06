@@ -1,4 +1,5 @@
 import { GameDialogController } from "./game-controller/game-dialog-controller.ts";
+import { DiscoveryJournalController } from "./game-controller/discovery-journal-controller.ts";
 import { LeaderboardController } from "./game-controller/leaderboard-controller.ts";
 import { GameSessionController } from "./game-controller/game-session-controller.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
@@ -42,10 +43,13 @@ export function initializeGameController(
     () => gameSession.selectedGameDifficulty,
     render,
   );
+  const journal = new DiscoveryJournalController();
   const gameSession = new GameSessionController({
     applicationRoot,
     announcements,
     render,
+    onSuccessfulBrew: journal.recordRecipe,
+    onReactionsActivated: journal.recordReactions,
     resetOtherControllers: () => {
       dialogs.reset();
       leaderboardController.reset();

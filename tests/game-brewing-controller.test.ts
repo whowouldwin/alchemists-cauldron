@@ -24,6 +24,8 @@ function createController(initialState: GameState | null) {
     render: () => {
       renderCount += 1;
     },
+    onSuccessfulBrew: () => {},
+    onReactionsActivated: () => {},
     announcements: {
       region: {} as HTMLDivElement,
       ingredientAdded: () => {},

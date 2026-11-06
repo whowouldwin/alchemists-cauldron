@@ -1,6 +1,7 @@
 import { GameDialogController } from "./game-controller/game-dialog-controller.ts";
 import { DiscoveryJournalController } from "./game-controller/discovery-journal-controller.ts";
 import { JournalScreenController } from "./game-controller/journal-screen-controller.ts";
+import { LaboratoryController } from "./game-controller/laboratory-controller.ts";
 import { LeaderboardController } from "./game-controller/leaderboard-controller.ts";
 import { GameSessionController } from "./game-controller/game-session-controller.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
@@ -13,12 +14,20 @@ import {
 } from "./ui/game-focus.ts";
 import { initializeIngredientTooltips } from "./ui/ingredient-shelf/ingredient-tooltip-interactions.ts";
 import { renderGame } from "./ui/screens/render-game.ts";
+import {
+  createLaboratoryClickHandler,
+  createLaboratoryRecipeHandler,
+} from "./ui/laboratory/laboratory-events.ts";
 
 export function initializeGameController(
   applicationRoot: HTMLElement,
   announcements: GameAnnouncements,
 ): void {
   function renderScreen(): HTMLElement {
+    if (laboratory.isVisible) {
+      return laboratory.render();
+    }
+
     if (journalScreen.isVisible) {
       return journalScreen.render();
     }
@@ -59,6 +68,14 @@ export function initializeGameController(
     journal,
     render,
   });
+  const laboratory = new LaboratoryController({
+    applicationRoot,
+    canOpen: () => gameSession.currentGameState === null,
+    render,
+    announce: (message) => {
+      announcements.region.textContent = message;
+    },
+  });
   const gameSession = new GameSessionController({
     applicationRoot,
     announcements,
@@ -69,6 +86,7 @@ export function initializeGameController(
       dialogs.reset();
       leaderboardController.reset();
       journalScreen.reset();
+      laboratory.reset();
     },
   });
 
@@ -85,6 +103,15 @@ export function initializeGameController(
     canAddIngredient: gameSession.canAddIngredient,
     addIngredient: gameSession.addIngredient,
   });
+
+  applicationRoot.addEventListener(
+    "click",
+    createLaboratoryClickHandler(laboratory),
+  );
+  applicationRoot.addEventListener(
+    "change",
+    createLaboratoryRecipeHandler(laboratory),
+  );
 
   applicationRoot.addEventListener(
     "click",

@@ -9,6 +9,7 @@ const GAME_RULES = [
   "Medium enables 2 reactions and Hard enables 3. Some ingredient combinations change the mixture's values, spend time or cost a life.",
   "The game ends when time or lives run out, or when you have no ingredients left to use. Pause stops the timer until you resume.",
   "Open Journal from the menu or after a game to revisit recipes you have successfully brewed and reactions you have triggered. Discoveries carry over between games in this browser.",
+  "Practice in Lab lets you choose a recipe and experiment with unlimited portions, without a timer or lives. Reactions are off in base practice. Training does not change your game scores or discoveries.",
 ] as const;
 
 export function renderHelpPanel(): HTMLDialogElement {

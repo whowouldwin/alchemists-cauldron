@@ -1,0 +1,74 @@
+.laboratory-mixture {
+  &__heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    h2 {
+      margin: 0;
+    }
+
+    button {
+      min-height: 44px;
+      margin-left: auto;
+    }
+  }
+
+  &__count {
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: var(--color-neutral-light);
+    font-size: 13px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__ingredients {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 24px;
+    margin: 0 0 16px;
+    padding-left: 22px;
+
+    li {
+      padding: 6px 0;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    li::marker {
+      color: var(--color-muted);
+      font-weight: 750;
+    }
+  }
+
+  &__status {
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid var(--color-neutral-mid);
+    border-radius: 10px;
+    background: var(--color-paper);
+    font-size: 13px;
+    line-height: 1.6;
+
+    &--match {
+      border-color: #88b495;
+      background: #eaf5ed;
+      color: #245c36;
+    }
+  }
+
+  .parameter-bars {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .laboratory-mixture .parameter-bars,
+  .laboratory-mixture__ingredients {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

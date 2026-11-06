@@ -76,6 +76,13 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
   const helpButton = createElement("button", "leaderboard-link", "Help");
   const topbarActions = createElement("div", "start-screen-actions");
   const startActions = createElement("div", "start-actions");
+  const laboratoryButton = createElement(
+    "button",
+    "leaderboard-link",
+    "Practice in Lab",
+  );
+  laboratoryButton.type = "button";
+  laboratoryButton.dataset.action = "open-laboratory";
 
   settingsButton.type = "button";
   settingsButton.dataset.action = "open-difficulty-settings";
@@ -100,6 +107,7 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
   if (continueButton !== null) {
     startActions.append(continueButton);
   }
+  startActions.append(laboratoryButton);
   const difficultySettings = renderDifficultySettings(
     options.selectedDifficulty,
   );

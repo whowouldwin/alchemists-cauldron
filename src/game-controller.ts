@@ -1,5 +1,6 @@
 import { GameDialogController } from "./game-controller/game-dialog-controller.ts";
 import { DiscoveryJournalController } from "./game-controller/discovery-journal-controller.ts";
+import { JournalScreenController } from "./game-controller/journal-screen-controller.ts";
 import { LeaderboardController } from "./game-controller/leaderboard-controller.ts";
 import { GameSessionController } from "./game-controller/game-session-controller.ts";
 import type { GameAnnouncements } from "./ui/game-announcements.ts";
@@ -17,22 +18,31 @@ export function initializeGameController(
   applicationRoot: HTMLElement,
   announcements: GameAnnouncements,
 ): void {
+  function renderScreen(): HTMLElement {
+    if (journalScreen.isVisible) {
+      return journalScreen.render();
+    }
+
+    if (leaderboardController.isVisible()) {
+      return leaderboardController.render();
+    }
+
+    return renderGame(
+      gameSession.currentGameState,
+      gameSession.isLeaderboardEntryPending,
+      {
+        selectedDifficulty: gameSession.selectedGameDifficulty,
+        isDifficultySettingsOpen: dialogs.isSettingsOpen,
+        isHelpOpen: dialogs.isHelpOpen,
+        hasSavedGame: gameSession.hasSavedGame,
+      },
+    );
+  }
+
   function render(): void {
     const focusedButton = getFocusedGameButton(applicationRoot);
-    const screen = leaderboardController.isVisible()
-      ? leaderboardController.render()
-      : renderGame(
-          gameSession.currentGameState,
-          gameSession.isLeaderboardEntryPending,
-          {
-            selectedDifficulty: gameSession.selectedGameDifficulty,
-            isDifficultySettingsOpen: dialogs.isSettingsOpen,
-            isHelpOpen: dialogs.isHelpOpen,
-            hasSavedGame: gameSession.hasSavedGame,
-          },
-        );
 
-    applicationRoot.replaceChildren(screen);
+    applicationRoot.replaceChildren(renderScreen());
     restoreGameButtonFocus(applicationRoot, focusedButton);
     leaderboardController.afterRender();
     dialogs.afterRender();
@@ -44,6 +54,11 @@ export function initializeGameController(
     render,
   );
   const journal = new DiscoveryJournalController();
+  const journalScreen = new JournalScreenController({
+    applicationRoot,
+    journal,
+    render,
+  });
   const gameSession = new GameSessionController({
     applicationRoot,
     announcements,
@@ -53,6 +68,7 @@ export function initializeGameController(
     resetOtherControllers: () => {
       dialogs.reset();
       leaderboardController.reset();
+      journalScreen.reset();
     },
   });
 
@@ -80,6 +96,9 @@ export function initializeGameController(
       selectDifficulty: gameSession.selectDifficulty,
       openHelp: () => dialogs.openHelp(),
       closeHelp: () => dialogs.closeHelp(),
+      openJournal: journalScreen.open,
+      closeJournal: journalScreen.close,
+      selectJournalSection: journalScreen.selectSection,
       selectLeaderboardDifficulty: leaderboardController.selectDifficulty,
       pauseGame: gameSession.pauseGame,
       resumeGame: gameSession.resumeGame,

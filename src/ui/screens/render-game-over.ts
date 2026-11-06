@@ -1,6 +1,7 @@
 import type { GameOverReason, GameState } from "../../state/game-state.ts";
 import { createElement } from "../shared/create-element.ts";
 import {
+  renderJournalButton,
   renderLeaderboardButton,
   renderTopbar,
 } from "../shared/render-layout.ts";
@@ -67,7 +68,9 @@ export function renderGameOver(
   panel.append(playAgainButton);
 
   const topbar = renderTopbar("A little magic lab");
-  topbar.append(renderLeaderboardButton());
+  const topbarActions = createElement("div", "start-screen-actions");
+  topbarActions.append(renderJournalButton(), renderLeaderboardButton());
+  topbar.append(topbarActions);
   appShell.append(topbar, panel);
 
   return appShell;

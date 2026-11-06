@@ -1,0 +1,119 @@
+@use "journal-entries";
+
+.journal-screen {
+  max-width: 1120px;
+}
+
+.journal-panel {
+  padding: clamp(20px, 4vw, 36px);
+  border: 1px solid var(--color-line);
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-offset);
+
+  h1 {
+    margin-bottom: 12px;
+    font-size: clamp(28px, 4vw, 40px);
+    letter-spacing: -0.04em;
+  }
+
+  &__description {
+    max-width: 58ch;
+    margin-bottom: 28px;
+    color: var(--color-muted);
+    line-height: 1.6;
+  }
+}
+
+.journal-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.journal-section {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-weight: 750;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+
+  &:hover {
+    background: var(--color-neutral-light);
+  }
+
+  &[aria-pressed="true"] {
+    border-color: var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-surface);
+  }
+
+  &__count {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+}
+
+.journal-collection {
+  h2 {
+    margin-bottom: 12px;
+    font-size: 20px;
+    letter-spacing: -0.03em;
+  }
+
+  &__hint {
+    margin: 12px 0 24px;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+}
+
+.journal-progress {
+  display: block;
+  width: 100%;
+  height: 10px;
+  accent-color: var(--color-ink);
+}
+
+.journal-empty {
+  margin-top: 24px;
+  padding: clamp(24px, 4vw, 40px);
+  border: 1px dashed var(--color-line);
+  border-radius: 12px;
+  background: var(--color-paper);
+  text-align: center;
+
+  h3 {
+    margin: 0 0 12px;
+    font-size: 20px;
+  }
+
+  p {
+    max-width: 50ch;
+    margin: 0 auto;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+}
+
+.journal-notice {
+  padding: 14px 16px;
+  border: 1px solid #bd9b48;
+  border-radius: 10px;
+  background: #fff5d9;
+  color: #563f0b;
+  font-size: 14px;
+  line-height: 1.6;
+}

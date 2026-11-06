@@ -1,5 +1,6 @@
 import { CAULDRON_ICON } from "../shared/ui-assets.ts";
 import {
+  renderJournalButton,
   renderLeaderboardButton,
   renderTopbar,
 } from "../shared/render-layout.ts";
@@ -87,7 +88,12 @@ export function renderStartScreen(options: StartScreenOptions): HTMLElement {
   helpButton.dataset.action = "open-help";
   helpButton.setAttribute("aria-expanded", String(options.isHelpOpen));
   helpButton.setAttribute("aria-controls", "game-help");
-  topbarActions.append(helpButton, settingsButton, renderLeaderboardButton());
+  topbarActions.append(
+    renderJournalButton(),
+    helpButton,
+    settingsButton,
+    renderLeaderboardButton(),
+  );
   topbar.append(topbarActions);
   startActions.append(startButton);
 

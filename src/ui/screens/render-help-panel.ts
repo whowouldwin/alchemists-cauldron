@@ -8,6 +8,7 @@ const GAME_RULES = [
   "Pour Out clears the cauldron for 10 seconds without losing a life. Used ingredients do not return to the shelf.",
   "Medium enables 2 reactions and Hard enables 3. Some ingredient combinations change the mixture's values, spend time or cost a life.",
   "The game ends when time or lives run out, or when you have no ingredients left to use. Pause stops the timer until you resume.",
+  "Open Journal from the menu or after a game to revisit recipes you have successfully brewed and reactions you have triggered. Discoveries carry over between games in this browser.",
 ] as const;
 
 export function renderHelpPanel(): HTMLDialogElement {

@@ -1,4 +1,5 @@
 import type { Difficulty } from "../data/recipes.ts";
+import type { JournalSection } from "./journal/render-journal-collection.ts";
 
 export interface GameClickActions {
   readonly startGame: () => void;
@@ -8,6 +9,9 @@ export interface GameClickActions {
   readonly selectDifficulty: (difficulty: Difficulty) => void;
   readonly openHelp: () => void;
   readonly closeHelp: () => void;
+  readonly openJournal: () => void;
+  readonly closeJournal: () => void;
+  readonly selectJournalSection: (section: JournalSection) => void;
   readonly pauseGame: () => void;
   readonly resumeGame: () => void;
   readonly exitToMenu: () => void;
@@ -67,6 +71,21 @@ function handleActionButton(
     case "close-help":
       actions.closeHelp();
       return true;
+    case "open-journal":
+      actions.openJournal();
+      return true;
+    case "close-journal":
+      actions.closeJournal();
+      return true;
+    case "select-journal-section": {
+      const section = button.dataset.journalSection;
+
+      if (section === "recipes" || section === "reactions") {
+        actions.selectJournalSection(section);
+      }
+
+      return true;
+    }
     case "open-leaderboard":
       actions.openLeaderboard();
       return true;

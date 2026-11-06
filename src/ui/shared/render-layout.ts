@@ -29,3 +29,12 @@ export function renderLeaderboardButton(): HTMLButtonElement {
 
   return button;
 }
+
+export function renderJournalButton(): HTMLButtonElement {
+  const button = createElement("button", "leaderboard-link", "Journal");
+
+  button.type = "button";
+  button.dataset.action = "open-journal";
+
+  return button;
+}

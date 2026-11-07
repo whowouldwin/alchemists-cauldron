@@ -6,6 +6,10 @@ interface LaboratoryActions {
   readonly selectRecipe: (recipeId: string) => void;
   readonly addReaction: (reactionId: string) => void;
   readonly removeReaction: (reactionId: string) => void;
+  readonly saveExperiment: () => void;
+  readonly restoreExperiment: (key: string) => void;
+  readonly removeExperiment: (key: string) => void;
+  readonly reloadExperiments: () => void;
 }
 
 export function createLaboratoryClickHandler(
@@ -34,6 +38,25 @@ export function createLaboratoryClickHandler(
       case "clear-laboratory-mixture":
         actions.clearMixture();
         break;
+      case "save-laboratory-experiment":
+        actions.saveExperiment();
+        break;
+      case "reload-laboratory-experiments":
+        actions.reloadExperiments();
+        break;
+      case "open-laboratory-experiment":
+      case "remove-laboratory-experiment": {
+        const key = button.dataset.experimentKey;
+        if (key === undefined) {
+          break;
+        }
+        if (button.dataset.action === "open-laboratory-experiment") {
+          actions.restoreExperiment(key);
+        } else {
+          actions.removeExperiment(key);
+        }
+        break;
+      }
       case "remove-laboratory-reaction": {
         const reactionId = button.dataset.reactionId;
 

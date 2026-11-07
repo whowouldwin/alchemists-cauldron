@@ -1,6 +1,7 @@
 @use "laboratory-mixture";
 @use "laboratory-reactions";
 @use "reaction-trace";
+@use "saved-experiments";
 
 .laboratory-screen {
   width: min(100% - 40px, 1380px);

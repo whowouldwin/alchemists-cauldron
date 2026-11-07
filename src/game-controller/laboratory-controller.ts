@@ -19,6 +19,7 @@ import {
   focusLaboratoryReaction,
 } from "../ui/laboratory/laboratory-focus.ts";
 import { focusGameAction } from "./focus-game-action.ts";
+import { LaboratoryExperimentsController } from "./laboratory-experiments-controller.ts";
 
 interface LaboratoryControllerOptions {
   readonly applicationRoot: HTMLElement;
@@ -31,9 +32,19 @@ export class LaboratoryController {
   private visible = false;
   private state = createLaboratoryState();
   private readonly options: LaboratoryControllerOptions;
+  private readonly experiments: LaboratoryExperimentsController;
 
   constructor(options: LaboratoryControllerOptions) {
     this.options = options;
+    this.experiments = new LaboratoryExperimentsController({
+      applicationRoot: options.applicationRoot,
+      getState: () => this.state,
+      restoreState: (state) => {
+        this.state = state;
+      },
+      render: options.render,
+      announce: options.announce,
+    });
   }
 
   get isVisible(): boolean {
@@ -46,11 +57,12 @@ export class LaboratoryController {
         "#laboratory-calculation",
       )?.open ?? false;
 
-    return renderLaboratory(
-      this.state,
-      evaluateLaboratoryMixture(this.state),
+    const result = evaluateLaboratoryMixture(this.state);
+    return renderLaboratory(this.state, result, {
       calculationIsOpen,
-    );
+      experimentActions: this.experiments.renderActions(result.matchesRecipe),
+      savedExperiments: this.experiments.renderLibrary(),
+    });
   };
 
   readonly open = (): void => {
@@ -110,6 +122,16 @@ export class LaboratoryController {
     this.updateReactions(removeLaboratoryReaction(this.state, reactionId));
   };
 
+  readonly saveExperiment = (): void => this.experiments.save();
+
+  readonly restoreExperiment = (key: string): void =>
+    this.experiments.restore(key);
+
+  readonly removeExperiment = (key: string): void =>
+    this.experiments.remove(key);
+
+  readonly reloadExperiments = (): void => this.experiments.reload();
+
   readonly clearMixture = (): void => {
     if (!this.update(clearLaboratoryMixture(this.state))) {
       return;
@@ -125,6 +147,7 @@ export class LaboratoryController {
     }
 
     this.state = nextState;
+    this.experiments.clearFeedback();
     this.options.render();
     return true;
   }

@@ -10,6 +10,7 @@ export function renderLaboratoryMixture(
   state: LaboratoryState,
   result: LaboratoryResult,
   calculationIsOpen: boolean,
+  experimentActions: HTMLElement,
 ): HTMLElement {
   const panel = createElement("section", "laboratory-panel laboratory-mixture");
   const headingRow = createElement("div", "laboratory-mixture__heading");
@@ -64,6 +65,7 @@ export function renderLaboratoryMixture(
 
   panel.append(
     status,
+    experimentActions,
     renderParameterBars(
       result.trace.values,
       result.targetRanges,

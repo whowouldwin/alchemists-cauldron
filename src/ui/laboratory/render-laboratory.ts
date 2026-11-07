@@ -7,10 +7,16 @@ import { renderLaboratoryShelf } from "./render-laboratory-shelf.ts";
 import { renderLaboratoryMixture } from "./render-laboratory-mixture.ts";
 import { renderLaboratoryReactions } from "./render-laboratory-reactions.ts";
 
+interface LaboratoryViewOptions {
+  readonly calculationIsOpen: boolean;
+  readonly experimentActions: HTMLElement;
+  readonly savedExperiments: HTMLElement;
+}
+
 export function renderLaboratory(
   state: LaboratoryState,
   result: LaboratoryResult,
-  calculationIsOpen: boolean,
+  options: LaboratoryViewOptions,
 ): HTMLElement {
   const screen = createElement("main", "app-shell laboratory-screen");
   const topbar = renderTopbar();
@@ -41,9 +47,14 @@ export function renderLaboratory(
   );
   workspace.append(
     ingredientsAndReactions,
-    renderLaboratoryMixture(state, result, calculationIsOpen),
+    renderLaboratoryMixture(
+      state,
+      result,
+      options.calculationIsOpen,
+      options.experimentActions,
+    ),
   );
-  screen.append(topbar, headingRow, workspace);
+  screen.append(topbar, headingRow, options.savedExperiments, workspace);
 
   return screen;
 }

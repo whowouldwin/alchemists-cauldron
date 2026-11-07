@@ -10,6 +10,7 @@ const GAME_RULES = [
   "The game ends when time or lives run out, or when you have no ingredients left to use. Pause stops the timer until you resume.",
   "Open Journal from the menu or after a game to revisit recipes you have successfully brewed and reactions you have triggered. Discoveries carry over between games in this browser.",
   "Practice in Lab lets you choose a recipe and reactions, with unlimited portions and no timer or lives. Open Calculation to inspect each effect. Explosive mixtures remain available for inspection but cannot count as successful brews. Training does not change your game scores or discoveries.",
+  "Save a successful laboratory experiment to keep its ingredients and reaction order in this browser. Open it from Saved experiments to repeat it, or remove it from your collection.",
 ] as const;
 
 export function renderHelpPanel(): HTMLDialogElement {

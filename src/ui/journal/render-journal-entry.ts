@@ -2,7 +2,7 @@ import type { Recipe, RecipeRange } from "../../data/recipes.ts";
 import type { IReaction } from "../../logic/reactions/reaction-types.ts";
 import { createElement } from "../shared/create-element.ts";
 import { formatIngredientValue } from "../shared/format-ingredient-value.ts";
-import { REACTION_NOTES } from "./reaction-notes.ts";
+import { REACTION_NOTES } from "../shared/reaction-notes.ts";
 
 export function renderJournalRecipe(recipe: Recipe): HTMLElement {
   const card = createEntry(recipe.name, "recipe");

@@ -16,7 +16,7 @@ import { initializeIngredientTooltips } from "./ui/ingredient-shelf/ingredient-t
 import { renderGame } from "./ui/screens/render-game.ts";
 import {
   createLaboratoryClickHandler,
-  createLaboratoryRecipeHandler,
+  createLaboratoryChangeHandler,
 } from "./ui/laboratory/laboratory-events.ts";
 
 export function initializeGameController(
@@ -110,7 +110,7 @@ export function initializeGameController(
   );
   applicationRoot.addEventListener(
     "change",
-    createLaboratoryRecipeHandler(laboratory),
+    createLaboratoryChangeHandler(laboratory),
   );
 
   applicationRoot.addEventListener(

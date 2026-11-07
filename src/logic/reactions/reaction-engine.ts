@@ -1,20 +1,16 @@
 import type { Ingredient } from "../../data/ingredients.ts";
-import { calculateCauldron } from "../calculate-cauldron.ts";
-import { getReactionsByIds } from "./reaction-catalog.ts";
+import { traceCauldronReactions } from "./reaction-trace.ts";
 import type { IReaction, ReactionResolution } from "./reaction-types.ts";
 
 export function resolveCauldronReactions(
   ingredients: readonly Ingredient[],
   activeReactionIds: readonly string[],
 ): ReactionResolution {
-  const baseValues = calculateCauldron(ingredients);
-  const activeReactions = getReactionsByIds(activeReactionIds).filter(
-    (reaction) => reaction.isActive(ingredients, baseValues),
+  const { values, steps } = traceCauldronReactions(
+    ingredients,
+    activeReactionIds,
   );
-  const values = activeReactions.reduce(
-    (currentValues, reaction) => reaction.apply(currentValues),
-    baseValues,
-  );
+  const activeReactions = steps.map(({ reaction }) => reaction);
 
   return { values, activeReactions };
 }

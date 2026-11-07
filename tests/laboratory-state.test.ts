@@ -87,7 +87,12 @@ test("uses the game calculation and displays targets including Easy tolerance", 
   );
 
   assert.deepEqual(evaluateLaboratoryMixture(mixture), {
-    values: { temperature: 25, density: 8, magicPower: 10 },
+    trace: {
+      baseValues: { temperature: 25, density: 8, magicPower: 10 },
+      values: { temperature: 25, density: 8, magicPower: 10 },
+      steps: [],
+    },
+    hasExplosion: false,
     targetRanges: {
       temperature: { minimum: 20, maximum: 54 },
       density: { minimum: 0, maximum: 34 },
@@ -107,7 +112,12 @@ test("recalculates the match using Hard tolerance after every addition", () => {
 
   assert.equal(evaluateLaboratoryMixture(phoenix).matchesRecipe, false);
   assert.deepEqual(evaluateLaboratoryMixture(mixture), {
-    values: { temperature: 62, density: -1, magicPower: 42 },
+    trace: {
+      baseValues: { temperature: 62, density: -1, magicPower: 42 },
+      values: { temperature: 62, density: -1, magicPower: 42 },
+      steps: [],
+    },
+    hasExplosion: false,
     targetRanges: {
       temperature: { minimum: 52, maximum: 72 },
       density: { minimum: -5, maximum: 15 },

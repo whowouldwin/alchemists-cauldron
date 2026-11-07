@@ -7,8 +7,17 @@ import {
   type LaboratoryState,
 } from "../laboratory/laboratory-state.ts";
 import { evaluateLaboratoryMixture } from "../laboratory/laboratory-result.ts";
+import {
+  addLaboratoryReaction,
+  removeLaboratoryReaction,
+} from "../laboratory/laboratory-reactions.ts";
 import { renderLaboratory } from "../ui/laboratory/render-laboratory.ts";
-import { getLaboratoryStatusMessage } from "../ui/laboratory/render-laboratory-mixture.ts";
+import { getLaboratoryStatusMessage } from "../ui/laboratory/laboratory-status.ts";
+import {
+  focusLaboratoryRecipe,
+  focusLaboratoryIngredient,
+  focusLaboratoryReaction,
+} from "../ui/laboratory/laboratory-focus.ts";
 import { focusGameAction } from "./focus-game-action.ts";
 
 interface LaboratoryControllerOptions {
@@ -31,8 +40,18 @@ export class LaboratoryController {
     return this.visible;
   }
 
-  readonly render = (): HTMLElement =>
-    renderLaboratory(this.state, evaluateLaboratoryMixture(this.state));
+  readonly render = (): HTMLElement => {
+    const calculationIsOpen =
+      this.options.applicationRoot.querySelector<HTMLDetailsElement>(
+        "#laboratory-calculation",
+      )?.open ?? false;
+
+    return renderLaboratory(
+      this.state,
+      evaluateLaboratoryMixture(this.state),
+      calculationIsOpen,
+    );
+  };
 
   readonly open = (): void => {
     if (this.visible || !this.options.canOpen()) {
@@ -41,7 +60,7 @@ export class LaboratoryController {
 
     this.visible = true;
     this.options.render();
-    this.focusRecipeSelector();
+    focusLaboratoryRecipe(this.options.applicationRoot);
   };
 
   readonly close = (): void => {
@@ -63,9 +82,9 @@ export class LaboratoryController {
       return;
     }
 
-    this.focusRecipeSelector();
+    focusLaboratoryRecipe(this.options.applicationRoot);
     this.options.announce(
-      `Now practicing ${this.state.recipe.name}. The mixture is empty.`,
+      `Now practicing ${this.state.recipe.name}. The mixture and reaction selection are empty.`,
     );
   };
 
@@ -74,26 +93,21 @@ export class LaboratoryController {
       return;
     }
 
-    const button =
-      this.options.applicationRoot.querySelector<HTMLButtonElement>(
-        `[data-laboratory-ingredient-id="${ingredientId}"]`,
-      );
-
-    if (button !== null && !button.disabled) {
-      button.focus({ preventScroll: true });
-    } else {
-      focusGameAction(this.options.applicationRoot, "clear-laboratory-mixture");
-    }
+    focusLaboratoryIngredient(this.options.applicationRoot, ingredientId);
 
     const maximum =
       DIFFICULTY_SETTINGS[this.state.recipe.difficulty].maxCauldronIngredients;
-    const status = getLaboratoryStatusMessage(
-      this.state,
-      evaluateLaboratoryMixture(this.state),
+    this.announceResult(
+      `${this.state.ingredients.length} of ${maximum} ingredient slots used.`,
     );
-    this.options.announce(
-      `${this.state.ingredients.length} of ${maximum} ingredient slots used. ${status}`,
-    );
+  };
+
+  readonly addReaction = (reactionId: string): void => {
+    this.updateReactions(addLaboratoryReaction(this.state, reactionId));
+  };
+
+  readonly removeReaction = (reactionId: string): void => {
+    this.updateReactions(removeLaboratoryReaction(this.state, reactionId));
   };
 
   readonly clearMixture = (): void => {
@@ -101,9 +115,7 @@ export class LaboratoryController {
       return;
     }
 
-    this.options.applicationRoot
-      .querySelector<HTMLButtonElement>("[data-laboratory-ingredient-id]")
-      ?.focus();
+    focusLaboratoryIngredient(this.options.applicationRoot);
     this.options.announce("Mixture cleared. You can start another experiment.");
   };
 
@@ -117,9 +129,20 @@ export class LaboratoryController {
     return true;
   }
 
-  private focusRecipeSelector(): void {
-    this.options.applicationRoot
-      .querySelector<HTMLSelectElement>("#laboratory-recipe")
-      ?.focus();
+  private updateReactions(nextState: LaboratoryState): void {
+    if (!this.update(nextState)) {
+      return;
+    }
+
+    focusLaboratoryReaction(this.options.applicationRoot);
+    this.announceResult("Reaction selection updated.");
+  }
+
+  private announceResult(message: string): void {
+    const status = getLaboratoryStatusMessage(
+      this.state,
+      evaluateLaboratoryMixture(this.state),
+    );
+    this.options.announce(`${message} ${status}`);
   }
 }

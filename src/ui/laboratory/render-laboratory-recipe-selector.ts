@@ -10,7 +10,7 @@ export function renderLaboratoryRecipeSelector(recipe: Recipe): HTMLElement {
   const hint = createElement(
     "p",
     "laboratory-recipe__hint",
-    `Targets include ±${tolerance} tolerance. Changing the recipe clears your mixture.`,
+    `Targets include ±${tolerance} tolerance. Changing the recipe clears your mixture and selected reactions.`,
   );
 
   select.id = "laboratory-recipe";

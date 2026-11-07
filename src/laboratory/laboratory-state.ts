@@ -8,10 +8,11 @@ import { RECIPES, type Recipe } from "../data/recipes.ts";
 export interface LaboratoryState {
   readonly recipe: Recipe;
   readonly ingredients: readonly Ingredient[];
+  readonly selectedReactionIds: readonly string[];
 }
 
 export function createLaboratoryState(): LaboratoryState {
-  return { recipe: RECIPES[0], ingredients: [] };
+  return { recipe: RECIPES[0], ingredients: [], selectedReactionIds: [] };
 }
 
 export function isLaboratoryFull(state: LaboratoryState): boolean {
@@ -50,7 +51,7 @@ export function selectLaboratoryRecipe(
     return state;
   }
 
-  return { recipe, ingredients: [] };
+  return { recipe, ingredients: [], selectedReactionIds: [] };
 }
 
 export function clearLaboratoryMixture(

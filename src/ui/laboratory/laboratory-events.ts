@@ -4,6 +4,8 @@ interface LaboratoryActions {
   readonly clearMixture: () => void;
   readonly addIngredient: (ingredientId: string) => void;
   readonly selectRecipe: (recipeId: string) => void;
+  readonly addReaction: (reactionId: string) => void;
+  readonly removeReaction: (reactionId: string) => void;
 }
 
 export function createLaboratoryClickHandler(
@@ -32,6 +34,14 @@ export function createLaboratoryClickHandler(
       case "clear-laboratory-mixture":
         actions.clearMixture();
         break;
+      case "remove-laboratory-reaction": {
+        const reactionId = button.dataset.reactionId;
+
+        if (reactionId !== undefined) {
+          actions.removeReaction(reactionId);
+        }
+        break;
+      }
       case "add-laboratory-ingredient": {
         const ingredientId = button.dataset.laboratoryIngredientId;
 
@@ -44,15 +54,22 @@ export function createLaboratoryClickHandler(
   };
 }
 
-export function createLaboratoryRecipeHandler(
+export function createLaboratoryChangeHandler(
   actions: LaboratoryActions,
 ): (event: Event) => void {
   return (event) => {
-    if (
-      event.target instanceof HTMLSelectElement &&
-      event.target.dataset.action === "select-laboratory-recipe"
-    ) {
-      actions.selectRecipe(event.target.value);
+    const select = event.target;
+    if (!(select instanceof HTMLSelectElement) || select.disabled) {
+      return;
+    }
+
+    switch (select.dataset.action) {
+      case "select-laboratory-recipe":
+        actions.selectRecipe(select.value);
+        break;
+      case "add-laboratory-reaction":
+        actions.addReaction(select.value);
+        break;
     }
   };
 }

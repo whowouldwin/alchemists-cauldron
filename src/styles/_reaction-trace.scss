@@ -1,0 +1,64 @@
+.reaction-trace {
+  margin-top: 24px;
+  border-top: 1px solid var(--color-neutral-mid);
+
+  summary {
+    padding: 16px 0;
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  summary:focus-visible,
+  &__table-wrap:focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  &__table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    min-width: 460px;
+    border-collapse: collapse;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  caption {
+    margin-bottom: 12px;
+    color: var(--color-muted);
+    text-align: left;
+  }
+
+  th,
+  td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--color-neutral-light);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  td {
+    font-variant-numeric: tabular-nums;
+  }
+
+  th:first-child {
+    width: 40%;
+    padding-left: 0;
+  }
+
+  tbody tr:last-child {
+    background: var(--color-paper);
+    font-weight: 750;
+  }
+
+  &__effect {
+    display: block;
+    margin-top: 6px;
+    color: var(--color-muted);
+    font-weight: 400;
+  }
+}

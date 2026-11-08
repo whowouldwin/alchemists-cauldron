@@ -16,7 +16,7 @@ The game uses TypeScript, native DOM APIs, HTML, and SCSS. Game rules live separ
 
 All three levels are implemented. The final Story 3 pull request is open for RS School Cross-Check.
 
-The Creative Extension is implemented on `feature/alchemist-journal`. Its browser acceptance check and publication are pending. See the [extension guide and verification checklist](docs/creative-extension.md) and the [8-minute demonstration plan](docs/creative-extension-demo.md) (in Russian).
+The Creative Extension is implemented on `feature/alchemist-journal` and [published on GitHub Pages](https://whowouldwin.github.io/alchemists-cauldron/). Its browser acceptance check is pending. See the [extension guide and verification checklist](docs/creative-extension.md) and the [8-minute demonstration plan](docs/creative-extension-demo.md).
 
 ## How to play
 

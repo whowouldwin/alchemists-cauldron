@@ -1,25 +1,25 @@
-# Демонстрация Creative Extension
+# Creative Extension Demonstration
 
-План рассчитан примерно на **8 минут**. Пройди действия вручную и объясни расчёты своими словами. Для репетиции запускай `npm run dev`; опубликованную ссылку используй после deployment расширения.
+This plan takes approximately **8 minutes**. Walk through the steps and explain the calculations in your own words. Rehearse with `npm run dev` or use the [published game](https://whowouldwin.github.io/alchemists-cauldron/).
 
-## План выступления
+## Presentation outline
 
-| Время     | Что показать и объяснить                                                                                                                                  |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0:00–0:40 | Проблема: во время игры сложно изучать реакции под таймером и запоминать удачные составы. Решение: журнал открытий и отдельная тренировочная лаборатория. |
-| 0:40–1:40 | Успешная варка в Easy, появление рецепта в журнале, категории Recipes/Reactions.                                                                          |
-| 1:40–2:40 | Practice in Lab: выбор рецепта, состав, целевые диапазоны с допуском, отсутствие таймера и расходуемого запаса.                                           |
-| 2:40–3:50 | Acid Spark и Bubbling: исходные значения, изменение Magic Power, потеря соответствия цели и обратный пересчёт после удаления реакции.                     |
-| 3:50–5:00 | Сохранить Ember Soup, перезагрузить страницу, открыть эксперимент из библиотеки.                                                                          |
-| 5:00–5:40 | Volatile Mix: предупреждение о взрыве и сохранённый для анализа состав.                                                                                   |
-| 5:40–7:30 | Показать общий расчёт реакций, разделение правил/контроллеров/DOM, формат хранения и несколько содержательных тестов.                                     |
-| 7:30–8:00 | Назвать проверенные возможности и ограничения: данные локальны для браузера, незавершённая тренировка не сохраняется автоматически.                       |
+| Time      | What to show and explain                                                                                                                                      |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0:00–0:40 | Problem: learning reactions under a timer and remembering successful mixtures is difficult. Solution: a discovery journal and a separate practice laboratory. |
+| 0:40–1:40 | Brew successfully on Easy, show the recipe in the journal, and introduce the Recipes/Reactions categories.                                                    |
+| 1:40–2:40 | Practice in Lab: choose a recipe, build a mixture, explain targets with tolerance, and show that there is no timer or limited stock.                          |
+| 2:40–3:50 | Acid Spark and Bubbling: base values, the change in Magic Power, the mixture no longer matching the target, and recalculation after removing the reaction.    |
+| 3:50–5:00 | Save Ember Soup, reload the page, and open the experiment from the library.                                                                                   |
+| 5:00–5:40 | Volatile Mix: an explosion warning and a mixture retained for inspection.                                                                                     |
+| 5:40–7:30 | Show the shared reaction calculation, the separation of rules, controllers, and DOM rendering, the storage format, and a few meaningful tests.                |
+| 7:30–8:00 | Summarize verified features and limitations: data is local to the browser, and unfinished practice sessions are not saved automatically.                      |
 
-## 1. Открытие в обычной игре
+## 1. Make a discovery in a regular game
 
-Выбери **Settings → Easy**, затем **Start Game**. Рецепт выбирается случайно; используй подходящую строку:
+Choose **Settings → Easy**, then **Start Game**. The recipe is selected randomly; use the corresponding row:
 
-| Рецепт      | Ингредиенты                               |
+| Recipe      | Ingredients                               |
 | ----------- | ----------------------------------------- |
 | Moon Mist   | Dragon Tears + Fairy Dust                 |
 | Root Bloom  | Fairy Dust + Mandrake Root                |
@@ -28,81 +28,81 @@
 | Bright Dew  | Dragon Tears + Fairy Dust + Mandrake Root |
 | Snow Dust   | Fairy Dust + Frost Lotus + Mandrake Root  |
 
-Нажми **Brew**. После успешной варки вернись через **Pause → Exit to Menu**, открой **Journal**. Сваренный рецепт появится в Recipes; счётчик увеличится, если рецепт ещё не был открыт. После выхода в меню эта демонстрационная партия завершается, а открытия сохраняются.
+Select **Brew**. After a successful brew, use **Pause → Exit to Menu** and open **Journal**. The brewed recipe appears in Recipes; the count increases if the recipe has not been discovered before. Exiting to the menu ends this demonstration game, while discoveries are preserved.
 
-Для показа заполненного раздела Reactions заранее активируй реакцию в обычной игре Medium или Hard и проверь её в журнале. Лаборатория не выдаёт открытия, а выбор реакций в обычной партии случаен, поэтому этот пример удобно подготовить на репетиции.
+To show a populated Reactions category, activate a reaction in a regular Medium or Hard game beforehand and check that it appears in the journal. Practice does not unlock discoveries, and reaction selection in regular games is random, so prepare this example during rehearsal.
 
-## 2. Базовая смесь
+## 2. Build a base mixture
 
-Открой **Practice in Lab**, выбери **Moon Mist**. Добавь **Dragon Tears**, затем **Fairy Dust**.
+Open **Practice in Lab** and select **Moon Mist**. Add **Dragon Tears**, then **Fairy Dust**.
 
-| Параметр    | Расчёт  | Результат | Допустимый диапазон с Easy ±12 |
-| ----------- | ------- | --------- | ------------------------------ |
-| Temperature | 25 + 12 | 37        | 20…54                          |
-| Density     | 8 + 9   | 17        | 0…34                           |
-| Magic Power | 10 + 12 | 22        | 5…39                           |
+| Parameter   | Calculation | Result | Accepted range with Easy ±12 |
+| ----------- | ----------- | ------ | ---------------------------- |
+| Temperature | 25 + 12     | 37     | 20…54                        |
+| Density     | 8 + 9       | 17     | 0…34                         |
+| Magic Power | 10 + 12     | 22     | 5…39                         |
 
-Смесь подходит. Показать `Calculation`: без выбранных реакций исходная сумма совпадает с итогом. Пояснить, что запас порций не ограничен, но одновременно в смеси остаётся максимум четыре ингредиента.
+The mixture matches. Open `Calculation`: with no reactions selected, the base sum equals the final values. Explain that portions are unlimited, but this mixture still has a maximum of four ingredient slots.
 
-## 3. Реакция меняет результат
+## 3. Show how a reaction changes the result
 
-Выбери **Acid Spark**: предыдущая смесь очистится. Добавь **Fairy Dust + Caustic Acid**.
+Select **Acid Spark**; the previous mixture will be cleared. Add **Fairy Dust + Caustic Acid**.
 
-- До реакции: Temperature **22**, Density **23**, Magic Power **34**. Смесь подходит.
-- Выбери **Bubbling**. Условие выполнено, Magic Power становится **34 × 1.5 = 51**.
-- Диапазон Magic Power с Medium ±8 — **21…47**. Смесь перестаёт подходить; сохранение недоступно.
-- Открой **Calculation**: видны исходная сумма и изменение `34 → 51`.
-- Удали Bubbling. Значение вернётся к **34**, смесь снова подходит.
+- Before the reaction: Temperature **22**, Density **23**, Magic Power **34**. The mixture matches.
+- Select **Bubbling**. Its condition is met, so Magic Power becomes **34 × 1.5 = 51**.
+- The Magic Power range with Medium ±8 is **21…47**. The mixture no longer matches, and saving is disabled.
+- Open **Calculation** to show the base sum and the change from `34 → 51`.
+- Remove Bubbling. Magic Power returns to **34**, and the mixture matches again.
 
-Пояснение: в обычной игре активация Bubbling также отнимает 10 секунд. В тренировке цена показана в описании; таймера здесь нет.
+Explain that activating Bubbling in a regular game also costs 10 seconds. Practice displays this cost in the description; it has no timer.
 
-## 4. Сохранить и повторить эксперимент
+## 4. Save and repeat an experiment
 
-1. Выбери **Ember Soup** из группы Hard.
-2. Добавь **Phoenix Feather → Fairy Dust → Toad Slime**.
-3. Выбери **Magma Flux**, затем **Pressure Spike**.
-4. Исходные значения: **67 / 29 / 42**. Magma Flux срабатывает при Temperature ≥60: итог **67 / 26.1 / 50.4**. Pressure Spike остаётся неактивной, потому что исходная Density меньше 70.
-5. Смесь подходит с Hard ±5: цели **57…77 / 19…39 / 32…52**. Нажми **Save experiment**.
-6. Перезагрузи страницу, снова открой **Practice in Lab → Saved experiments → Open** у Ember Soup.
-7. Проверь рецепт, три порции и порядок **Magma Flux → Pressure Spike**. Результат вычисляется заново. Кнопка **Experiment saved** недоступна для повторного сохранения той же записи.
+1. Select **Ember Soup** from the Hard group.
+2. Add **Phoenix Feather → Fairy Dust → Toad Slime**.
+3. Select **Magma Flux**, then **Pressure Spike**.
+4. The base values are **67 / 29 / 42**. Magma Flux activates at Temperature ≥60, producing **67 / 26.1 / 50.4**. Pressure Spike remains inactive because the base Density is below 70.
+5. The mixture matches with Hard ±5: the targets are **57…77 / 19…39 / 32…52**. Select **Save experiment**.
+6. Reload the page, then reopen **Practice in Lab → Saved experiments → Open** for Ember Soup.
+7. Check the recipe, all three portions, and the **Magma Flux → Pressure Spike** order. The result is recalculated. The **Experiment saved** button is disabled to prevent saving the same entry again.
 
-При необходимости покажи **Remove**: запись исчезает из библиотеки, открытая смесь остаётся. Для сохранения результата на время защиты оставь один подготовленный эксперимент.
+If useful, show **Remove**: the saved entry disappears from the library while the current mixture remains. Keep one prepared experiment available for the presentation.
 
-## 5. Взрыв без потери тренировочного состава
+## 5. Inspect an explosive mixture
 
-Выбери **Void Flame**, добавь **Phoenix Feather + Essence of the Void + Toad Slime**, затем реакцию **Volatile Mix**.
+Select **Void Flame**, add **Phoenix Feather + Essence of the Void + Toad Slime**, then select **Volatile Mix**.
 
-Значения остаются **35 / 10 / 70**, но успешным результат не считается: реакция вызывает взрыв. Лаборатория оставляет состав для изучения, показывает предупреждение и запрещает сохранение. Удали реакцию — та же смесь снова подходит.
+The values remain **35 / 10 / 70**, but the result is not successful because the reaction causes an explosion. The laboratory keeps the mixture for inspection, displays a warning, and disables saving. Remove the reaction: the same mixture matches again.
 
-## Пример для вопроса о порядке реакций
+## Example for a question about reaction order
 
-Выбери любой Hard-рецепт, например Ember Soup. Добавь **Dragon Tears дважды** и **Toad Slime дважды**. Исходная сумма: **60 / 76 / 20**.
+Select any Hard recipe, such as Ember Soup. Add **Dragon Tears twice** and **Toad Slime twice**. The base sum is **60 / 76 / 20**.
 
-| Порядок                     | Изменение Density                     | Итоговые T / D / M |
-| --------------------------- | ------------------------------------- | ------------------ |
-| Magma Flux → Pressure Spike | 76 × 0.9 = 68.4; затем установка в 70 | 60 / 70 / 26.4     |
-| Pressure Spike → Magma Flux | установка в 70; затем 70 × 0.9 = 63   | 60 / 63 / 26.4     |
+| Order                       | Density changes                 | Final T / D / M |
+| --------------------------- | ------------------------------- | --------------- |
+| Magma Flux → Pressure Spike | 76 × 0.9 = 68.4; then set to 70 | 60 / 70 / 26.4  |
+| Pressure Spike → Magma Flux | Set to 70; then 70 × 0.9 = 63   | 60 / 63 / 26.4  |
 
-Чтобы поменять порядок, удали Magma Flux и добавь её заново. Pressure Spike срабатывает в обоих случаях: условие проверяется по исходной Density **76**. Этот пример показывает расчёт; он не является подходящей смесью для Ember Soup.
+To change the order, remove Magma Flux and add it again. Pressure Spike activates in both cases because its condition uses the base Density of **76**. This example demonstrates calculation order; it does not match Ember Soup.
 
-## Вопросы для технической части
+## Technical discussion
 
-**Почему отдельное состояние лаборатории?** У игры есть запас, таймер, жизни и счёт. У лаборатории — выбранный рецепт, ингредиенты и реакции. Разделение позволяет переиспользовать расчёт, сохраняя независимый тренировочный режим.
+**Separate laboratory state.** A regular game has stock, a timer, lives, and a score. The laboratory has a selected recipe, ingredients, and reactions. Separate state allows both modes to share calculations while keeping practice independent.
 
-**Почему чистые функции и классы используются вместе?** Правила получают данные и возвращают результат без доступа к странице. Контроллеры хранят текущее состояние экрана и связывают действия с отображением. Например, [`LaboratoryController`](../src/game-controller/laboratory-controller.ts) вызывает функции из `src/laboratory`.
+**Pure functions and classes.** Rules take data and return results without accessing the page. Controllers manage the current screen state and connect actions to rendering. For example, [`LaboratoryController`](../src/game-controller/laboratory-controller.ts) calls functions from `src/laboratory`.
 
-**Где гарантия одинаковой математики игры и лаборатории?** Оба режима используют [`traceCauldronReactions()`](../src/logic/reactions/reaction-trace.ts) и игровую проверку рецепта. Условия реакций проверяются по исходной сумме, а эффекты последовательно преобразуют результат. Это проверяется примерами с перестановкой реакций и пересечением порога.
+**Shared calculations.** Both modes use [`traceCauldronReactions()`](../src/logic/reactions/reaction-trace.ts) and the game's recipe check. Reaction conditions use the base sum, while effects transform the result in sequence. Tests cover reordered reactions and thresholds crossed by earlier effects.
 
-**Почему хранить ID, а не готовые значения?** ID позволяют восстановить канонические ингредиенты и реакции. Значения рассчитываются заново, поэтому сохранённый JSON не становится вторым источником игровых правил. При загрузке проверяются формат, допустимость состава и успешность смеси.
+**Storing IDs instead of calculated values.** IDs resolve to canonical ingredients and reactions. Values are recalculated, so stored JSON does not become a second source of game rules. Loading validates the format, the allowed mixture, and its success.
 
-**Зачем проверять JSON, если есть TypeScript?** Типы проверяют код при разработке. Содержимое `localStorage` поступает во время выполнения и может оказаться другой версии или неверной структуры; загрузка принимает `unknown` и проверяет поля.
+**Runtime JSON validation.** TypeScript checks code during development. `localStorage` data arrives at runtime and may have a different version or invalid structure. Loading accepts `unknown` and validates its fields.
 
-**Что происходит при ошибке хранения?** Эксперимент не объявляется сохранённым, смесь остаётся на экране, пользователь получает сообщение. Библиотека с повреждёнными данными не перезаписывается. В журнале неудавшаяся запись остаётся в памяти; успешная варка или активация реакции запускает следующую попытку сохранения.
+**Storage failures.** An experiment is not reported as saved when a write fails. The mixture remains on screen, and the user sees a message. A malformed experiment library is not overwritten. Unsaved journal discoveries remain in memory; a successful brew or reaction activation triggers another save attempt.
 
-**Какие тесты наиболее важны?** Покажи [`reaction-trace.test.ts`](../tests/reaction-trace.test.ts), [`saved-experiments-storage.test.ts`](../tests/saved-experiments-storage.test.ts) и [`game-discoveries.test.ts`](../tests/game-discoveries.test.ts): порядок эффектов, отказ записи и открытие при завершающем игру взрыве. Прошедшие тесты логики не заменяют ручную проверку кликов, фокуса и отображения.
+**Meaningful tests.** Show [`reaction-trace.test.ts`](../tests/reaction-trace.test.ts), [`saved-experiments-storage.test.ts`](../tests/saved-experiments-storage.test.ts), and [`game-discoveries.test.ts`](../tests/game-discoveries.test.ts): effect order, write failures, and recording a discovery when an explosion ends the game. Passing logic tests does not replace checking clicks, focus, and rendering in a browser.
 
-## Связь с оцениванием
+## Assessment criteria
 
-В [задании](https://github.com/rolling-scopes-school/qualifying-stage/blob/main/tasks/creative-extension/mini-games.md) предусмотрена презентация на 5–10 минут и технические вопросы. По [критериям](https://github.com/rolling-scopes-school/qualifying-stage/blob/main/tasks/creative-extension/mentors-check.md) оцениваются сложность — до 100, понимание решений — до 50, презентация — до 50, стабильность и качество кода — до 50 баллов.
+The [assignment](https://github.com/rolling-scopes-school/qualifying-stage/blob/main/tasks/creative-extension/mini-games.md) requires a 5–10 minute presentation and technical questions. The [assessment checklist](https://github.com/rolling-scopes-school/qualifying-stage/blob/main/tasks/creative-extension/mentors-check.md) awards up to 100 points for complexity, 50 for understanding and justification, 50 for presentation, and 50 for stability and code quality.
 
-Для сложности покажи совместную работу журнала, симуляции, пошагового расчёта и сохранения. Для понимания объясни пример с порядком реакций и восстановление по ID. Для презентации отрепетируй этот маршрут с таймером. Для стабильности заверши [проверку интерфейса](creative-extension.md#приёмка-в-браузере). Итоговую оценку выставляет куратор; наличие функций само по себе не гарантирует максимальный балл.
+To demonstrate complexity, show how the journal, simulation, calculation trace, and persistence work together. To demonstrate understanding, explain reaction order and restoration by ID. Rehearse the presentation with a timer. To verify stability, complete the [browser acceptance check](creative-extension.md#browser-acceptance-check). The curator assigns the final score; implemented features alone do not guarantee full marks.

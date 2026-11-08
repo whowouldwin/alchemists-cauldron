@@ -1,65 +1,65 @@
-# Creative Extension: журнал и лаборатория
+# Creative Extension: Discovery Journal and Practice Laboratory
 
-Расширение помогает разбираться в рецептах и реакциях. Журнал сохраняет открытия из обычной игры, а лаборатория позволяет спокойно проверять составы, видеть расчёт и возвращаться к удачным экспериментам.
+The extension helps players understand recipes and reactions. The journal records discoveries from regular games, while the laboratory provides a place to try mixtures, inspect calculations, and revisit successful experiments.
 
-## Возможности
+## Features
 
-| Возможность              | Поведение                                                                                                                                                                       |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Журнал открытий          | Сохраняет успешно сваренные рецепты и активированные реакции. Повторное открытие не создаёт дубликат.                                                                           |
-| Выбор рецепта            | Доступны все 20 рецептов. Смена рецепта очищает смесь и выбранные реакции.                                                                                                      |
-| Тренировка               | Нет таймера и жизней, порции не заканчиваются. Сохраняются ограничения сложности: 4/6/8 видов ингредиентов и 4/4/5 мест в смеси.                                                |
-| Выбор реакций            | Easy — без реакций; Medium — до 2; Hard — до 3. Для каждого уровня используются допустимые реакции из общего каталога.                                                          |
-| Расчёт                   | `Calculation` показывает исходную сумму, эффект каждой сработавшей реакции и итоговые значения. Условия проверяются по исходной смеси, эффекты применяются в выбранном порядке. |
-| Сохранённые эксперименты | Сохраняются только успешные смеси без взрыва. Запись можно открыть или удалить. Порядок ингредиентов, повторные порции и порядок реакций сохраняются.                           |
+| Feature            | Behavior                                                                                                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Discovery journal  | Records successfully brewed recipes and activated reactions. Repeated discoveries do not create duplicates.                                                          |
+| Recipe selection   | All 20 recipes are available. Changing the recipe clears the mixture and selected reactions.                                                                         |
+| Practice mode      | No timer or lives, and portions never run out. Difficulty limits still apply: 4/6/8 ingredient types and 4/4/5 mixture slots for Easy/Medium/Hard.                   |
+| Reaction selection | Easy has no reactions; Medium allows up to 2; Hard allows up to 3. Each difficulty uses eligible reactions from the shared catalogue.                                |
+| Calculation        | `Calculation` shows the base sum, each activated reaction's effect, and the final values. Conditions use the base mixture; effects follow the selected order.        |
+| Saved experiments  | Only successful mixtures without an explosion can be saved. Entries can be opened or removed. Ingredient order, repeated portions, and reaction order are preserved. |
 
-В лаборатории границы цели уже включают допуск сложности: Easy ±12, Medium ±8, Hard ±5. В журнале показаны базовые диапазоны рецепта с пояснением о дополнительном допуске.
+Laboratory targets already include the difficulty tolerance: Easy ±12, Medium ±8, Hard ±5. The journal shows each recipe's base ranges with an explanation of the extra tolerance.
 
-При взрыве лаборатория оставляет состав для изучения и показывает предупреждение. В обычной игре та же реакция очищает котёл и отнимает жизнь. Тренировка не изменяет очки, игровой запас, сохранённую партию и журнал открытий.
+When a mixture explodes, the laboratory keeps it for inspection and displays a warning. In a regular game, the same reaction empties the cauldron and costs a life. Practice does not change scores, ingredient stock, the saved game, or journal discoveries.
 
-## Как устроен код
+## Code structure
 
-| Ответственность                  | Где смотреть                                                                                                                                                                                                                                     |
+| Responsibility                   | Where to look                                                                                                                                                                                                                                    |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Каталоги и ограничения сложности | [`src/data`](../src/data) и [`reaction-definitions.ts`](../src/logic/reactions/reaction-definitions.ts)                                                                                                                                          |
-| Изменение тренировочной смеси    | [`laboratory-state.ts`](../src/laboratory/laboratory-state.ts), [`laboratory-reactions.ts`](../src/laboratory/laboratory-reactions.ts)                                                                                                           |
-| Общий расчёт реакций             | [`reaction-trace.ts`](../src/logic/reactions/reaction-trace.ts); обычная игра использует его через [`reaction-engine.ts`](../src/logic/reactions/reaction-engine.ts)                                                                             |
-| Проверка результата лаборатории  | [`laboratory-result.ts`](../src/laboratory/laboratory-result.ts) переиспользует игровую проверку рецепта                                                                                                                                         |
-| Снимок эксперимента              | [`saved-experiment.ts`](../src/laboratory/saved-experiment.ts) сохраняет ID и восстанавливает состояние через действующие правила                                                                                                                |
-| Чтение и запись данных           | [`src/storage`](../src/storage); структура JSON проверяется во время загрузки                                                                                                                                                                    |
-| Состояние экранов и действия     | [`LaboratoryController`](../src/game-controller/laboratory-controller.ts), [`LaboratoryExperimentsController`](../src/game-controller/laboratory-experiments-controller.ts), [`ExperimentLibrary`](../src/game-controller/experiment-library.ts) |
-| Разметка и события               | [`src/ui/laboratory`](../src/ui/laboratory) и [`src/ui/journal`](../src/ui/journal), нативный DOM API                                                                                                                                            |
+| Catalogues and difficulty limits | [`src/data`](../src/data) and [`reaction-definitions.ts`](../src/logic/reactions/reaction-definitions.ts)                                                                                                                                        |
+| Practice state changes           | [`laboratory-state.ts`](../src/laboratory/laboratory-state.ts), [`laboratory-reactions.ts`](../src/laboratory/laboratory-reactions.ts)                                                                                                           |
+| Shared reaction calculation      | [`reaction-trace.ts`](../src/logic/reactions/reaction-trace.ts); regular games use it through [`reaction-engine.ts`](../src/logic/reactions/reaction-engine.ts)                                                                                  |
+| Laboratory result evaluation     | [`laboratory-result.ts`](../src/laboratory/laboratory-result.ts) reuses the game's recipe check                                                                                                                                                  |
+| Experiment snapshots             | [`saved-experiment.ts`](../src/laboratory/saved-experiment.ts) stores IDs and restores state through the current rules                                                                                                                           |
+| Data loading and saving          | [`src/storage`](../src/storage); JSON structure is validated when loading                                                                                                                                                                        |
+| Screen state and actions         | [`LaboratoryController`](../src/game-controller/laboratory-controller.ts), [`LaboratoryExperimentsController`](../src/game-controller/laboratory-experiments-controller.ts), [`ExperimentLibrary`](../src/game-controller/experiment-library.ts) |
+| Rendering and events             | [`src/ui/laboratory`](../src/ui/laboratory) and [`src/ui/journal`](../src/ui/journal), using native DOM APIs                                                                                                                                     |
 
-Расчёты и преобразования состояния — чистые функции без DOM и `localStorage`. Классы хранят состояние экранов и библиотеки, связывают действия с расчётами, сохранением и отображением. Новые зависимости не добавлены.
+Calculations and state transformations are pure functions without DOM or `localStorage` access. Classes manage screen and library state, connecting actions to calculations, persistence, and rendering. No new dependencies were added.
 
-## Сохранение и ограничения
+## Persistence and limitations
 
-- Журнал использует ключ `alchemists-cauldron.journal`, эксперименты — `alchemists-cauldron.experiments`. Формат обоих документов имеет `version: 1`.
-- Эксперимент содержит только ID рецепта, ингредиентов и реакций. При открытии данные берутся из актуальных каталогов и результат рассчитывается заново.
-- Дубликат эксперимента определяется по рецепту и двум упорядоченным спискам ID. Другой порядок считается отдельной записью.
-- Если библиотека экспериментов повреждена или имеет неизвестную версию, приложение сообщает об ошибке и не перезаписывает её. Кнопка `Retry loading` повторяет чтение; она не восстанавливает повреждённый JSON автоматически.
-- При ошибке записи эксперимента текущая смесь остаётся на экране. Несохранённые открытия журнала остаются в памяти до закрытия страницы; следующая попытка записать открытие повторяет сохранение.
-- Загрузка журнала отбрасывает неизвестные ID и дубликаты. Некорректный документ загружается как пустой журнал, без записи в хранилище при чтении.
-- Данные привязаны к браузеру и адресу сайта. Локальная версия и GitHub Pages имеют разные хранилища. Синхронизации между устройствами и автоматического сохранения незавершённой тренировки нет.
-- Перед изменением библиотеки читается её последняя версия. Это защищает последовательные изменения из разных экземпляров, но не является транзакционной синхронизацией вкладок.
+- The journal uses `alchemists-cauldron.journal`; experiments use `alchemists-cauldron.experiments`. Both document formats have `version: 1`.
+- An experiment stores only recipe, ingredient, and reaction IDs. Opening it resolves data from the current catalogues and recalculates the result.
+- Duplicate experiments are identified by the recipe and the two ordered ID lists. A different order is treated as a separate entry.
+- If the experiment library is malformed or has an unsupported version, the application reports an error and does not overwrite it. `Retry loading` tries reading again; it does not automatically repair malformed JSON.
+- If saving an experiment fails, the current mixture stays on screen. Unsaved journal discoveries remain in memory until the page closes; the next attempt to record a discovery retries saving.
+- Loading the journal filters out unknown IDs and duplicates. An invalid document loads as an empty journal, without writing to storage during the read.
+- Data belongs to the browser and site origin. The local development site and GitHub Pages have separate storage. There is no synchronization between devices or automatic saving of unfinished practice sessions.
+- The library is read again before it is changed. This preserves sequential updates from different instances, but does not provide transactional synchronization between tabs.
 
-## Итоговая проверка логики
+## Logic verification
 
-Проверено **08.11.2026** для реализации `87b2ddf`, Node **22.23.3**. Все **127 тестов** прошли, пропущенных тестов нет. Проверка типов, ESLint и production-сборка также прошли.
+Verified on **8 November 2026** for implementation commit `87b2ddf`, using Node **22.23.3**. All **127 tests** passed, with none skipped. Type checking, ESLint, and the production build also passed.
 
-| Требование или риск                                                                                           | Свидетельство                                                                           | Результат                       |
-| ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------- |
-| Открытие записывается один раз и переживает загрузку                                                          | `discovery-journal.test.ts`, `discovery-journal-storage.test.ts`                        | Пройдено                        |
-| Учитывается сваренный рецепт, включая последнюю успешную варку; реакция сохраняется даже при последнем взрыве | `game-discoveries.test.ts`                                                              | Пройдено                        |
-| Ограничения сложности, повторные порции, очистка и смена рецепта                                              | `laboratory-state.test.ts`, `laboratory-reactions.test.ts`                              | Пройдено                        |
-| Порядок эффектов, проверка условий по базовой смеси, взрыв                                                    | `reaction-trace.test.ts`, `laboratory-reactions.test.ts`                                | Пройдено                        |
-| Восстановление состава, дубликаты, некорректные данные и ошибки записи                                        | `saved-experiment.test.ts`, `saved-experiments-storage.test.ts`                         | Пройдено                        |
-| Регрессии обычной игры                                                                                        | Существующие тесты варки, таймера, завершения игры, сохранения и реакций в общем наборе | Пройдено в пределах этих тестов |
-| Реальные клики, фокус, отображение, перезагрузка страницы                                                     | Нужна проверка в браузере                                                               | Ожидает проверки                |
+| Requirement or risk                                                                                                             | Evidence                                                                       | Result                                 |
+| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------- |
+| Discoveries are recorded once and survive reloading                                                                             | `discovery-journal.test.ts`, `discovery-journal-storage.test.ts`               | Passed                                 |
+| The brewed recipe is recorded, including the last successful brew; a reaction is recorded even when its explosion ends the game | `game-discoveries.test.ts`                                                     | Passed                                 |
+| Difficulty limits, repeated portions, clearing, and recipe changes                                                              | `laboratory-state.test.ts`, `laboratory-reactions.test.ts`                     | Passed                                 |
+| Effect order, conditions checked against the base mixture, and explosions                                                       | `reaction-trace.test.ts`, `laboratory-reactions.test.ts`                       | Passed                                 |
+| Restoring mixtures, duplicates, invalid data, and write failures                                                                | `saved-experiment.test.ts`, `saved-experiments-storage.test.ts`                | Passed                                 |
+| Regular game regressions                                                                                                        | Existing brewing, timer, game-over, save, and reaction tests in the full suite | Passed within the scope of those tests |
+| Actual clicks, focus, rendering, and page reloads                                                                               | Browser verification required                                                  | Pending                                |
 
-Дополнительно через чистые функции проверены семь примеров из сценария демонстрации и наличие сохраняемой тренировочной смеси для каждого из 20 рецептов без выбранных реакций. Это проверка расчётов и восстановления, а не визуальная проверка.
+Additional checks through the pure functions covered seven examples from the demonstration guide and a valid, saveable practice mixture for each of the 20 recipes with no reactions selected. These checks verify calculations and restoration, not visual behavior.
 
-Команды для повторения автоматических проверок:
+Commands to repeat the automated checks:
 
 ```bash
 npm test
@@ -69,18 +69,22 @@ npm run format:check
 npm run build
 ```
 
-## Приёмка в браузере
+## Browser acceptance check
 
-Автоматический доступ к внутреннему браузеру при проверке был недоступен (`The browser access host is unavailable`). Следующие пункты пока не отмечены как выполненные:
+Automated access to the in-app browser was unavailable during verification (`The browser access host is unavailable`). The following items have not yet been marked as complete:
 
-- [ ] Открыть Journal, переключить Recipes/Reactions, проверить пустое состояние или существующие открытия и вернуться назад.
-- [ ] Выполнить примеры Moon Mist и Acid Spark из [сценария демонстрации](creative-extension-demo.md): значения, подписи целей и состояние кнопки сохранения соответствуют результату.
-- [ ] Заполнить смесь до 4/4 или 5/5: ингредиенты недоступны. `Clear mixture` снова делает их доступными и сохраняет выбранные реакции; смена рецепта очищает и смесь, и реакции.
-- [ ] Сохранить Ember Soup, перезагрузить страницу, снова открыть лабораторию и восстановить запись. Проверить порядок реакций, отсутствие дубликата и удаление записи без очистки текущей смеси.
-- [ ] Выполнить пример Volatile Mix: есть предупреждение, состав остаётся доступен для изучения, сохранение запрещено.
-- [ ] Пройти лабораторию клавиатурой: Tab, Shift+Tab, Enter/Space, стрелки в списках. Фокус виден и не теряется после добавления, очистки, сохранения и открытия записи. Открытая таблица Calculation остаётся открытой после пересчёта.
-- [ ] Проверить desktop 1366×768 и узкое окно около 390 px: текст и кнопки доступны, страница не прокручивается по горизонтали. Таблица расчёта может прокручиваться внутри своего блока.
-- [ ] В обычной игре проверить добавление, Brew, Pause/Resume и завершение. После успешной варки открыть журнал и убедиться, что записан сваренный рецепт. После перезагрузки открытие остаётся.
-- [ ] Сохранить обычную партию перезагрузкой страницы, из меню потренироваться в лаборатории, затем выбрать Continue Game. Партия открывается на паузе с прежними очками, запасом и составом; тренировка не добавляет открытий.
+- [ ] Open Journal, switch between Recipes and Reactions, inspect the empty state or existing discoveries, and go back.
+- [ ] Follow the Moon Mist and Acid Spark examples in the [demonstration guide](creative-extension-demo.md): values, target labels, and the save button state should match the result.
+- [ ] Fill the mixture to 4/4 or 5/5: ingredient buttons become unavailable. `Clear mixture` enables them again and preserves selected reactions; changing the recipe clears both the mixture and reactions.
+- [ ] Save Ember Soup, reload the page, reopen the laboratory, and restore the entry. Check reaction order, duplicate prevention, and removal of the saved entry without clearing the current mixture.
+- [ ] Follow the Volatile Mix example: a warning appears, the mixture remains available for inspection, and saving is disabled.
+- [ ] Navigate the laboratory using Tab, Shift+Tab, Enter/Space, and arrow keys in selects. Focus remains visible after adding, clearing, saving, and opening an entry. An expanded Calculation table stays open after recalculation.
+- [ ] Check a 1366×768 desktop viewport and a narrow window around 390 px wide: text and buttons remain accessible, with no horizontal page scrolling. The calculation table may scroll inside its own container.
+- [ ] In a regular game, check ingredient addition, Brew, Pause/Resume, and game over. After a successful brew, open the journal and confirm that it records the brewed recipe. The discovery remains after reloading.
+- [ ] Save a regular game by reloading the page, practice in the laboratory from the menu, then choose Continue Game. The game opens paused with its previous score, stock, and mixture; practice has not added discoveries.
 
-После приёмки остаются репетиция демонстрации и публикация одобренной версии: deployment, push и PR. Изменения интерфейса или правил при обнаружении ошибок проходят отдельную локальную проверку.
+## Publication status
+
+The extension was published on **8 November 2026**: [play the game](https://whowouldwin.github.io/alchemists-cauldron/) or [view the source branch](https://github.com/whowouldwin/alchemists-cauldron/tree/feature/alchemist-journal). The [GitHub Pages deployment](https://github.com/whowouldwin/alchemists-cauldron/actions/runs/42490263057) succeeded, and the public HTML, JavaScript, and CSS matched the production build from source commit `7d71d94`.
+
+Browser acceptance and a demonstration rehearsal remain. Any fixes to the interface or game rules should be reviewed locally before publication.
